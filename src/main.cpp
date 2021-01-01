@@ -12,8 +12,8 @@ const uint8_t bsec_config_iaq[] = {
 #include "config/generic_33v_300s_4d/bsec_iaq.txt"
 };
 
-const char *ssid = "wifissid";
-const char *password = "wifikey";
+const char *ssid = "sso";
+const char *password = "pass";
 
 AsyncWebServer server(80);
 
@@ -184,8 +184,8 @@ void setup(void)
 
   iaqSensor.setConfig(bsec_config_iaq);
   checkIaqSensorStatus();
-  clearState();
-  //loadState();
+ // clearState();
+  loadState();
 
   bsec_virtual_sensor_t sensorList[10] = {
       BSEC_OUTPUT_RAW_TEMPERATURE,
