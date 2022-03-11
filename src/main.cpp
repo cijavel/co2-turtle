@@ -10,6 +10,12 @@
 #include <SectionManager.h>
 #include <helpers.h>
 
+
+//https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
+//https://www.rehva.eu/fileadmin/user_upload/REHVA_COVID-19_guidance_document_V3_03082020.pdf
+//https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf
+//https://github.com/FastLED/FastLED/wiki/Basic-usage
+
 const uint8_t bsec_config_iaq[] = {
 //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
 #include "config/generic_33v_300s_4d/bsec_iaq.txt"
@@ -24,33 +30,126 @@ void clearState(void);
 
 #define STATE_SAVE_PERIOD UINT32_C(360 * 60 * 1000) // 360 minutes - 4 times a day
 
+
+// --------------------------------------------------------------------------
 // Create an object of the class Bsec
 Bsec iaqSensor;
 uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
 uint16_t stateUpdateCounter = 0;
 uint32_t millisOverflowCounter = 0;
 uint32_t lastTime = 0;
-String output = "";
-const String header = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent, MH Z-19B CO2";
 int latest_accuracy = 0;
 
+String output = "";
+const String header = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent, MH Z-19B CO2";
+
+const String string_timestamp = "Timestamp [ms]";
+const String string_rawtemperatur = "raw temperature [°C]";
+const String string_pressure = "pressure [hPa]";
+const String string_rawrelativehumidity = "raw relative humidity [%]";
+const String string_gas = "gas [Ohm]";
+const String string_iaq = "IAQ";
+const String string_iaqaccuracy = "IAQ accuracy";
+const String string_temp = "temperature [°C]";
+const String string_relativehumidity = "relative humidity [%]";
+const String string_staticiaq = "Static IAQ";
+const String string_co2equil = "CO2 equivalentv";
+const String string_breahtvoc = "breath VOC equivalent";
+const String string_MHZ19B_co2 = "MH Z-19B CO2";
+
+String data_timestamp = "";
+String data_rawtemperatur = "";
+String data_pressure = "";
+String data_rawrelativehumidity = "";
+String data_gas = "";
+String data_iaq = "";
+String data_iaqaccuracy = "";
+String data_temp = "";
+String data_relativehumidity = "";
+String data_staticiaq = "";
+String data_co2equil = "";
+String data_breahtvoc = "";
+String data_MHZ19B_co2 = "";
+
+String header_data = "";
 
 
 
+// Helper function definitions
+void checkIaqSensorStatus(void)
+{
+  if (iaqSensor.status != BSEC_OK)
+  {
+    if (iaqSensor.status < BSEC_OK)
+    {
+      output = "BSEC error code : " + String(iaqSensor.status);
+      Serial.println(output);
+      for (;;)
+        errLeds(); /* Halt in case of failure */
+    }
+    else
+    {
+      output = "BSEC warning code : " + String(iaqSensor.status);
+      Serial.println(output);
+    }
+  }
 
-AsyncWebServer server(80);
+  if (iaqSensor.bme680Status != BME680_OK)
+  {
+    if (iaqSensor.bme680Status < BME680_OK)
+    {
+      output = "BME680 error code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
+      for (;;)
+        errLeds(); /* Halt in case of failure */
+    }
+    else
+    {
+      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
+    }
+  }
+}
 
-#define RX_PIN 18
-#define TX_PIN 19
-#define BAUDRATE 9600
 
-MHZ19 myMHZ19;
-HardwareSerial mySerial(1);
-
+// --------------------------------------------------------------------------
 //WLAN
-const char *ssid     = "Antwort42_iot_optout_nomap";
-const char *password = "DasLebenistschwerohneInternet2024";
+const char *ssid     = "";
+const char *password = "";
 
+void WiFiReStart( const char *input_ssid, const char *input_password)
+{
+  // Connect to WiFi network
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(input_ssid);
+
+  WiFi.begin(input_ssid, input_password);
+  int wifiWaitCount = 0;
+  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+  {
+    delay(250);
+    Serial.print(".");
+    wifiWaitCount++;
+  }
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println("");
+    Serial.println("WiFi connected");
+
+    // Start the server
+    //server.begin();
+
+    //Serial.println("Server started");
+
+    // Print the IP address
+    Serial.println(WiFi.localIP());
+  }
+}
+
+
+// --------------------------------------------------------------------------
 // definition of LED
 
 #define NUM_LEDS 34
@@ -111,6 +210,19 @@ void rainbowAllSections(uint8_t pauseDuration, int repeat)
 
 
 
+
+// --------------------------------------------------------------------------
+// Server
+
+AsyncWebServer server(80);
+
+#define RX_PIN 18
+#define TX_PIN 19
+#define BAUDRATE 9600
+
+MHZ19 myMHZ19;
+HardwareSerial mySerial(1);
+
 void handle_NotFound(AsyncWebServerRequest *request)
 {
   request->send(404, "text/plain; charset=utf-8", "Not found");
@@ -118,7 +230,22 @@ void handle_NotFound(AsyncWebServerRequest *request)
 
 void handle_data(AsyncWebServerRequest *request)
 {
-  request->send(200, "text/plain; charset=utf-8", header + "\n" + output);
+  header_data =
+  "{\"" + 
+  string_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
+  string_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
+  string_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
+  string_rawrelativehumidity + "\":\"" + data_rawrelativehumidity + "\",\n" + "\"" + 
+  string_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
+  string_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
+  string_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
+  string_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
+  string_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
+  string_staticiaq           + "\":\"" + data_staticiaq           + "\",\n" +  "\"" + 
+  string_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
+  string_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
+  string_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"}";
+  request->send(200, "application/json; charset=utf-8", header_data);
 }
 
 void handle_data_only(AsyncWebServerRequest *request)
@@ -146,75 +273,12 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
   }
 }
 
-// Helper function definitions
-void checkIaqSensorStatus(void)
-{
-  if (iaqSensor.status != BSEC_OK)
-  {
-    if (iaqSensor.status < BSEC_OK)
-    {
-      output = "BSEC error code : " + String(iaqSensor.status);
-      Serial.println(output);
-      for (;;)
-        errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      output = "BSEC warning code : " + String(iaqSensor.status);
-      Serial.println(output);
-    }
-  }
-
-  if (iaqSensor.bme680Status != BME680_OK)
-  {
-    if (iaqSensor.bme680Status < BME680_OK)
-    {
-      output = "BME680 error code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
-      for (;;)
-        errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
-    }
-  }
-}
 
 
 
+// --------------------------------------------------------------------------
 
-void WiFiReStart()
-{
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
 
-  WiFi.begin(ssid, password);
-  int wifiWaitCount = 0;
-  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-  {
-    delay(250);
-    Serial.print(".");
-    wifiWaitCount++;
-  }
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("");
-    Serial.println("WiFi connected");
-
-    // Start the server
-    //server.begin();
-
-    //Serial.println("Server started");
-
-    // Print the IP address
-    Serial.println(WiFi.localIP());
-  }
-}
 
 
 // Entry point for the example
@@ -224,8 +288,7 @@ void setup(void)
   // FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
 
   Serial.begin(9600);
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.println("Connecting to ") + ssid ;
   WiFi.begin(ssid, password);
   int wifiWaitCount = 0;
 
@@ -247,8 +310,7 @@ void setup(void)
   {
     Serial.println("");
     Serial.println("WiFi connected.");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+    Serial.println("IP address: " + WiFi.localIP());
     LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
     FastLED.show();
   }
@@ -260,7 +322,7 @@ void setup(void)
   }
   FastLED.clear(true);
 
-
+  // webpages on server
   server.on("/", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
   server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
@@ -301,10 +363,12 @@ void setup(void)
 
   iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
   checkIaqSensorStatus();
-
+  
+  Serial.println("---------- Setup finished -------------");
+  
   // Print the header
   Serial.println(header);
-  Serial.println("---------- Setup finished -------------");
+  
 }
 
 // Function that is looped forever
@@ -315,12 +379,12 @@ void loop(void)
   {
     
     LEDsectionManager.fillSectionWithColor(0, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
-     FastLED.show();
+    FastLED.show();
     delay(150);
 
     LEDsectionManager.fillSectionWithColor(0, oldStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
-    WiFiReStart();
+    WiFiReStart(ssid, password);
     delay(5000);
   }
   else
@@ -337,6 +401,20 @@ void loop(void)
   unsigned long time_trigger = millis();
   if (iaqSensor.run())
   { // If new data is available
+
+		data_timestamp           = String(time_trigger);
+		data_rawtemperatur       = String(iaqSensor.rawTemperature);
+		data_pressure            = String(iaqSensor.pressure / 100.0);
+		data_rawrelativehumidity = String(iaqSensor.rawHumidity);
+		data_gas                 = String(iaqSensor.gasResistance);
+		data_iaq                 = String(iaqSensor.iaq);
+		data_iaqaccuracy         = String(iaqSensor.iaqAccuracy);
+		data_temp                = String(iaqSensor.temperature);
+		data_relativehumidity    = String(iaqSensor.humidity);
+		data_staticiaq           = String(iaqSensor.staticIaq);
+		data_co2equil            = String(iaqSensor.co2Equivalent);
+		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
+
     output = String(time_trigger);
     output += ", " + String(iaqSensor.rawTemperature);
     output += ", " + String(iaqSensor.pressure);
@@ -349,7 +427,6 @@ void loop(void)
     if (iaqSensor.iaqAccuracy == 0)
     {
       rainbowAllSections(20, 100);
-      // LEDsectionManager.fillSectionWithColor(1, CRGB::Violet, FillStyle(ALL_AT_ONCE)); // LED_STATUS
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
@@ -612,6 +689,3 @@ void updateState(void)
   }
 }
 
-//https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
-//https://www.rehva.eu/fileadmin/user_upload/REHVA_COVID-19_guidance_document_V3_03082020.pdf
-//https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf
