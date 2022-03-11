@@ -38,9 +38,42 @@ uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
 uint16_t stateUpdateCounter = 0;
 uint32_t millisOverflowCounter = 0;
 uint32_t lastTime = 0;
+int latest_accuracy = 0;
+
 String output = "";
 const String header = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent, MH Z-19B CO2";
-int latest_accuracy = 0;
+
+const String string_timestamp = "Timestamp [ms]";
+const String string_rawtemperatur = "raw temperature [°C]";
+const String string_pressure = "pressure [hPa]";
+const String string_rawrelativehumidity = "raw relative humidity [%]";
+const String string_gas = "gas [Ohm]";
+const String string_iaq = "IAQ";
+const String string_iaqaccuracy = "IAQ accuracy";
+const String string_temp = "temperature [°C]";
+const String string_relativehumidity = "relative humidity [%]";
+const String string_staticiaq = "Static IAQ";
+const String string_co2equil = "CO2 equivalentv";
+const String string_breahtvoc = "breath VOC equivalent";
+const String string_MHZ19B_co2 = "MH Z-19B CO2";
+
+String data_timestamp = "";
+String data_rawtemperatur = "";
+String data_pressure = "";
+String data_rawrelativehumidity = "";
+String data_gas = "";
+String data_iaq = "";
+String data_iaqaccuracy = "";
+String data_temp = "";
+String data_relativehumidity = "";
+String data_staticiaq = "";
+String data_co2equil = "";
+String data_breahtvoc = "";
+String data_MHZ19B_co2 = "";
+
+String header_data = "";
+
+
 
 // Helper function definitions
 void checkIaqSensorStatus(void)
@@ -197,7 +230,22 @@ void handle_NotFound(AsyncWebServerRequest *request)
 
 void handle_data(AsyncWebServerRequest *request)
 {
-  request->send(200, "text/plain; charset=utf-8", header + "\n" + output);
+  header_data =
+  "{\"" + 
+  string_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
+  string_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
+  string_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
+  string_rawrelativehumidity + "\":\"" + data_rawrelativehumidity + "\",\n" + "\"" + 
+  string_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
+  string_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
+  string_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
+  string_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
+  string_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
+  string_staticiaq           + "\":\"" + data_staticiaq           + "\",\n" +  "\"" + 
+  string_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
+  string_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
+  string_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"}";
+  request->send(200, "application/json; charset=utf-8", header_data);
 }
 
 void handle_data_only(AsyncWebServerRequest *request)
@@ -240,8 +288,7 @@ void setup(void)
   // FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
 
   Serial.begin(9600);
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.println("Connecting to ") + ssid ;
   WiFi.begin(ssid, password);
   int wifiWaitCount = 0;
 
@@ -263,8 +310,7 @@ void setup(void)
   {
     Serial.println("");
     Serial.println("WiFi connected.");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+    Serial.println("IP address: " + WiFi.localIP());
     LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
     FastLED.show();
   }
@@ -276,7 +322,7 @@ void setup(void)
   }
   FastLED.clear(true);
 
-
+  // webpages on server
   server.on("/", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
   server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
@@ -317,10 +363,12 @@ void setup(void)
 
   iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
   checkIaqSensorStatus();
-
+  
+  Serial.println("---------- Setup finished -------------");
+  
   // Print the header
   Serial.println(header);
-  Serial.println("---------- Setup finished -------------");
+  
 }
 
 // Function that is looped forever
@@ -353,6 +401,20 @@ void loop(void)
   unsigned long time_trigger = millis();
   if (iaqSensor.run())
   { // If new data is available
+
+		data_timestamp           = String(time_trigger);
+		data_rawtemperatur       = String(iaqSensor.rawTemperature);
+		data_pressure            = String(iaqSensor.pressure / 100.0);
+		data_rawrelativehumidity = String(iaqSensor.rawHumidity);
+		data_gas                 = String(iaqSensor.gasResistance);
+		data_iaq                 = String(iaqSensor.iaq);
+		data_iaqaccuracy         = String(iaqSensor.iaqAccuracy);
+		data_temp                = String(iaqSensor.temperature);
+		data_relativehumidity    = String(iaqSensor.humidity);
+		data_staticiaq           = String(iaqSensor.staticIaq);
+		data_co2equil            = String(iaqSensor.co2Equivalent);
+		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
+
     output = String(time_trigger);
     output += ", " + String(iaqSensor.rawTemperature);
     output += ", " + String(iaqSensor.pressure);
