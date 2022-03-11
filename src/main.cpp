@@ -11,6 +11,11 @@
 #include <helpers.h>
 
 
+//https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
+//https://www.rehva.eu/fileadmin/user_upload/REHVA_COVID-19_guidance_document_V3_03082020.pdf
+//https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf
+//https://github.com/FastLED/FastLED/wiki/Basic-usage
+
 const uint8_t bsec_config_iaq[] = {
 //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
 #include "config/generic_33v_300s_4d/bsec_iaq.txt"
@@ -622,6 +627,3 @@ void updateState(void)
   }
 }
 
-//https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
-//https://www.rehva.eu/fileadmin/user_upload/REHVA_COVID-19_guidance_document_V3_03082020.pdf
-//https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf
