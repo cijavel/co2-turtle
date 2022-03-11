@@ -7,41 +7,13 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
+#include <SectionManager.h>
+#include <helpers.h>
+
 const uint8_t bsec_config_iaq[] = {
 //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
 #include "config/generic_33v_300s_4d/bsec_iaq.txt"
 };
-
-const char *ssid = "sso";
-const char *password = "pass";
-
-AsyncWebServer server(80);
-
-#define RX_PIN 18
-#define TX_PIN 19
-#define BAUDRATE 9600
-
-MHZ19 myMHZ19;
-HardwareSerial mySerial(1);
-
-#define NUM_LEDS 5
-#define DATA_PIN 5
-
-/*
-#define LED_STATUS 0
-#define LED_TEMP 1
-#define LED_HUM 2
-#define LED_AIRQ 3
-#define LED_CO2 4
-*/
-
-#define LED_STATUS 4
-#define LED_TEMP 3
-#define LED_HUM 2
-#define LED_AIRQ 1
-#define LED_CO2 0
-
-CRGB led[NUM_LEDS];
 
 // Helper functions declarations
 void checkIaqSensorStatus(void);
@@ -58,9 +30,86 @@ uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
 uint16_t stateUpdateCounter = 0;
 uint32_t millisOverflowCounter = 0;
 uint32_t lastTime = 0;
-
 String output = "";
 const String header = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent, MH Z-19B CO2";
+int latest_accuracy = 0;
+
+
+
+
+
+AsyncWebServer server(80);
+
+#define RX_PIN 18
+#define TX_PIN 19
+#define BAUDRATE 9600
+
+MHZ19 myMHZ19;
+HardwareSerial mySerial(1);
+
+//WLAN
+const char *ssid     = "Antwort42_iot_optout_nomap";
+const char *password = "DasLebenistschwerohneInternet2024";
+
+// definition of LED
+
+#define NUM_LEDS 34
+#define DATA_PIN 5
+
+#define LED_WLANCONNECT 0
+#define LED_STATUS 3
+#define LED_TEMP 8
+#define LED_HUM 15
+#define LED_AIRQ 22
+#define LED_CO2 29
+
+CRGB led[NUM_LEDS];
+SectionManager LEDsectionManager = SectionManager(led);
+
+void addLEDsection()
+{
+  LEDsectionManager.addSections(6);
+  LEDsectionManager.addRangeToSection(0, 0, 0, false);   // WLAN
+  LEDsectionManager.addRangeToSection(1, 2, 5, false);   // LED_STATUS
+  LEDsectionManager.addRangeToSection(2, 7, 12, false);  // LED_TEMP
+  LEDsectionManager.addRangeToSection(3, 14, 19, false); // LED_HUM
+  LEDsectionManager.addRangeToSection(4, 21, 26, false); // LED_AIRQ
+  LEDsectionManager.addRangeToSection(5, 28, 33, false); // LED_CO2
+}
+
+void rainbowAllSections(uint8_t pauseDuration, int repeat)
+{
+  int colorsteps = 240; // how many colors, 256 all color, 
+  int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
+  int colorrun =  NUM_LEDS + repeat;
+  uint16_t level, wheelPosition;
+
+  for (wheelPosition = 0; wheelPosition < colorrun ; wheelPosition++) 
+  {
+    // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
+    for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
+    {
+
+
+
+      uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
+
+
+
+      for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
+      {
+        LEDsectionManager.setColorAtGlobalIndex(level, color);
+      }
+
+
+      FastLED.setBrightness(50);
+      FastLED.show();
+      delay(pauseDuration);
+    }
+  }
+}
+
+
 
 void handle_NotFound(AsyncWebServerRequest *request)
 {
@@ -91,18 +140,53 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
       request->send(200, "text/plain; charset=utf-8", "Missing Get Param Value ?calibrateZero=true");
     }
   }
-
   else
   {
     request->send(200, "text/plain; charset=utf-8", "Missing Get Param ?calibrateZero=true");
   }
 }
 
-int latest_accuracy = 0;
+// Helper function definitions
+void checkIaqSensorStatus(void)
+{
+  if (iaqSensor.status != BSEC_OK)
+  {
+    if (iaqSensor.status < BSEC_OK)
+    {
+      output = "BSEC error code : " + String(iaqSensor.status);
+      Serial.println(output);
+      for (;;)
+        errLeds(); /* Halt in case of failure */
+    }
+    else
+    {
+      output = "BSEC warning code : " + String(iaqSensor.status);
+      Serial.println(output);
+    }
+  }
+
+  if (iaqSensor.bme680Status != BME680_OK)
+  {
+    if (iaqSensor.bme680Status < BME680_OK)
+    {
+      output = "BME680 error code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
+      for (;;)
+        errLeds(); /* Halt in case of failure */
+    }
+    else
+    {
+      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
+    }
+  }
+}
+
+
+
 
 void WiFiReStart()
 {
-
   // Connect to WiFi network
   Serial.println();
   Serial.println();
@@ -132,22 +216,30 @@ void WiFiReStart()
   }
 }
 
+
 // Entry point for the example
 void setup(void)
 {
+
+  // FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+
   Serial.begin(9600);
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
   int wifiWaitCount = 0;
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+
+  addLEDsection();
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
+  FastLED.clear(true);
+
   while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
   {
     delay(500);
     Serial.print(".");
     wifiWaitCount++;
     FastLED.setBrightness(wifiWaitCount * 2);
-    led[LED_STATUS] = CRGB::BlueViolet;
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkBlue, FillStyle(ALL_AT_ONCE));
     FastLED.show();
   }
   // Print local IP address and start web server
@@ -157,11 +249,18 @@ void setup(void)
     Serial.println("WiFi connected.");
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
+    FastLED.show();
   }
   else
   {
     Serial.println("WiFi not connected");
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
+    FastLED.show();
   }
+  FastLED.clear(true);
+
+
   server.on("/", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
   server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
@@ -205,28 +304,32 @@ void setup(void)
 
   // Print the header
   Serial.println(header);
+  Serial.println("---------- Setup finished -------------");
 }
 
 // Function that is looped forever
 void loop(void)
 {
-  CRGB oldStatus = led[LED_STATUS];
+  CRGB oldStatus = led[LED_WLANCONNECT]; // let the LED blink if WLAN connection is gone
   if (WiFi.status() != WL_CONNECTED)
   {
-    led[LED_STATUS] = CRGB::Green;
-    FastLED.show();
+    
+    LEDsectionManager.fillSectionWithColor(0, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+     FastLED.show();
     delay(150);
-    led[LED_STATUS] = oldStatus;
+
+    LEDsectionManager.fillSectionWithColor(0, oldStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
     WiFiReStart();
     delay(5000);
   }
   else
   {
-    led[LED_STATUS] = CRGB::LightSeaGreen;
+    LEDsectionManager.fillSectionWithColor(0, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
     delay(150);
-    led[LED_STATUS] = oldStatus;
+
+    LEDsectionManager.fillSectionWithColor(0, oldStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
     delay(10000);
   }
@@ -241,68 +344,130 @@ void loop(void)
     output += ", " + String(iaqSensor.gasResistance);
     output += ", " + String(iaqSensor.iaq);
     output += ", " + String(iaqSensor.iaqAccuracy);
+
+
     if (iaqSensor.iaqAccuracy == 0)
-      led[LED_STATUS] = CRGB::Red;
+    {
+      rainbowAllSections(20, 100);
+      // LEDsectionManager.fillSectionWithColor(1, CRGB::Violet, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+    }
     else if (iaqSensor.iaqAccuracy == 1)
-      led[LED_STATUS] = CRGB::Yellow;
+    {
+      LEDsectionManager.fillSectionWithColor(1, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+    }
     else if (iaqSensor.iaqAccuracy == 2)
-      led[LED_STATUS] = CRGB::Green;
+    {
+      LEDsectionManager.fillSectionWithColor(1, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+    }
     else if (iaqSensor.iaqAccuracy >= 3)
     {
-      led[LED_STATUS] = CRGB::Green;
+      LEDsectionManager.fillSectionWithColor(1, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_STATUS
       updateState();
     }
+
+
+
+
 
     output += ", " + String(iaqSensor.temperature);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.temperature < 19)
-        led[LED_TEMP] = CRGB::Magenta;
+      {
+        LEDsectionManager.fillSectionWithColor(2, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+      }
       else if (iaqSensor.temperature < 20)
-        led[LED_TEMP] = CRGB::LightSeaGreen;
+      {
+        LEDsectionManager.fillSectionWithColor(2, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+      }
       else if (iaqSensor.temperature > 26)
-        led[LED_TEMP] = CRGB::Orange;
+      {
+        LEDsectionManager.fillSectionWithColor(2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+      }
       else if (iaqSensor.temperature > 28)
-        led[LED_TEMP] = CRGB::Red;
+      {
+        LEDsectionManager.fillSectionWithColor(2, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+      }
       else
-        led[LED_TEMP] = CRGB::Green;
+      {
+        LEDsectionManager.fillSectionWithColor(2, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+      }
     }
     else
-      led[LED_TEMP] = CRGB::Black;
+    {
+      //LEDsectionManager.fillSectionWithColor(2, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+    }
+    
+
+
+
+
     output += ", " + String(iaqSensor.humidity);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.humidity < 20)
-        led[LED_HUM] = CRGB::Red;
+      {
+        LEDsectionManager.fillSectionWithColor(3, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_HUM
+      }
       else if (iaqSensor.humidity < 30)
-        led[LED_HUM] = CRGB::Orange;
+      {
+        LEDsectionManager.fillSectionWithColor(3, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_HUM
+      }
       else if (iaqSensor.humidity > 60)
-        led[LED_HUM] = CRGB::LightSeaGreen;
+      {
+        LEDsectionManager.fillSectionWithColor(3, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_HUM
+      }
       else if (iaqSensor.humidity > 70)
-        led[LED_HUM] = CRGB::Magenta;
+      {
+        LEDsectionManager.fillSectionWithColor(3, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_HUM
+      }
       else
-        led[LED_HUM] = CRGB::Green;
+      {
+        LEDsectionManager.fillSectionWithColor(3, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_HUM
+      }
     }
     else
-      led[LED_HUM] = CRGB::Black;
+    {
+         //LEDsectionManager.fillSectionWithColor(3, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_HUM
+    }
+
+
+
+
     output += ", " + String(iaqSensor.staticIaq);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.iaq <= 50)
-        led[LED_AIRQ] = CRGB::Green;
+      {  
+        LEDsectionManager.fillSectionWithColor(4, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      }
       else if (iaqSensor.iaq <= 100)
-        led[LED_AIRQ] = CRGB::YellowGreen;
+      {  
+        LEDsectionManager.fillSectionWithColor(4, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      }
       else if (iaqSensor.iaq <= 150)
-        led[LED_AIRQ] = CRGB::Yellow;
+      {  
+        LEDsectionManager.fillSectionWithColor(4, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      }
       else if (iaqSensor.iaq <= 200)
-        led[LED_AIRQ] = CRGB::Orange;
+      {  
+        LEDsectionManager.fillSectionWithColor(4, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      }
       else if (iaqSensor.iaq < 250)
-        led[LED_AIRQ] = CRGB::Red;
+      {  
+        LEDsectionManager.fillSectionWithColor(4, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      }
       else
-        led[LED_AIRQ] = CRGB::Magenta;
+      {  
+        LEDsectionManager.fillSectionWithColor(4, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      }
     }
     else
-      led[LED_AIRQ] = CRGB::Black;
+    { 
+      //LEDsectionManager.fillSectionWithColor(4, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+    }
+
+
 
     output += ", " + String(iaqSensor.co2Equivalent);
     int MHZ19CO2 = myMHZ19.getCO2();
@@ -313,25 +478,40 @@ void loop(void)
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (checkCO2 < 600)
-        led[LED_CO2] = CRGB::Green;
+      {  
+        LEDsectionManager.fillSectionWithColor(5, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      }
       else if (checkCO2 < 800)
-        led[LED_CO2] = CRGB::YellowGreen;
+      {  
+        LEDsectionManager.fillSectionWithColor(5, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      }
       else if (checkCO2 < 900)
-        led[LED_CO2] = CRGB::Yellow;
+      {  
+         LEDsectionManager.fillSectionWithColor(5, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      }
       else if (checkCO2 < 1000)
-        led[LED_CO2] = CRGB::Orange;
+      {  
+        LEDsectionManager.fillSectionWithColor(5, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      }
       else if (checkCO2 < 1200)
-        led[LED_CO2] = CRGB::Red;
+      {  
+        LEDsectionManager.fillSectionWithColor(5, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      }
       else
-        led[LED_CO2] = CRGB::Magenta;
+      {  
+        LEDsectionManager.fillSectionWithColor(5, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      }
     }
     else
-      led[LED_CO2] = CRGB::Black;
+    { 
+      //LEDsectionManager.fillSectionWithColor(5, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_CO2
+    }
+
     output += ", " + String(iaqSensor.breathVocEquivalent);
     output += ", " + String(MHZ19CO2);
 
     Serial.println(output);
-    FastLED.setBrightness(96);
+    FastLED.setBrightness(50);
     FastLED.show();
   }
   else
@@ -340,41 +520,6 @@ void loop(void)
   }
 }
 
-// Helper function definitions
-void checkIaqSensorStatus(void)
-{
-  if (iaqSensor.status != BSEC_OK)
-  {
-    if (iaqSensor.status < BSEC_OK)
-    {
-      output = "BSEC error code : " + String(iaqSensor.status);
-      Serial.println(output);
-      for (;;)
-        errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      output = "BSEC warning code : " + String(iaqSensor.status);
-      Serial.println(output);
-    }
-  }
-
-  if (iaqSensor.bme680Status != BME680_OK)
-  {
-    if (iaqSensor.bme680Status < BME680_OK)
-    {
-      output = "BME680 error code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
-      for (;;)
-        errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
-    }
-  }
-}
 
 void errLeds(void)
 {
