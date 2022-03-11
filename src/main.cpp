@@ -10,6 +10,7 @@
 #include <SectionManager.h>
 #include <helpers.h>
 
+
 const uint8_t bsec_config_iaq[] = {
 //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
 #include "config/generic_33v_300s_4d/bsec_iaq.txt"
@@ -24,6 +25,8 @@ void clearState(void);
 
 #define STATE_SAVE_PERIOD UINT32_C(360 * 60 * 1000) // 360 minutes - 4 times a day
 
+
+// --------------------------------------------------------------------------
 // Create an object of the class Bsec
 Bsec iaqSensor;
 uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
@@ -34,23 +37,81 @@ String output = "";
 const String header = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent, MH Z-19B CO2";
 int latest_accuracy = 0;
 
+// Helper function definitions
+void checkIaqSensorStatus(void)
+{
+  if (iaqSensor.status != BSEC_OK)
+  {
+    if (iaqSensor.status < BSEC_OK)
+    {
+      output = "BSEC error code : " + String(iaqSensor.status);
+      Serial.println(output);
+      for (;;)
+        errLeds(); /* Halt in case of failure */
+    }
+    else
+    {
+      output = "BSEC warning code : " + String(iaqSensor.status);
+      Serial.println(output);
+    }
+  }
+
+  if (iaqSensor.bme680Status != BME680_OK)
+  {
+    if (iaqSensor.bme680Status < BME680_OK)
+    {
+      output = "BME680 error code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
+      for (;;)
+        errLeds(); /* Halt in case of failure */
+    }
+    else
+    {
+      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
+    }
+  }
+}
 
 
-
-
-AsyncWebServer server(80);
-
-#define RX_PIN 18
-#define TX_PIN 19
-#define BAUDRATE 9600
-
-MHZ19 myMHZ19;
-HardwareSerial mySerial(1);
-
+// --------------------------------------------------------------------------
 //WLAN
-const char *ssid     = "Antwort42_iot_optout_nomap";
-const char *password = "DasLebenistschwerohneInternet2024";
+const char *ssid     = "";
+const char *password = "";
 
+void WiFiReStart( const char *input_ssid, const char *input_password)
+{
+  // Connect to WiFi network
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(input_ssid);
+
+  WiFi.begin(input_ssid, input_password);
+  int wifiWaitCount = 0;
+  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+  {
+    delay(250);
+    Serial.print(".");
+    wifiWaitCount++;
+  }
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println("");
+    Serial.println("WiFi connected");
+
+    // Start the server
+    //server.begin();
+
+    //Serial.println("Server started");
+
+    // Print the IP address
+    Serial.println(WiFi.localIP());
+  }
+}
+
+
+// --------------------------------------------------------------------------
 // definition of LED
 
 #define NUM_LEDS 34
@@ -111,6 +172,19 @@ void rainbowAllSections(uint8_t pauseDuration, int repeat)
 
 
 
+
+// --------------------------------------------------------------------------
+// Server
+
+AsyncWebServer server(80);
+
+#define RX_PIN 18
+#define TX_PIN 19
+#define BAUDRATE 9600
+
+MHZ19 myMHZ19;
+HardwareSerial mySerial(1);
+
 void handle_NotFound(AsyncWebServerRequest *request)
 {
   request->send(404, "text/plain; charset=utf-8", "Not found");
@@ -146,75 +220,12 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
   }
 }
 
-// Helper function definitions
-void checkIaqSensorStatus(void)
-{
-  if (iaqSensor.status != BSEC_OK)
-  {
-    if (iaqSensor.status < BSEC_OK)
-    {
-      output = "BSEC error code : " + String(iaqSensor.status);
-      Serial.println(output);
-      for (;;)
-        errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      output = "BSEC warning code : " + String(iaqSensor.status);
-      Serial.println(output);
-    }
-  }
-
-  if (iaqSensor.bme680Status != BME680_OK)
-  {
-    if (iaqSensor.bme680Status < BME680_OK)
-    {
-      output = "BME680 error code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
-      for (;;)
-        errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
-    }
-  }
-}
 
 
 
+// --------------------------------------------------------------------------
 
-void WiFiReStart()
-{
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
 
-  WiFi.begin(ssid, password);
-  int wifiWaitCount = 0;
-  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-  {
-    delay(250);
-    Serial.print(".");
-    wifiWaitCount++;
-  }
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("");
-    Serial.println("WiFi connected");
-
-    // Start the server
-    //server.begin();
-
-    //Serial.println("Server started");
-
-    // Print the IP address
-    Serial.println(WiFi.localIP());
-  }
-}
 
 
 // Entry point for the example
@@ -315,12 +326,12 @@ void loop(void)
   {
     
     LEDsectionManager.fillSectionWithColor(0, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
-     FastLED.show();
+    FastLED.show();
     delay(150);
 
     LEDsectionManager.fillSectionWithColor(0, oldStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
-    WiFiReStart();
+    WiFiReStart(ssid, password);
     delay(5000);
   }
   else
@@ -349,7 +360,6 @@ void loop(void)
     if (iaqSensor.iaqAccuracy == 0)
     {
       rainbowAllSections(20, 100);
-      // LEDsectionManager.fillSectionWithColor(1, CRGB::Violet, FillStyle(ALL_AT_ONCE)); // LED_STATUS
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
