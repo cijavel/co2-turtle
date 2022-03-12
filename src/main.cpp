@@ -159,6 +159,13 @@ void WiFiReStart( const char *input_ssid, const char *input_password)
 
 // --------------------------------------------------------------------------
 // definition of LED
+#define LED_WLANCONNECT 0
+#define LED_STATUS 1
+#define LED_TEMP 2
+#define LED_HUM 3
+#define LED_AIRQ 4
+#define LED_CO2 5
+
 
 #define NUM_LEDS 34
 #define DATA_PIN 5
@@ -169,12 +176,12 @@ SectionManager LEDsectionManager = SectionManager(led);
 void addLEDsection(void)
 {
   LEDsectionManager.addSections(6);
-  LEDsectionManager.addRangeToSection(0, 0, 0, false);   // WLAN
-  LEDsectionManager.addRangeToSection(1, 2, 5, false);   // LED_STATUS
-  LEDsectionManager.addRangeToSection(2, 7, 12, false);  // LED_TEMP
-  LEDsectionManager.addRangeToSection(3, 14, 19, false); // LED_HUM
-  LEDsectionManager.addRangeToSection(4, 21, 26, false); // LED_AIRQ
-  LEDsectionManager.addRangeToSection(5, 28, 33, false); // LED_CO2
+  LEDsectionManager.addRangeToSection(LED_WLANCONNECT, 0, 0, false); // WLAN
+  LEDsectionManager.addRangeToSection(LED_STATUS, 2, 5, false);      // LED_STATUS
+  LEDsectionManager.addRangeToSection(LED_TEMP, 7, 12, false);       // LED_TEMP
+  LEDsectionManager.addRangeToSection(LED_HUM, 14, 19, false);       // LED_HUM
+  LEDsectionManager.addRangeToSection(LED_AIRQ, 21, 26, false);      // LED_AIRQ
+  LEDsectionManager.addRangeToSection(LED_CO2, 28, 33, false);       // LED_CO2
 }
 
 void rainbowAllSections(uint8_t pauseDuration, int repeat)
@@ -365,22 +372,22 @@ void loop(void)
 
   if (WiFi.status() != WL_CONNECTED)
   {
-    LEDsectionManager.fillSectionWithColor(0, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Green, FillStyle(ALL_AT_ONCE));
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(0, oldLEDStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, oldLEDStatus, FillStyle(ALL_AT_ONCE)); 
     FastLED.show();
     WiFiReStart(ssid, password);
     delay(5000);
   }
   else
   {
-    LEDsectionManager.fillSectionWithColor(0, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(0, oldLEDStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, oldLEDStatus, FillStyle(ALL_AT_ONCE)); 
     FastLED.show();
     delay(5000);
   }
@@ -411,21 +418,23 @@ void loop(void)
     output += ", " + String(iaqSensor.iaqAccuracy);
 
 
+
+
     if (iaqSensor.iaqAccuracy == 0)
     {
       rainbowAllSections(20, 50);
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
-      LEDsectionManager.fillSectionWithColor(1, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
     }
     else if (iaqSensor.iaqAccuracy == 2)
     {
-      LEDsectionManager.fillSectionWithColor(1, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
     }
     else if (iaqSensor.iaqAccuracy >= 3)
     {
-      LEDsectionManager.fillSectionWithColor(1, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
       updateState(); //acurate data. save them
     }
 
@@ -438,28 +447,28 @@ void loop(void)
     {
       if (iaqSensor.temperature < 19)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.temperature < 20)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.temperature > 26)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Orange, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.temperature > 28)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
       else
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
       }
     }
     else
     {
-      //LEDsectionManager.fillSectionWithColor(2, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+      //LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Black, FillStyle(ALL_AT_ONCE));
     }
     
 
@@ -471,28 +480,28 @@ void loop(void)
     {
       if (iaqSensor.humidity < 20)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.humidity < 30)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.humidity > 60)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.humidity > 70)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
       }
       else
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
     }
     else
     {
-         //LEDsectionManager.fillSectionWithColor(3, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_HUM
+         //LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
     }
 
 
@@ -503,32 +512,32 @@ void loop(void)
     {
       if (iaqSensor.iaq <= 50)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(4, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.iaq <= 100)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(4, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.iaq <= 150)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.iaq <= 200)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.iaq < 250)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
       else
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
       }
     }
     else
     { 
-      //LEDsectionManager.fillSectionWithColor(4, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      //LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Black, FillStyle(ALL_AT_ONCE));
     }
 
 
@@ -543,32 +552,32 @@ void loop(void)
     {
       if (checkCO2 < 600)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 800)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 900)
       {  
-         LEDsectionManager.fillSectionWithColor(5, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_CO2
+         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 1000)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 1200)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
       else
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
       }
     }
     else
     { 
-      //LEDsectionManager.fillSectionWithColor(5, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      //LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
     }
 
     output += ", " + String(iaqSensor.breathVocEquivalent);
