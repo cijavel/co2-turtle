@@ -15,9 +15,9 @@
 //https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf
 //https://github.com/FastLED/FastLED/wiki/Basic-usage
 
-const uint8_t bsec_config_iaq[] = {
-//#include "config/generic_33v_300s_28d/bsec_iaq.txt"
-#include "config/generic_33v_300s_4d/bsec_iaq.txt"
+const uint8_t bsec_config_iaq[] = {  
+  //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
+  #include "config/generic_33v_300s_4d/bsec_iaq.txt"
 };
 
 // Helper functions declarations
@@ -41,39 +41,51 @@ uint32_t millisOverflowCounter = 0;
 uint32_t lastTime = 0;
 int latest_accuracy = 0;
 
-String output = "";
-const String header = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent, MH Z-19B CO2";
+const String name_timestamp           = "Timestamp [ms]";
+const String name_rawtemperatur       = "raw temperature [°C]";
+const String name_pressure            = "pressure [hPa]";
+const String name_rawrelativehumidity = "raw relative humidity [%]";
+const String name_gas                 = "gas [Ohm]";
+const String name_iaq                 = "IAQ";
+const String name_iaqaccuracy         = "IAQ accuracy";
+const String name_temp                = "temperature [°C]";
+const String name_relativehumidity    = "relative humidity [%]";
+const String name_iaqstatic           = "IAQ Static";
+const String name_co2equil            = "CO2 equivalentv";
+const String name_breahtvoc           = "breath VOC equivalent";
+const String name_MHZ19B_co2          = "MH Z-19B CO2";
 
-const String string_timestamp = "Timestamp [ms]";
-const String string_rawtemperatur = "raw temperature [°C]";
-const String string_pressure = "pressure [hPa]";
-const String string_rawrelativehumidity = "raw relative humidity [%]";
-const String string_gas = "gas [Ohm]";
-const String string_iaq = "IAQ";
-const String string_iaqaccuracy = "IAQ accuracy";
-const String string_temp = "temperature [°C]";
-const String string_relativehumidity = "relative humidity [%]";
-const String string_staticiaq = "Static IAQ";
-const String string_co2equil = "CO2 equivalentv";
-const String string_breahtvoc = "breath VOC equivalent";
-const String string_MHZ19B_co2 = "MH Z-19B CO2";
-
-String data_timestamp = "";
-String data_rawtemperatur = "";
-String data_pressure = "";
+String data_timestamp           = "";
+String data_rawtemperatur       = "";
+String data_pressure            = "";
 String data_rawrelativehumidity = "";
-String data_gas = "";
-String data_iaq = "";
-String data_iaqaccuracy = "";
-String data_temp = "";
-String data_relativehumidity = "";
-String data_staticiaq = "";
-String data_co2equil = "";
-String data_breahtvoc = "";
-String data_MHZ19B_co2 = "";
+String data_gas                 = "";
+String data_iaq                 = "";
+String data_iaqaccuracy         = "";
+String data_temp                = "";
+String data_relativehumidity    = "";
+String data_iaqstatic           = "";
+String data_co2equil            = "";
+String data_breahtvoc           = "";
+String data_MHZ19B_co2          = "";
 
 String header_data = "";
+String output      = "";
 
+const String header =   
+  name_timestamp           + ", " + 
+  name_rawtemperatur       + ", " + 
+  name_temp                + ", " + 
+  name_pressure            + ", " + 
+  name_rawrelativehumidity + ", " + 
+  name_relativehumidity    + ", " + 
+  name_gas                 + ", " + 
+  name_iaq                 + ", " + 
+  name_iaqaccuracy         + ", " + 
+  name_iaqstatic           + ", " +  
+  name_co2equil            + ", " + 
+  name_breahtvoc           + ", " + 
+  name_MHZ19B_co2 ;
 
 
 // Helper function definitions
@@ -273,21 +285,23 @@ void handle_data(AsyncWebServerRequest *request)
 {
   header_data =
   "{\n\"" + 
-  string_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
-  string_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
-  string_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
-  string_rawrelativehumidity + "\":\"" + data_rawrelativehumidity + "\",\n" + "\"" + 
-  string_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
-  string_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
-  string_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
-  string_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
-  string_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
-  string_staticiaq           + "\":\"" + data_staticiaq           + "\",\n" +  "\"" + 
-  string_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
-  string_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
-  string_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
+  name_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
+  name_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
+  name_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
+  name_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
+  name_rawrelativehumidity + "\":\"" + data_rawrelativehumidity + "\",\n" + "\"" + 
+  name_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
+  name_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
+  name_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
+  name_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
+  name_iaqstatic           + "\":\"" + data_iaqstatic           + "\",\n" +  "\"" + 
+  name_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
+  name_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
+  name_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
   request->send(200, "application/json; charset=utf-8", header_data);
 }
+
+
 
 void handle_data_only(AsyncWebServerRequest *request)
 {
@@ -404,7 +418,7 @@ void loop(void)
 
   if (iaqSensor.iaqAccuracy == 0)
   {
-    ledloop = rainbowAllSections(20, ledloop, 4);
+    ledloop = rainbowAllSections(20, ledloop, 6);
   }
   unsigned long time_trigger = millis();
   if (iaqSensor.run())
@@ -419,7 +433,7 @@ void loop(void)
 		data_iaqaccuracy         = String(iaqSensor.iaqAccuracy);
 		data_temp                = String(iaqSensor.temperature);
 		data_relativehumidity    = String(iaqSensor.humidity);
-		data_staticiaq           = String(iaqSensor.staticIaq);
+		data_iaqstatic           = String(iaqSensor.staticIaq);
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
 
