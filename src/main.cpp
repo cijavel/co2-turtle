@@ -12,34 +12,49 @@
 
 //https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
 //https://www.rehva.eu/fileadmin/user_upload/REHVA_COVID-19_guidance_document_V3_03082020.pdf
+
+//Senor
 //https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf
+//https://www.winsen-sensor.com/d/files/infrared-gas-sensor/ndir-co2-sensor/mh-z19b-co2-manual(ver1_6).pdf
+
+//Libs
 //https://github.com/FastLED/FastLED/wiki/Basic-usage
+//https://github.com/chris-schmitz/FastLED-Section-Manager?utm_source=platformio&utm_medium=piohome
 
-const uint8_t bsec_config_iaq[] = {
-//#include "config/generic_33v_300s_28d/bsec_iaq.txt"
-#include "config/generic_33v_300s_4d/bsec_iaq.txt"
-};
+// ---------------------------------------------
+// Configuration
+// ---------------------------------------------
 
+
+// WLAN
+const char *ssid     = "";
+const char *password = "";
+String deviceName    = "ESP32 SensorTurtle";
+
+
+
+// ---------------------------------------------
 // Helper functions declarations
+// ---------------------------------------------
 void checkIaqSensorStatus(void);
 void errLeds(void);
 void loadState(void);
 void updateState(void);
 void clearState(void);
-void addLEDsection(void);
-void handle_data(AsyncWebServerRequest *request);
-void handle_data_only(AsyncWebServerRequest *request);
-void mh_z19b_calibrateZero(AsyncWebServerRequest *request);
-void WiFiReStart( const char *input_ssid, const char *input_password);
-void rainbowAllSections(uint8_t pauseDuration, int repeat);
-void handle_NotFound(AsyncWebServerRequest *request);
 
 
+// --------------------------------------------------------------------------
+// sensor data
+// --------------------------------------------------------------------------
+
+const uint8_t bsec_config_iaq[] = {  
+  //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
+  #include "config/generic_33v_300s_4d/bsec_iaq.txt"
+};
 //save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(720 * 60 * 1000) // 720 minutes - 2 times a day
 
 
-// --------------------------------------------------------------------------
 // Create an object of the class Bsec
 Bsec iaqSensor;
 uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
@@ -48,39 +63,51 @@ uint32_t millisOverflowCounter = 0;
 uint32_t lastTime = 0;
 int latest_accuracy = 0;
 
-String output = "";
-const String header = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent, MH Z-19B CO2";
+const String name_timestamp           = "Timestamp [ms]";
+const String name_rawtemperatur       = "raw temperature [°C]";
+const String name_pressure            = "pressure [hPa]";
+const String name_rawrelativehumidity = "raw relative humidity [%]";
+const String name_gas                 = "gas [Ohm]";
+const String name_iaq                 = "IAQ";
+const String name_iaqaccuracy         = "IAQ accuracy";
+const String name_temp                = "temperature [°C]";
+const String name_relativehumidity    = "relative humidity [%]";
+const String name_iaqstatic           = "IAQ Static";
+const String name_co2equil            = "CO2 equivalentv";
+const String name_breahtvoc           = "breath VOC equivalent";
+const String name_MHZ19B_co2          = "MH Z-19B CO2";
 
-const String string_timestamp = "Timestamp [ms]";
-const String string_rawtemperatur = "raw temperature [°C]";
-const String string_pressure = "pressure [hPa]";
-const String string_rawrelativehumidity = "raw relative humidity [%]";
-const String string_gas = "gas [Ohm]";
-const String string_iaq = "IAQ";
-const String string_iaqaccuracy = "IAQ accuracy";
-const String string_temp = "temperature [°C]";
-const String string_relativehumidity = "relative humidity [%]";
-const String string_staticiaq = "Static IAQ";
-const String string_co2equil = "CO2 equivalentv";
-const String string_breahtvoc = "breath VOC equivalent";
-const String string_MHZ19B_co2 = "MH Z-19B CO2";
-
-String data_timestamp = "";
-String data_rawtemperatur = "";
-String data_pressure = "";
+String data_timestamp           = "";
+String data_rawtemperatur       = "";
+String data_pressure            = "";
 String data_rawrelativehumidity = "";
-String data_gas = "";
-String data_iaq = "";
-String data_iaqaccuracy = "";
-String data_temp = "";
-String data_relativehumidity = "";
-String data_staticiaq = "";
-String data_co2equil = "";
-String data_breahtvoc = "";
-String data_MHZ19B_co2 = "";
+String data_gas                 = "";
+String data_iaq                 = "";
+String data_iaqaccuracy         = "";
+String data_temp                = "";
+String data_relativehumidity    = "";
+String data_iaqstatic           = "";
+String data_co2equil            = "";
+String data_breahtvoc           = "";
+String data_MHZ19B_co2          = "";
 
 String header_data = "";
+String output      = "";
 
+const String header =   
+  name_timestamp           + ", " + 
+  name_rawtemperatur       + ", " + 
+  name_temp                + ", " + 
+  name_pressure            + ", " + 
+  name_rawrelativehumidity + ", " + 
+  name_relativehumidity    + ", " + 
+  name_gas                 + ", " + 
+  name_iaq                 + ", " + 
+  name_iaqaccuracy         + ", " + 
+  name_iaqstatic           + ", " +  
+  name_co2equil            + ", " + 
+  name_breahtvoc           + ", " + 
+  name_MHZ19B_co2 ;
 
 
 // Helper function definitions
@@ -121,91 +148,148 @@ void checkIaqSensorStatus(void)
 
 
 // --------------------------------------------------------------------------
-//WLAN
-const char *ssid     = "";
-const char *password = "";
-
-void WiFiReStart( const char *input_ssid, const char *input_password)
-{
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(input_ssid);
-
-  WiFi.begin(input_ssid, input_password);
-  int wifiWaitCount = 0;
-  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-  {
-    delay(250);
-    Serial.print(".");
-    wifiWaitCount++;
-  }
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("");
-    Serial.println("WiFi connected");
-
-    // Start the server
-    //server.begin();
-
-    //Serial.println("Server started");
-
-    // Print the IP address
-    Serial.println(WiFi.localIP());
-  }
-}
-
-
-// --------------------------------------------------------------------------
 // definition of LED
+// --------------------------------------------------------------------------
+#define LED_WLANCONNECT 0
+#define LED_STATUS 1
+#define LED_TEMP 2
+#define LED_HUM 3
+#define LED_AIRQ 4
+#define LED_CO2 5
+
 
 #define NUM_LEDS 34
 #define DATA_PIN 5
-CRGB oldLEDStatus = CRGB::Black;
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
+int ledloop = 0;
 
 void addLEDsection(void)
 {
   LEDsectionManager.addSections(6);
-  LEDsectionManager.addRangeToSection(0, 0, 0, false);   // WLAN
-  LEDsectionManager.addRangeToSection(1, 2, 5, false);   // LED_STATUS
-  LEDsectionManager.addRangeToSection(2, 7, 12, false);  // LED_TEMP
-  LEDsectionManager.addRangeToSection(3, 14, 19, false); // LED_HUM
-  LEDsectionManager.addRangeToSection(4, 21, 26, false); // LED_AIRQ
-  LEDsectionManager.addRangeToSection(5, 28, 33, false); // LED_CO2
+  LEDsectionManager.addRangeToSection(LED_WLANCONNECT, 0, 0, false); // WLAN
+  LEDsectionManager.addRangeToSection(LED_STATUS, 2, 5, false);      // LED_STATUS
+  LEDsectionManager.addRangeToSection(LED_TEMP, 7, 12, false);       // LED_TEMP
+  LEDsectionManager.addRangeToSection(LED_HUM, 14, 19, false);       // LED_HUM
+  LEDsectionManager.addRangeToSection(LED_AIRQ, 21, 26, false);      // LED_AIRQ
+  LEDsectionManager.addRangeToSection(LED_CO2, 28, 33, false);       // LED_CO2
+
+    //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+  FastLED.clear(true);
+
 }
 
-void rainbowAllSections(uint8_t pauseDuration, int repeat)
+
+int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 {
-  int colorsteps = 240; // how many colors, 256 all color, 
-  int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
-  int colorrun =  NUM_LEDS + repeat;
-  uint16_t level, wheelPosition;
-
-  for (wheelPosition = 0; wheelPosition < colorrun ; wheelPosition++) 
-  {
-    // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
-    for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
+    if (NUM_LEDS * multi < wheelPosition)
     {
-      uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
- 
-      for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
-      {
-        LEDsectionManager.setColorAtGlobalIndex(level, color);
-      }
+      wheelPosition = 0 ;
+    }
+   wheelPosition += 1;
 
-      FastLED.setBrightness(50);
-      FastLED.show();
-      delay(pauseDuration);
+
+  int colorsteps = 230; // how many colors, 256 all color, 
+  int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
+  uint16_t level ;
+  // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
+  for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
+  {
+    uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
+
+    for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
+    {
+      LEDsectionManager.setColorAtGlobalIndex(level, color);
+    }
+
+    FastLED.setBrightness(50);
+    FastLED.show();
+    delay(pauseDuration);
+  }
+  return wheelPosition;
+}
+
+
+
+// --------------------------------------------------------------------------
+// WLAN functions
+// --------------------------------------------------------------------------
+
+void WiFiReStart()
+{
+  if (*ssid)
+  {
+    // Connect to WiFi network
+    Serial.println();
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+
+    WiFi.begin(ssid, password);
+    int wifiWaitCount = 0;
+    while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+    {
+      delay(250);
+      Serial.print(".");
+      wifiWaitCount++;
+    }
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      Serial.println("");
+      Serial.println("WiFi connected");
+
+      // Start the server
+      //server.begin();
+
+      //Serial.println("Server started");
+
+      // Print the IP address
+      Serial.println(WiFi.localIP());
     }
   }
 }
 
+void WiFiSetup()
+{
+  int wifiWaitCount = 0;
+  WiFi.setHostname(deviceName.c_str());
+  Serial.print("\nConnecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+  {
+    delay(800);
+    Serial.print(".");
+    wifiWaitCount++;
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkBlue, FillStyle(ALL_AT_ONCE));
+    FastLED.setBrightness(wifiWaitCount * 2);
+    FastLED.show();
+  }
+  // Print local IP address and start web server
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println("WiFi connected.");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
+    FastLED.show();
+  }
+  else
+  {
+    Serial.println("WiFi not connected");
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
+    FastLED.show();
+  }
+  FastLED.clear(true);
+}
+
+
+
 
 // --------------------------------------------------------------------------
-// Server
+// Web Server
+// --------------------------------------------------------------------------
 AsyncWebServer server(80);
 
 #define RX_PIN 18
@@ -224,19 +308,19 @@ void handle_data(AsyncWebServerRequest *request)
 {
   header_data =
   "{\n\"" + 
-  string_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
-  string_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
-  string_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
-  string_rawrelativehumidity + "\":\"" + data_rawrelativehumidity + "\",\n" + "\"" + 
-  string_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
-  string_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
-  string_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
-  string_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
-  string_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
-  string_staticiaq           + "\":\"" + data_staticiaq           + "\",\n" +  "\"" + 
-  string_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
-  string_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
-  string_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
+  name_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
+  name_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
+  name_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
+  name_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
+  name_rawrelativehumidity + "\":\"" + data_rawrelativehumidity + "\",\n" + "\"" + 
+  name_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
+  name_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
+  name_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
+  name_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
+  name_iaqstatic           + "\":\"" + data_iaqstatic           + "\",\n" +  "\"" + 
+  name_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
+  name_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
+  name_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
   request->send(200, "application/json; charset=utf-8", header_data);
 }
 
@@ -267,51 +351,17 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
 
 
 
-
+// --------------------------------------------------------------------------
+//  MAIN
 // --------------------------------------------------------------------------
 // Entry point for the example
 void setup(void)
 {
-  int wifiWaitCount = 0;
- 
   addLEDsection();
-  //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
-  FastLED.clear(true);
 
   Serial.begin(9600);
-  Serial.print("\nConnecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
 
-
-
-  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-  {
-    delay(800);
-    Serial.print(".");
-    wifiWaitCount++;
-    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkBlue, FillStyle(ALL_AT_ONCE));
-    FastLED.setBrightness(wifiWaitCount * 2);
-    FastLED.show();
-  }
-  // Print local IP address and start web server
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("WiFi connected.");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
-    FastLED.show();
-  }
-  else
-  {
-    Serial.println("WiFi not connected");
-    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
-    FastLED.show();
-  }
-  FastLED.clear(true);
-
+  WiFiSetup();
 
 
   // webpages on server
@@ -362,29 +412,35 @@ void setup(void)
 // Function that is looped forever
 void loop(void)
 {
+  
 
   if (WiFi.status() != WL_CONNECTED)
   {
-    LEDsectionManager.fillSectionWithColor(0, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(0, oldLEDStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Black , FillStyle(ALL_AT_ONCE)); 
     FastLED.show();
-    WiFiReStart(ssid, password);
-    delay(5000);
+    WiFiReStart();
+    delay(1000);
   }
   else
   {
-    LEDsectionManager.fillSectionWithColor(0, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::LightSkyBlue, FillStyle(ALL_AT_ONCE));
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(0, oldLEDStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Black , FillStyle(ALL_AT_ONCE)); 
     FastLED.show();
-    delay(5000);
+    delay(1000);
   }
 
+
+  if (iaqSensor.iaqAccuracy == 0)
+  {
+    ledloop = rainbowAllSections(20, ledloop, 6);
+  }
   unsigned long time_trigger = millis();
   if (iaqSensor.run())
   { // If new data is available
@@ -398,7 +454,7 @@ void loop(void)
 		data_iaqaccuracy         = String(iaqSensor.iaqAccuracy);
 		data_temp                = String(iaqSensor.temperature);
 		data_relativehumidity    = String(iaqSensor.humidity);
-		data_staticiaq           = String(iaqSensor.staticIaq);
+		data_iaqstatic           = String(iaqSensor.staticIaq);
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
 
@@ -413,19 +469,19 @@ void loop(void)
 
     if (iaqSensor.iaqAccuracy == 0)
     {
-      rainbowAllSections(20, 50);
+
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
-      LEDsectionManager.fillSectionWithColor(1, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
     }
     else if (iaqSensor.iaqAccuracy == 2)
     {
-      LEDsectionManager.fillSectionWithColor(1, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
     }
     else if (iaqSensor.iaqAccuracy >= 3)
     {
-      LEDsectionManager.fillSectionWithColor(1, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_STATUS
+      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
       updateState(); //acurate data. save them
     }
 
@@ -438,28 +494,28 @@ void loop(void)
     {
       if (iaqSensor.temperature < 19)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.temperature < 20)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.temperature > 26)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Orange, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.temperature > 28)
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
       else
       {
-        LEDsectionManager.fillSectionWithColor(2, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
       }
     }
     else
     {
-      //LEDsectionManager.fillSectionWithColor(2, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_TEMP
+      //LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Black, FillStyle(ALL_AT_ONCE));
     }
     
 
@@ -471,28 +527,28 @@ void loop(void)
     {
       if (iaqSensor.humidity < 20)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.humidity < 30)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.humidity > 60)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.humidity > 70)
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
       }
       else
       {
-        LEDsectionManager.fillSectionWithColor(3, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_HUM
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
     }
     else
     {
-         //LEDsectionManager.fillSectionWithColor(3, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_HUM
+         //LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
     }
 
 
@@ -503,32 +559,32 @@ void loop(void)
     {
       if (iaqSensor.iaq <= 50)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(4, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.iaq <= 100)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(4, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.iaq <= 150)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
       }
       else if (iaqSensor.iaq <= 200)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE));
       }
       else if (iaqSensor.iaq < 250)
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
       else
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
       }
     }
     else
     { 
-      //LEDsectionManager.fillSectionWithColor(4, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_AIRQ
+      //LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Black, FillStyle(ALL_AT_ONCE));
     }
 
 
@@ -543,32 +599,32 @@ void loop(void)
     {
       if (checkCO2 < 600)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 800)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 900)
       {  
-         LEDsectionManager.fillSectionWithColor(5, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); // LED_CO2
+         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 1000)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Orange, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
       else if (checkCO2 < 1200)
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Red, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
       else
       {  
-        LEDsectionManager.fillSectionWithColor(5, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); // LED_CO2
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
       }
     }
     else
     { 
-      //LEDsectionManager.fillSectionWithColor(5, CRGB::Black, FillStyle(ALL_AT_ONCE)); // LED_CO2
+      //LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
     }
 
     output += ", " + String(iaqSensor.breathVocEquivalent);
