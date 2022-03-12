@@ -76,7 +76,7 @@ const String name_relativehumidity    = "relative humidity [%]";
 const String name_iaqstatic           = "IAQ Static";
 const String name_co2equil            = "CO2 equivalentv";
 const String name_breahtvoc           = "breath VOC equivalent";
-const String name_MHZ19B_co2          = "MH Z-19B CO2";
+const String name_MHZ19B_co2          = "MHZ19B CO2 [ppm]";
 
 String data_timestamp           = "";
 String data_rawtemperatur       = "";
