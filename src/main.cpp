@@ -27,8 +27,17 @@ void errLeds(void);
 void loadState(void);
 void updateState(void);
 void clearState(void);
+void addLEDsection(void);
+void handle_data(AsyncWebServerRequest *request);
+void handle_data_only(AsyncWebServerRequest *request);
+void mh_z19b_calibrateZero(AsyncWebServerRequest *request);
+void WiFiReStart( const char *input_ssid, const char *input_password);
+void rainbowAllSections(uint8_t pauseDuration, int repeat);
+void handle_NotFound(AsyncWebServerRequest *request);
 
-#define STATE_SAVE_PERIOD UINT32_C(360 * 60 * 1000) // 360 minutes - 4 times a day
+
+//save calibration data
+#define STATE_SAVE_PERIOD UINT32_C(720 * 60 * 1000) // 720 minutes - 2 times a day
 
 
 // --------------------------------------------------------------------------
@@ -114,8 +123,8 @@ void checkIaqSensorStatus(void)
 
 // --------------------------------------------------------------------------
 //WLAN
-const char *ssid     = "";
-const char *password = "";
+const char *ssid     = "Antwort42_iot_optout_nomap";
+const char *password = "DasLebenistschwerohneInternet2024";
 
 void WiFiReStart( const char *input_ssid, const char *input_password)
 {
@@ -154,18 +163,11 @@ void WiFiReStart( const char *input_ssid, const char *input_password)
 
 #define NUM_LEDS 34
 #define DATA_PIN 5
-
-#define LED_WLANCONNECT 0
-#define LED_STATUS 3
-#define LED_TEMP 8
-#define LED_HUM 15
-#define LED_AIRQ 22
-#define LED_CO2 29
-
+CRGB oldLEDStatus = CRGB::Black;
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
 
-void addLEDsection()
+void addLEDsection(void)
 {
   LEDsectionManager.addSections(6);
   LEDsectionManager.addRangeToSection(0, 0, 0, false);   // WLAN
@@ -188,18 +190,12 @@ void rainbowAllSections(uint8_t pauseDuration, int repeat)
     // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
     for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
     {
-
-
-
       uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
-
-
-
+ 
       for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
       {
         LEDsectionManager.setColorAtGlobalIndex(level, color);
       }
-
 
       FastLED.setBrightness(50);
       FastLED.show();
@@ -209,11 +205,8 @@ void rainbowAllSections(uint8_t pauseDuration, int repeat)
 }
 
 
-
-
 // --------------------------------------------------------------------------
 // Server
-
 AsyncWebServer server(80);
 
 #define RX_PIN 18
@@ -277,10 +270,6 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
 
 
 // --------------------------------------------------------------------------
-
-
-
-
 // Entry point for the example
 void setup(void)
 {
@@ -324,6 +313,8 @@ void setup(void)
   }
   FastLED.clear(true);
 
+
+
   // webpages on server
   server.on("/", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
@@ -340,7 +331,7 @@ void setup(void)
 
   iaqSensor.begin(0x77, Wire);
   output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
-  //Serial.println(output);
+  Serial.println(output);
   checkIaqSensorStatus();
 
   iaqSensor.setTemperatureOffset(4);
@@ -372,15 +363,14 @@ void setup(void)
 // Function that is looped forever
 void loop(void)
 {
-  CRGB oldStatus = led[LED_WLANCONNECT]; // let the LED blink if WLAN connection is gone
+
   if (WiFi.status() != WL_CONNECTED)
   {
-    
     LEDsectionManager.fillSectionWithColor(0, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(0, oldStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(0, oldLEDStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
     WiFiReStart(ssid, password);
     delay(5000);
@@ -391,7 +381,7 @@ void loop(void)
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(0, oldStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
+    LEDsectionManager.fillSectionWithColor(0, oldLEDStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
     delay(5000);
   }
@@ -425,8 +415,6 @@ void loop(void)
     if (iaqSensor.iaqAccuracy == 0)
     {
       rainbowAllSections(20, 50);
-      updateState();
-
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
@@ -439,7 +427,7 @@ void loop(void)
     else if (iaqSensor.iaqAccuracy >= 3)
     {
       LEDsectionManager.fillSectionWithColor(1, CRGB::Green, FillStyle(ALL_AT_ONCE)); // LED_STATUS
-      updateState();
+      updateState(); //acurate data. save them
     }
 
 
