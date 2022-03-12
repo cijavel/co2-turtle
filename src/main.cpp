@@ -6,7 +6,6 @@
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-
 #include <SectionManager.h>
 #include <helpers.h>
 
@@ -123,8 +122,8 @@ void checkIaqSensorStatus(void)
 
 // --------------------------------------------------------------------------
 //WLAN
-const char *ssid     = "Antwort42_iot_optout_nomap";
-const char *password = "DasLebenistschwerohneInternet2024";
+const char *ssid     = "";
+const char *password = "";
 
 void WiFiReStart( const char *input_ssid, const char *input_password)
 {
@@ -182,7 +181,7 @@ void rainbowAllSections(uint8_t pauseDuration, int repeat)
 {
   int colorsteps = 240; // how many colors, 256 all color, 
   int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
-  int colorrun =  NUM_LEDS * repeat;
+  int colorrun =  NUM_LEDS + repeat;
   uint16_t level, wheelPosition;
 
   for (wheelPosition = 0; wheelPosition < colorrun ; wheelPosition++) 
@@ -296,12 +295,12 @@ void setup(void)
     FastLED.setBrightness(wifiWaitCount * 2);
     FastLED.show();
   }
-  delay(100);
   // Print local IP address and start web server
   if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("WiFi connected.");
-    Serial.println("IP address: " + WiFi.localIP());
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
     LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
     FastLED.show();
   }
