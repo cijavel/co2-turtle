@@ -53,6 +53,7 @@ const uint8_t bsec_config_iaq[] = {
 };
 //save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(720 * 60 * 1000) // 720 minutes - 2 times a day
+MHZ19 myMHZ19; // Co2 sensor
 
 
 // Create an object of the class Bsec
@@ -167,8 +168,8 @@ int ledloop = 0;
 void addLEDsection(void)
 {
   LEDsectionManager.addSections(6);
-  LEDsectionManager.addRangeToSection(LED_WLANCONNECT, 0, 0, false); // WLAN
-  LEDsectionManager.addRangeToSection(LED_STATUS, 2, 5, false);      // LED_STATUS
+  LEDsectionManager.addRangeToSection(LED_WLANCONNECT, 0, 0, false); // LED_WLAN
+  LEDsectionManager.addRangeToSection(LED_STATUS, 2, 5, false);      // LED_STATUS data Quality
   LEDsectionManager.addRangeToSection(LED_TEMP, 7, 12, false);       // LED_TEMP
   LEDsectionManager.addRangeToSection(LED_HUM, 14, 19, false);       // LED_HUM
   LEDsectionManager.addRangeToSection(LED_AIRQ, 21, 26, false);      // LED_AIRQ
@@ -296,7 +297,6 @@ AsyncWebServer server(80);
 #define TX_PIN 19
 #define BAUDRATE 9600
 
-MHZ19 myMHZ19;
 HardwareSerial mySerial(1);
 
 void handle_NotFound(AsyncWebServerRequest *request)
@@ -457,6 +457,7 @@ void loop(void)
 		data_iaqstatic           = String(iaqSensor.staticIaq);
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
+    data_MHZ19B_co2          = String(myMHZ19.getCO2());
 
     output = String(time_trigger);
     output += ", " + String(iaqSensor.rawTemperature);
