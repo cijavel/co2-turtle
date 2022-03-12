@@ -12,15 +12,30 @@
 
 //https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
 //https://www.rehva.eu/fileadmin/user_upload/REHVA_COVID-19_guidance_document_V3_03082020.pdf
+
+//Senor
 //https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME680-DS001.pdf
+//https://www.winsen-sensor.com/d/files/infrared-gas-sensor/ndir-co2-sensor/mh-z19b-co2-manual(ver1_6).pdf
+
+//Libs
 //https://github.com/FastLED/FastLED/wiki/Basic-usage
+//https://github.com/chris-schmitz/FastLED-Section-Manager?utm_source=platformio&utm_medium=piohome
 
-const uint8_t bsec_config_iaq[] = {  
-  //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
-  #include "config/generic_33v_300s_4d/bsec_iaq.txt"
-};
+// ---------------------------------------------
+// Configuration
+// ---------------------------------------------
 
+
+// WLAN
+const char *ssid     = "";
+const char *password = "";
+String deviceName    = "ESP32 SensorTurtle";
+
+
+
+// ---------------------------------------------
 // Helper functions declarations
+// ---------------------------------------------
 void checkIaqSensorStatus(void);
 void errLeds(void);
 void loadState(void);
@@ -28,11 +43,18 @@ void updateState(void);
 void clearState(void);
 
 
+// --------------------------------------------------------------------------
+// sensor data
+// --------------------------------------------------------------------------
+
+const uint8_t bsec_config_iaq[] = {  
+  //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
+  #include "config/generic_33v_300s_4d/bsec_iaq.txt"
+};
 //save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(720 * 60 * 1000) // 720 minutes - 2 times a day
 
 
-// --------------------------------------------------------------------------
 // Create an object of the class Bsec
 Bsec iaqSensor;
 uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
@@ -127,6 +149,7 @@ void checkIaqSensorStatus(void)
 
 // --------------------------------------------------------------------------
 // definition of LED
+// --------------------------------------------------------------------------
 #define LED_WLANCONNECT 0
 #define LED_STATUS 1
 #define LED_TEMP 2
@@ -190,16 +213,14 @@ int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 
 
 // --------------------------------------------------------------------------
-//WLAN
-const char *ssid     = "";
-const char *password = "";
+// WLAN functions
+// --------------------------------------------------------------------------
 
 void WiFiReStart()
 {
   if (*ssid)
   {
     // Connect to WiFi network
-    Serial.println();
     Serial.println();
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -231,6 +252,7 @@ void WiFiReStart()
 void WiFiSetup()
 {
   int wifiWaitCount = 0;
+  WiFi.setHostname(deviceName.c_str());
   Serial.print("\nConnecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
@@ -266,7 +288,8 @@ void WiFiSetup()
 
 
 // --------------------------------------------------------------------------
-// Server
+// Web Server
+// --------------------------------------------------------------------------
 AsyncWebServer server(80);
 
 #define RX_PIN 18
@@ -301,8 +324,6 @@ void handle_data(AsyncWebServerRequest *request)
   request->send(200, "application/json; charset=utf-8", header_data);
 }
 
-
-
 void handle_data_only(AsyncWebServerRequest *request)
 {
   request->send(200, "text/plain; charset=utf-8", output);
@@ -330,7 +351,8 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
 
 
 
-
+// --------------------------------------------------------------------------
+//  MAIN
 // --------------------------------------------------------------------------
 // Entry point for the example
 void setup(void)
@@ -349,7 +371,6 @@ void setup(void)
   server.onNotFound(handle_NotFound);
 
   server.begin();
-
 
   EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
   mySerial.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN); // ESP32 Example
