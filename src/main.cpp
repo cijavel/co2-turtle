@@ -31,7 +31,7 @@ void handle_data(AsyncWebServerRequest *request);
 void handle_data_only(AsyncWebServerRequest *request);
 void mh_z19b_calibrateZero(AsyncWebServerRequest *request);
 void WiFiReStart( const char *input_ssid, const char *input_password);
-void rainbowAllSections(uint8_t pauseDuration, int repeat);
+int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi);
 void handle_NotFound(AsyncWebServerRequest *request);
 
 
@@ -172,6 +172,7 @@ void WiFiReStart( const char *input_ssid, const char *input_password)
 CRGB oldLEDStatus = CRGB::Black;
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
+int ledloop = 0;
 
 void addLEDsection(void)
 {
@@ -184,30 +185,34 @@ void addLEDsection(void)
   LEDsectionManager.addRangeToSection(LED_CO2, 28, 33, false);       // LED_CO2
 }
 
-void rainbowAllSections(uint8_t pauseDuration, int repeat)
+
+int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 {
+    if (NUM_LEDS * multi < wheelPosition)
+    {
+      wheelPosition = 0 ;
+    }
+   wheelPosition += 1;
+
+
   int colorsteps = 240; // how many colors, 256 all color, 
   int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
-  int colorrun =  NUM_LEDS + repeat;
-  uint16_t level, wheelPosition;
-
-  for (wheelPosition = 0; wheelPosition < colorrun ; wheelPosition++) 
+  uint16_t level ;
+  // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
+  for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
   {
-    // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
-    for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
-    {
-      uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
- 
-      for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
-      {
-        LEDsectionManager.setColorAtGlobalIndex(level, color);
-      }
+    uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
 
-      FastLED.setBrightness(50);
-      FastLED.show();
-      delay(pauseDuration);
+    for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
+    {
+      LEDsectionManager.setColorAtGlobalIndex(level, color);
     }
+
+    FastLED.setBrightness(50);
+    FastLED.show();
+    delay(pauseDuration);
   }
+  return wheelPosition;
 }
 
 
@@ -369,6 +374,7 @@ void setup(void)
 // Function that is looped forever
 void loop(void)
 {
+  
 
   if (WiFi.status() != WL_CONNECTED)
   {
@@ -389,9 +395,14 @@ void loop(void)
 
     LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, oldLEDStatus, FillStyle(ALL_AT_ONCE)); 
     FastLED.show();
-    delay(5000);
+    delay(1000);
   }
 
+
+  if (iaqSensor.iaqAccuracy == 0)
+  {
+    ledloop = rainbowAllSections(20, ledloop, 3);
+  }
   unsigned long time_trigger = millis();
   if (iaqSensor.run())
   { // If new data is available
@@ -418,11 +429,9 @@ void loop(void)
     output += ", " + String(iaqSensor.iaqAccuracy);
 
 
-
-
     if (iaqSensor.iaqAccuracy == 0)
     {
-      rainbowAllSections(20, 50);
+
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
