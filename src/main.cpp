@@ -180,7 +180,7 @@ void rainbowAllSections(uint8_t pauseDuration, int repeat)
 {
   int colorsteps = 240; // how many colors, 256 all color, 
   int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
-  int colorrun =  NUM_LEDS + repeat;
+  int colorrun =  NUM_LEDS * repeat;
   uint16_t level, wheelPosition;
 
   for (wheelPosition = 0; wheelPosition < colorrun ; wheelPosition++) 
@@ -231,7 +231,7 @@ void handle_NotFound(AsyncWebServerRequest *request)
 void handle_data(AsyncWebServerRequest *request)
 {
   header_data =
-  "{\"" + 
+  "{\n\"" + 
   string_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
   string_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
   string_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
@@ -244,7 +244,7 @@ void handle_data(AsyncWebServerRequest *request)
   string_staticiaq           + "\":\"" + data_staticiaq           + "\",\n" +  "\"" + 
   string_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
   string_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
-  string_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"}";
+  string_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
   request->send(200, "application/json; charset=utf-8", header_data);
 }
 
@@ -284,31 +284,33 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
 // Entry point for the example
 void setup(void)
 {
-
-  // FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+  int wifiWaitCount = 0;
+ 
+  addLEDsection();
+  //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+  FastLED.clear(true);
 
   Serial.begin(9600);
-  Serial.println("Connecting to ") + ssid ;
+  Serial.print("\nConnecting to ");
+  Serial.println(ssid);
   WiFi.begin(ssid, password);
-  int wifiWaitCount = 0;
 
-  addLEDsection();
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
-  FastLED.clear(true);
+
 
   while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
   {
-    delay(500);
+    delay(800);
     Serial.print(".");
     wifiWaitCount++;
-    FastLED.setBrightness(wifiWaitCount * 2);
     LEDsectionManager.fillSectionWithColor(0, CRGB::DarkBlue, FillStyle(ALL_AT_ONCE));
+    FastLED.setBrightness(wifiWaitCount * 2);
     FastLED.show();
   }
+  delay(100);
   // Print local IP address and start web server
   if (WiFi.status() == WL_CONNECTED)
   {
-    Serial.println("");
     Serial.println("WiFi connected.");
     Serial.println("IP address: " + WiFi.localIP());
     LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
@@ -338,7 +340,7 @@ void setup(void)
 
   iaqSensor.begin(0x77, Wire);
   output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
-  Serial.println(output);
+  //Serial.println(output);
   checkIaqSensorStatus();
 
   iaqSensor.setTemperatureOffset(4);
@@ -364,11 +366,7 @@ void setup(void)
   iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
   checkIaqSensorStatus();
   
-  Serial.println("---------- Setup finished -------------");
-  
-  // Print the header
-  Serial.println(header);
-  
+  Serial.println(header); 
 }
 
 // Function that is looped forever
@@ -395,7 +393,7 @@ void loop(void)
 
     LEDsectionManager.fillSectionWithColor(0, oldStatus, FillStyle(ALL_AT_ONCE)); // LED_WLANCONNECT
     FastLED.show();
-    delay(10000);
+    delay(5000);
   }
 
   unsigned long time_trigger = millis();
@@ -426,7 +424,9 @@ void loop(void)
 
     if (iaqSensor.iaqAccuracy == 0)
     {
-      rainbowAllSections(20, 100);
+      rainbowAllSections(20, 50);
+      updateState();
+
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
