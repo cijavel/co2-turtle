@@ -26,13 +26,6 @@ void errLeds(void);
 void loadState(void);
 void updateState(void);
 void clearState(void);
-void addLEDsection(void);
-void handle_data(AsyncWebServerRequest *request);
-void handle_data_only(AsyncWebServerRequest *request);
-void mh_z19b_calibrateZero(AsyncWebServerRequest *request);
-void WiFiReStart( const char *input_ssid, const char *input_password);
-int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi);
-void handle_NotFound(AsyncWebServerRequest *request);
 
 
 //save calibration data
@@ -121,43 +114,6 @@ void checkIaqSensorStatus(void)
 
 
 // --------------------------------------------------------------------------
-//WLAN
-const char *ssid     = "";
-const char *password = "";
-
-void WiFiReStart( const char *input_ssid, const char *input_password)
-{
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(input_ssid);
-
-  WiFi.begin(input_ssid, input_password);
-  int wifiWaitCount = 0;
-  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-  {
-    delay(250);
-    Serial.print(".");
-    wifiWaitCount++;
-  }
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("");
-    Serial.println("WiFi connected");
-
-    // Start the server
-    //server.begin();
-
-    //Serial.println("Server started");
-
-    // Print the IP address
-    Serial.println(WiFi.localIP());
-  }
-}
-
-
-// --------------------------------------------------------------------------
 // definition of LED
 #define LED_WLANCONNECT 0
 #define LED_STATUS 1
@@ -169,7 +125,6 @@ void WiFiReStart( const char *input_ssid, const char *input_password)
 
 #define NUM_LEDS 34
 #define DATA_PIN 5
-CRGB oldLEDStatus = CRGB::Black;
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
 int ledloop = 0;
@@ -183,6 +138,11 @@ void addLEDsection(void)
   LEDsectionManager.addRangeToSection(LED_HUM, 14, 19, false);       // LED_HUM
   LEDsectionManager.addRangeToSection(LED_AIRQ, 21, 26, false);      // LED_AIRQ
   LEDsectionManager.addRangeToSection(LED_CO2, 28, 33, false);       // LED_CO2
+
+    //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+  FastLED.clear(true);
+
 }
 
 
@@ -195,7 +155,7 @@ int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
    wheelPosition += 1;
 
 
-  int colorsteps = 240; // how many colors, 256 all color, 
+  int colorsteps = 230; // how many colors, 256 all color, 
   int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
   uint16_t level ;
   // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
@@ -214,6 +174,83 @@ int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
   }
   return wheelPosition;
 }
+
+
+
+// --------------------------------------------------------------------------
+//WLAN
+const char *ssid     = "";
+const char *password = "";
+
+void WiFiReStart()
+{
+  if (*ssid)
+  {
+    // Connect to WiFi network
+    Serial.println();
+    Serial.println();
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+
+    WiFi.begin(ssid, password);
+    int wifiWaitCount = 0;
+    while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+    {
+      delay(250);
+      Serial.print(".");
+      wifiWaitCount++;
+    }
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      Serial.println("");
+      Serial.println("WiFi connected");
+
+      // Start the server
+      //server.begin();
+
+      //Serial.println("Server started");
+
+      // Print the IP address
+      Serial.println(WiFi.localIP());
+    }
+  }
+}
+
+void WiFiSetup()
+{
+  int wifiWaitCount = 0;
+  Serial.print("\nConnecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+  {
+    delay(800);
+    Serial.print(".");
+    wifiWaitCount++;
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkBlue, FillStyle(ALL_AT_ONCE));
+    FastLED.setBrightness(wifiWaitCount * 2);
+    FastLED.show();
+  }
+  // Print local IP address and start web server
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println("WiFi connected.");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
+    FastLED.show();
+  }
+  else
+  {
+    Serial.println("WiFi not connected");
+    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
+    FastLED.show();
+  }
+  FastLED.clear(true);
+}
+
+
 
 
 // --------------------------------------------------------------------------
@@ -284,46 +321,11 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
 // Entry point for the example
 void setup(void)
 {
-  int wifiWaitCount = 0;
- 
   addLEDsection();
-  //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
-  FastLED.clear(true);
 
   Serial.begin(9600);
-  Serial.print("\nConnecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
 
-
-
-  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-  {
-    delay(800);
-    Serial.print(".");
-    wifiWaitCount++;
-    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkBlue, FillStyle(ALL_AT_ONCE));
-    FastLED.setBrightness(wifiWaitCount * 2);
-    FastLED.show();
-  }
-  // Print local IP address and start web server
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("WiFi connected.");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkGreen, FillStyle(ALL_AT_ONCE));
-    FastLED.show();
-  }
-  else
-  {
-    Serial.println("WiFi not connected");
-    LEDsectionManager.fillSectionWithColor(0, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
-    FastLED.show();
-  }
-  FastLED.clear(true);
-
+  WiFiSetup();
 
 
   // webpages on server
@@ -333,6 +335,7 @@ void setup(void)
   server.onNotFound(handle_NotFound);
 
   server.begin();
+
 
   EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
   mySerial.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN); // ESP32 Example
@@ -378,22 +381,22 @@ void loop(void)
 
   if (WiFi.status() != WL_CONNECTED)
   {
-    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Green, FillStyle(ALL_AT_ONCE));
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, oldLEDStatus, FillStyle(ALL_AT_ONCE)); 
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Black , FillStyle(ALL_AT_ONCE)); 
     FastLED.show();
-    WiFiReStart(ssid, password);
-    delay(5000);
+    WiFiReStart();
+    delay(1000);
   }
   else
   {
-    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::LightSkyBlue, FillStyle(ALL_AT_ONCE));
     FastLED.show();
     delay(150);
 
-    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, oldLEDStatus, FillStyle(ALL_AT_ONCE)); 
+    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Black , FillStyle(ALL_AT_ONCE)); 
     FastLED.show();
     delay(1000);
   }
@@ -401,7 +404,7 @@ void loop(void)
 
   if (iaqSensor.iaqAccuracy == 0)
   {
-    ledloop = rainbowAllSections(20, ledloop, 3);
+    ledloop = rainbowAllSections(20, ledloop, 4);
   }
   unsigned long time_trigger = millis();
   if (iaqSensor.run())
