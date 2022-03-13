@@ -558,29 +558,39 @@ void loop(void)
     output += ", " + String(iaqSensor.staticIaq);
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (iaqSensor.iaq <= 50)
+      if (iaqSensor.iaq <= 50) // exellent
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.iaq <= 100)
+      else if (iaqSensor.iaq <= 100) // good
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.iaq <= 150)
+      else if (iaqSensor.iaq <= 150) // lightly polluted. Ventilation suggested.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.iaq <= 200)
+      else if (iaqSensor.iaq <= 200) // moderately polluted. please ventilate.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.iaq < 250)
+      else if (iaqSensor.iaq < 250) // heavily polluted. please ventilate.
+      {  
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.iaq < 300) // severly polluted. please ventilate urgently.
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
-      else
+      else // extremly polluted. please ventilate urgently.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Black, FillStyle(ALL_AT_ONCE));
+        FastLED.show();
+        delay(150);
+
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
+        FastLED.show();
+        delay(500);
       }
     }
     else
