@@ -67,7 +67,7 @@ int latest_accuracy = 0;
 const String name_timestamp           = "Timestamp [ms]";
 const String name_rawtemperatur       = "raw temperature [°C]";
 const String name_pressure            = "pressure [hPa]";
-const String name_rawrelativehumidity = "raw relative humidity [%]";
+const String name_rawhumidity         = "raw relative humidity [%]";
 const String name_gas                 = "gas [Ohm]";
 const String name_iaq                 = "IAQ";
 const String name_iaqaccuracy         = "IAQ accuracy";
@@ -75,13 +75,13 @@ const String name_temp                = "temperature [°C]";
 const String name_relativehumidity    = "relative humidity [%]";
 const String name_iaqstatic           = "IAQ Static";
 const String name_co2equil            = "CO2 equivalentv";
-const String name_breahtvoc           = "breath VOC equivalent";
+const String name_breahtvoc           = "breath VOC equivalent [ppm]";
 const String name_MHZ19B_co2          = "MHZ19B CO2 [ppm]";
 
 String data_timestamp           = "";
 String data_rawtemperatur       = "";
 String data_pressure            = "";
-String data_rawrelativehumidity = "";
+String data_rawhumidity = "";
 String data_gas                 = "";
 String data_iaq                 = "";
 String data_iaqaccuracy         = "";
@@ -92,6 +92,18 @@ String data_co2equil            = "";
 String data_breahtvoc           = "";
 String data_MHZ19B_co2          = "";
 
+String color_iaqaccuracy      = "";
+String color_temp             = "";
+String color_relativehumidity = "";
+String color_iaq              = "";
+String color_MHZ19B_co2       = "";
+
+String descr_iaqaccuracy      = "";
+String descr_temp             = "";
+String descr_relativehumidity = "";
+String descr_iaq              = "";
+String descr_MHZ19B_co2       = "";
+
 String header_data = "";
 String output      = "";
 
@@ -100,7 +112,7 @@ const String header =
   name_rawtemperatur       + ", " + 
   name_temp                + ", " + 
   name_pressure            + ", " + 
-  name_rawrelativehumidity + ", " + 
+  name_rawhumidity         + ", " + 
   name_relativehumidity    + ", " + 
   name_gas                 + ", " + 
   name_iaq                 + ", " + 
@@ -180,7 +192,6 @@ void addLEDsection(void)
   FastLED.clear(true);
 
 }
-
 
 int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 {
@@ -312,7 +323,7 @@ void handle_data(AsyncWebServerRequest *request)
   name_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
   name_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
   name_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
-  name_rawrelativehumidity + "\":\"" + data_rawrelativehumidity + "\",\n" + "\"" + 
+  name_rawhumidity         + "\":\"" + data_rawhumidity + "\",\n" + "\"" + 
   name_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
   name_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
   name_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
@@ -322,6 +333,107 @@ void handle_data(AsyncWebServerRequest *request)
   name_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
   name_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
   request->send(200, "application/json; charset=utf-8", header_data);
+}
+
+void handle_status(AsyncWebServerRequest *request)
+{
+  String header_data = R"=====(<!DOCTYPE HTML>
+  <html>
+    <head>
+      <title>sensor status</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+      <table class="content" style="text-align: left;">
+        <tr>
+          <th class="title">Sensor Accuracy</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_iaqaccuracy} level</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_iaqaccuracy}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="description" style="padding:0px 5px">{descr_iaqaccuracy}</td>
+        </tr>
+        <tr>
+          <th class="title">Temperature</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_temp} °C</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_temp}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_temp}</td>
+        </tr>
+        <tr>
+          <th class="title">Humidity</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_relativehumidity} %</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_relativehumidity}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_relativehumidity}</td>
+        </tr>
+        <tr>
+          <th class="title">Air Quality </th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_iaq} IAQ</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_iaq}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_iaq}</td>
+        </tr>
+        <tr>
+          <th class="title">Co2 Level</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_MHZ19B_co2} ppm</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_MHZ19B_co2}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_MHZ19B_co2}</td>
+        </tr>
+        <tr>
+          <th class="title"> .....  </th>
+        </tr>
+         <tr>
+          <th class="title">Air pressure</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_pressure} hPa</td>
+        </tr>
+        <tr>
+          <th class="title">gas resistance</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_gas} Ohm</td>
+        </tr>
+        <tr>
+          <th class="title">VOC</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_breahtvoc} ppm</td>
+        </tr>  
+
+      </table> 
+    </body>
+  </html>)=====";
+
+  header_data.replace("{data_iaqaccuracy}",data_iaqaccuracy);
+  header_data.replace("{color_iaqaccuracy}",color_iaqaccuracy);
+  header_data.replace("{descr_iaqaccuracy}",descr_iaqaccuracy);
+  header_data.replace("{data_temp}",data_temp);
+  header_data.replace("{color_temp}",color_temp);
+  header_data.replace("{descr_temp}",descr_temp);
+  header_data.replace("{data_relativehumidity}",data_relativehumidity);
+  header_data.replace("{color_relativehumidity}",color_relativehumidity);
+  header_data.replace("{descr_relativehumidity}",descr_relativehumidity);
+  header_data.replace("{data_iaq}",data_iaq);
+  header_data.replace("{color_iaq}",color_iaq);
+  header_data.replace("{descr_iaq}",descr_iaq);
+  header_data.replace("{data_MHZ19B_co2}",data_MHZ19B_co2);
+  header_data.replace("{color_MHZ19B_co2}",color_MHZ19B_co2);
+  header_data.replace("{descr_MHZ19B_co2}",descr_MHZ19B_co2);
+  header_data.replace("{data_pressure}",data_pressure);
+  header_data.replace("{data_gas}",data_gas);
+  header_data.replace("{data_breahtvoc}",data_breahtvoc); // Volatile Organic Compounds 
+
+
+  request->send(200, "text/html; charset=utf-8", header_data);
 }
 
 void handle_data_only(AsyncWebServerRequest *request)
@@ -368,6 +480,7 @@ void setup(void)
   server.on("/", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
   server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
+  server.on("/status", HTTP_GET, handle_status);
   server.onNotFound(handle_NotFound);
 
   server.begin();
@@ -429,11 +542,6 @@ void loop(void)
   {
     LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::LightSkyBlue, FillStyle(ALL_AT_ONCE));
     FastLED.show();
-    delay(150);
-
-    LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Black , FillStyle(ALL_AT_ONCE)); 
-    FastLED.show();
-    delay(1000);
   }
 
 
@@ -448,7 +556,7 @@ void loop(void)
 		data_timestamp           = String(time_trigger);
 		data_rawtemperatur       = String(iaqSensor.rawTemperature);
 		data_pressure            = String(iaqSensor.pressure / 100.0);
-		data_rawrelativehumidity = String(iaqSensor.rawHumidity);
+		data_rawhumidity         = String(iaqSensor.rawHumidity);
 		data_gas                 = String(iaqSensor.gasResistance);
 		data_iaq                 = String(iaqSensor.iaq);
 		data_iaqaccuracy         = String(iaqSensor.iaqAccuracy);
@@ -470,25 +578,27 @@ void loop(void)
 
     if (iaqSensor.iaqAccuracy == 0)
     {
-
+      descr_iaqaccuracy = "Calibration phase. Please wait....";
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
       LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+      color_iaqaccuracy = String (CRGB::Yellow,HEX);
+      descr_iaqaccuracy = "learning";
     }
     else if (iaqSensor.iaqAccuracy == 2)
     {
-      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
+      LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
+      color_iaqaccuracy = String (CRGB::GreenYellow,HEX);
+      descr_iaqaccuracy = "good";
     }
     else if (iaqSensor.iaqAccuracy >= 3)
     {
       LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
+      color_iaqaccuracy = "00" + String (CRGB::Green,HEX);
+      descr_iaqaccuracy = "good. start saving them.";
       updateState(); //acurate data. save them
     }
-
-
-
-
 
     output += ", " + String(iaqSensor.temperature);
     if (iaqSensor.iaqAccuracy > 0)
@@ -496,38 +606,57 @@ void loop(void)
       if (iaqSensor.temperature < 16) // too cold
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::LightBlue, FillStyle(ALL_AT_ONCE));
+        color_temp = String (CRGB::LightBlue,HEX);
+        descr_temp = "too cold";
       }
       else if (iaqSensor.temperature < 18) // cold
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Blue, FillStyle(ALL_AT_ONCE));
+        color_temp = String (CRGB::Blue,HEX);
+        descr_temp = "cold";
       }
       else if (iaqSensor.temperature < 20) // cool
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
+
+        color_temp = String (CRGB::SeaGreen,HEX);
+        descr_temp = "cool";
       }
       else if (iaqSensor.temperature < 22) // normal
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
+        color_temp = String (CRGB::Green,HEX);
+        descr_temp = "normal";
       }
       else if (iaqSensor.temperature < 24) // cosy
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
+        color_temp = String (CRGB::GreenYellow,HEX);
+        descr_temp = "cosy";
       }
       else if (iaqSensor.temperature < 26) // warm
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+        color_temp = String (CRGB::Yellow,HEX);
+        descr_temp = "warm";
       }
       else if (iaqSensor.temperature < 28) // hot
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+         color_temp = String (CRGB::Yellow,HEX);
+        descr_temp = "hot";
       }
       else if (iaqSensor.temperature > 28) // scalding hot
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Red, FillStyle(ALL_AT_ONCE));
+        color_temp = String (CRGB::Red,HEX);
+        descr_temp = "scalding hot";
       }
       else
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
+        color_temp = String (CRGB::Magenta,HEX);
+        descr_temp = "way too hot";
       }
     }
     else
@@ -538,37 +667,50 @@ void loop(void)
 
 
 
-
     output += ", " + String(iaqSensor.humidity);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.humidity < 20) // Far too dry
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE));
+        color_relativehumidity = String (CRGB::Red,HEX);
+        descr_relativehumidity = "Far too dry";
       }
       else if (iaqSensor.humidity < 30) // Too dry
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
+        color_relativehumidity = String (CRGB::Yellow,HEX);
+        descr_relativehumidity = "too dry";
       }
       else if (iaqSensor.humidity < 40) // dry
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE)); 
+        color_relativehumidity = String (CRGB::GreenYellow,HEX);
+        descr_relativehumidity = "dry";
       }
       else if (iaqSensor.humidity < 50) //normal
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+        color_relativehumidity = String (CRGB::Green,HEX);
+        descr_relativehumidity = "normal";
       }
       else if (iaqSensor.humidity < 60) // Slightly moist
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+        color_relativehumidity = String (CRGB::YellowGreen,HEX);
+        descr_relativehumidity = "Slightly moist";
       }
       else if (iaqSensor.humidity < 65) // moist
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
+        color_relativehumidity = String (CRGB::Orange,HEX);
+        descr_relativehumidity = "moist";
       }
       else if (iaqSensor.humidity < 70) // very moist
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
+        color_relativehumidity = String (CRGB::Red,HEX);
+        descr_relativehumidity = "very moist";
       }
       else // wet
       {
@@ -579,6 +721,9 @@ void loop(void)
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
         FastLED.show();
         delay(500);
+
+        color_relativehumidity = String (CRGB::Magenta,HEX);
+        descr_relativehumidity = "wet";
       }
     }
     else
@@ -595,26 +740,38 @@ void loop(void)
       if (iaqSensor.iaq <= 50) // exellent
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); 
+        color_iaq = String (CRGB::SeaGreen,HEX);
+        descr_iaq = "exellent";
       }
       else if (iaqSensor.iaq <= 100) // good
       {  
-        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Green, FillStyle(ALL_AT_ONCE));
+        color_iaq = "00" + String (CRGB::Green,HEX);
+        descr_iaq = "good";
       }
       else if (iaqSensor.iaq <= 150) // lightly polluted. Ventilation suggested.
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+        color_iaq = String (CRGB::YellowGreen,HEX);
+        descr_iaq = "lightly polluted. Ventilation suggested.";
       }
       else if (iaqSensor.iaq <= 200) // moderately polluted. please ventilate.
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+        color_iaq = String (CRGB::Yellow,HEX);
+        descr_iaq = "moderately polluted. please ventilate.";
       }
       else if (iaqSensor.iaq < 250) // heavily polluted. please ventilate.
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
+        color_iaq = String (CRGB::Orange,HEX);
+        descr_iaq = "heavily polluted. please ventilate.";
       }
       else if (iaqSensor.iaq < 300) // severly polluted. please ventilate urgently.
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
+        color_iaq = String (CRGB::Red,HEX);
+        descr_iaq = "severly polluted. please ventilate urgently.";
       }
       else // extremly polluted. please ventilate urgently.
       {  
@@ -625,13 +782,15 @@ void loop(void)
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
         FastLED.show();
         delay(500);
+
+        color_iaq = String (CRGB::Magenta,HEX);
+        descr_iaq = "extremly polluted. please ventilate urgently.";
       }
     }
     else
     { 
       //LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Black, FillStyle(ALL_AT_ONCE));
     }
-
 
 
 
@@ -650,26 +809,38 @@ void loop(void)
       if (checkCO2 < 600) //outdoor air
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Blue, FillStyle(ALL_AT_ONCE)); 
+        color_MHZ19B_co2 = String (CRGB::Blue,HEX);
+        descr_MHZ19B_co2 = "outdoor air";
       }
       else if (checkCO2 < 800) // fresh indoor air
       {  
-        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE));
+        color_MHZ19B_co2 = "00" + String (CRGB::Green,HEX);
+        descr_MHZ19B_co2 = "fresh indoor air";
       }
       else if (checkCO2 < 1000) // Indoor air
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE)); 
+        color_MHZ19B_co2 = String (CRGB::GreenYellow,HEX);
+        descr_MHZ19B_co2 = "Indoor air";
       }
-      else if (checkCO2 < 1200) // used interior air. please ventilate
+      else if (checkCO2 < 1200) // used indoor air. please ventilate
       {  
          LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
+         color_MHZ19B_co2 = String (CRGB::Yellow,HEX);
+         descr_MHZ19B_co2 = "used indoor air. please ventilate";
       }
       else if (checkCO2 < 1400) //stale indoor air. please ventilate
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
+        color_MHZ19B_co2 = String (CRGB::Orange,HEX);
+        descr_MHZ19B_co2 = "stale indoor air. please ventilate";
       }
       else if (checkCO2 < 1600) // strongly stale indoor air. please ventilate urgently. thinking performance impaired
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
+        color_MHZ19B_co2 = String (CRGB::Red,HEX);
+        descr_MHZ19B_co2 = "strongly stale indoor air. please ventilate urgently. thinking performance impaired";
       }
       else // Tiredness, headache. please ventilate urgently.
       {  
@@ -680,6 +851,9 @@ void loop(void)
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
         FastLED.show();
         delay(500);
+
+        color_MHZ19B_co2 = String (CRGB::Magenta,HEX);
+        descr_MHZ19B_co2 = "Warning. Tiredness, headache. please ventilate urgently.";
       }
     }
 
@@ -694,7 +868,6 @@ void loop(void)
     checkIaqSensorStatus();
   }
 }
-
 
 void errLeds(void)
 {
