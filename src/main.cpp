@@ -67,7 +67,7 @@ int latest_accuracy = 0;
 const String name_timestamp           = "Timestamp [ms]";
 const String name_rawtemperatur       = "raw temperature [°C]";
 const String name_pressure            = "pressure [hPa]";
-const String name_rawhumidity = "raw relative humidity [%]";
+const String name_rawhumidity         = "raw relative humidity [%]";
 const String name_gas                 = "gas [Ohm]";
 const String name_iaq                 = "IAQ";
 const String name_iaqaccuracy         = "IAQ accuracy";
@@ -75,7 +75,7 @@ const String name_temp                = "temperature [°C]";
 const String name_relativehumidity    = "relative humidity [%]";
 const String name_iaqstatic           = "IAQ Static";
 const String name_co2equil            = "CO2 equivalentv";
-const String name_breahtvoc           = "breath VOC equivalent";
+const String name_breahtvoc           = "breath VOC equivalent [ppm]";
 const String name_MHZ19B_co2          = "MHZ19B CO2 [ppm]";
 
 String data_timestamp           = "";
@@ -112,7 +112,7 @@ const String header =
   name_rawtemperatur       + ", " + 
   name_temp                + ", " + 
   name_pressure            + ", " + 
-  name_rawhumidity + ", " + 
+  name_rawhumidity         + ", " + 
   name_relativehumidity    + ", " + 
   name_gas                 + ", " + 
   name_iaq                 + ", " + 
@@ -337,79 +337,99 @@ void handle_data(AsyncWebServerRequest *request)
 
 void handle_status(AsyncWebServerRequest *request)
 {
-String header_data = R"=====(<!DOCTYPE HTML>
-<html>
-	<head>
-		<title>sensor status</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-	</head>
-	<body>
-		<table class="content" style="text-align: left;">
-			<tr>
-				<th class="title">Sensor Accuracy</th>
-				<td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{data_iaqaccuracy} level</td>
-				<td class="space"> </td>
-				<td class="status" style="background-color: #{color_iaqaccuracy}; padding:0px 10px"> </td>
-        <td class="space"> </td>
-				<td class="description" style="padding:0px 5px">{descr_iaqaccuracy}</td>
-			</tr>
-			<tr>
-				<th class="title">Temperature</th>
-				<td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{data_temp} °C</td>
-				<td class="space"> </td>
-				<td class="status" style="background-color: #{color_temp}; padding:0px 10px"> </td>
-        <td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{descr_temp}</td>
-			</tr>
-			<tr>
-				<th class="title">Humidity</th>
-				<td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{data_relativehumidity} %</td>
-				<td class="space"> </td>
-				<td class="status" style="background-color: #{color_relativehumidity}; padding:0px 10px"> </td>
-        <td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{descr_relativehumidity}</td>
-			</tr>
-			<tr>
-				<th class="title">Air Quality </th>
-				<td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{data_iaq} IAQ</td>
-				<td class="space"> </td>
-				<td class="status" style="background-color: #{color_iaq}; padding:0px 10px"> </td>
-        <td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{descr_iaq}</td>
-			</tr>
-			<tr>
-				<th class="title">Co2 Level</th>
-				<td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{data_MHZ19B_co2} ppm</td>
-				<td class="space"> </td>
-				<td class="status" style="background-color: #{color_MHZ19B_co2}; padding:0px 10px"> </td>
-        <td class="space"> </td>
-				<td class="data" style="padding:0px 5px">{descr_MHZ19B_co2}</td>
-			</tr>
-		</table> 
-	</body>
-</html>)=====";
+  String header_data = R"=====(<!DOCTYPE HTML>
+  <html>
+    <head>
+      <title>sensor status</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+      <table class="content" style="text-align: left;">
+        <tr>
+          <th class="title">Sensor Accuracy</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_iaqaccuracy} level</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_iaqaccuracy}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="description" style="padding:0px 5px">{descr_iaqaccuracy}</td>
+        </tr>
+        <tr>
+          <th class="title">Temperature</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_temp} °C</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_temp}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_temp}</td>
+        </tr>
+        <tr>
+          <th class="title">Humidity</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_relativehumidity} %</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_relativehumidity}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_relativehumidity}</td>
+        </tr>
+        <tr>
+          <th class="title">Air Quality </th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_iaq} IAQ</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_iaq}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_iaq}</td>
+        </tr>
+        <tr>
+          <th class="title">Co2 Level</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_MHZ19B_co2} ppm</td>
+          <td class="space"> </td>
+          <td class="status" style="background-color: #{color_MHZ19B_co2}; padding:0px 10px"> </td>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{descr_MHZ19B_co2}</td>
+        </tr>
+        <tr>
+        </tr>
+         <tr>
+          <th class="title">Air pressure</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_pressure} hPa</td>
+        </tr>
+        <tr>
+          <th class="title">gas resistance</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_gas} Ohm</td>
+        </tr>
+        <tr>
+          <th class="title">Volatile Organic Compounds (VOC)</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_breahtvoc} Ohm</td>
+        </tr>  
 
-header_data.replace("{data_iaqaccuracy}",data_iaqaccuracy);
-header_data.replace("{color_iaqaccuracy}",color_iaqaccuracy);
-header_data.replace("{descr_iaqaccuracy}",descr_iaqaccuracy);
-header_data.replace("{data_temp}",data_temp);
-header_data.replace("{color_temp}",color_temp);
-header_data.replace("{descr_temp}",descr_temp);
-header_data.replace("{data_relativehumidity}",data_relativehumidity);
-header_data.replace("{color_relativehumidity}",color_relativehumidity);
-header_data.replace("{descr_relativehumidity}",descr_relativehumidity);
-header_data.replace("{data_iaq}",data_iaq);
-header_data.replace("{color_iaq}",color_iaq);
-header_data.replace("{descr_iaq}",descr_iaq);
-header_data.replace("{data_MHZ19B_co2}",data_MHZ19B_co2);
-header_data.replace("{color_MHZ19B_co2}",color_MHZ19B_co2);
-header_data.replace("{descr_MHZ19B_co2}",descr_MHZ19B_co2);
+      </table> 
+    </body>
+  </html>)=====";
 
+  header_data.replace("{data_iaqaccuracy}",data_iaqaccuracy);
+  header_data.replace("{color_iaqaccuracy}",color_iaqaccuracy);
+  header_data.replace("{descr_iaqaccuracy}",descr_iaqaccuracy);
+  header_data.replace("{data_temp}",data_temp);
+  header_data.replace("{color_temp}",color_temp);
+  header_data.replace("{descr_temp}",descr_temp);
+  header_data.replace("{data_relativehumidity}",data_relativehumidity);
+  header_data.replace("{color_relativehumidity}",color_relativehumidity);
+  header_data.replace("{descr_relativehumidity}",descr_relativehumidity);
+  header_data.replace("{data_iaq}",data_iaq);
+  header_data.replace("{color_iaq}",color_iaq);
+  header_data.replace("{descr_iaq}",descr_iaq);
+  header_data.replace("{data_MHZ19B_co2}",data_MHZ19B_co2);
+  header_data.replace("{color_MHZ19B_co2}",color_MHZ19B_co2);
+  header_data.replace("{descr_MHZ19B_co2}",descr_MHZ19B_co2);
+  header_data.replace("{data_pressure}",data_pressure);
+  header_data.replace("{data_gas}",data_gas);
+  header_data.replace("{data_breahtvoc}",data_breahtvoc);
 
 
   request->send(200, "text/html; charset=utf-8", header_data);
@@ -557,7 +577,7 @@ void loop(void)
 
     if (iaqSensor.iaqAccuracy == 0)
     {
-
+      descr_iaqaccuracy = "calibration phase. please wait";
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
@@ -574,7 +594,7 @@ void loop(void)
     else if (iaqSensor.iaqAccuracy >= 3)
     {
       LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
-      color_iaqaccuracy = String (CRGB::Green,HEX);
+      color_iaqaccuracy = "00" + String (CRGB::Green,HEX);
       descr_iaqaccuracy = "good. start saving them.";
       updateState(); //acurate data. save them
     }
@@ -725,7 +745,7 @@ void loop(void)
       else if (iaqSensor.iaq <= 100) // good
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Green, FillStyle(ALL_AT_ONCE));
-        color_iaq = String (CRGB::Green,HEX);
+        color_iaq = "00" + String (CRGB::Green,HEX);
         descr_iaq = "good";
       }
       else if (iaqSensor.iaq <= 150) // lightly polluted. Ventilation suggested.
@@ -794,7 +814,7 @@ void loop(void)
       else if (checkCO2 < 800) // fresh indoor air
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE));
-        color_MHZ19B_co2 = String (CRGB::Green,HEX);
+        color_MHZ19B_co2 = "00" + String (CRGB::Green,HEX);
         descr_MHZ19B_co2 = "fresh indoor air";
       }
       else if (checkCO2 < 1000) // Indoor air
