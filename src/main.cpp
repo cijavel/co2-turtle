@@ -542,7 +542,7 @@ void loop(void)
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.humidity < 60) //
+      else if (iaqSensor.humidity < 60) // Slightly moist
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
       }
@@ -550,7 +550,7 @@ void loop(void)
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.humidity < 70) // Very moist
+      else if (iaqSensor.humidity < 70) // very moist
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
