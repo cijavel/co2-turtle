@@ -493,25 +493,41 @@ void loop(void)
     output += ", " + String(iaqSensor.temperature);
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (iaqSensor.temperature < 19)
+      if (iaqSensor.temperature < 16) // too cold
       {
-        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::LightBlue, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.temperature < 20)
+      else if (iaqSensor.temperature < 18) // cold
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Blue, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature < 20) // cool
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.temperature > 26)
+      else if (iaqSensor.temperature < 22) // normal
       {
-        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Orange, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.temperature > 28)
+      else if (iaqSensor.temperature < 24) // cosy
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature < 26) // warm
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature < 28) // hot
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature > 28) // scalding hot
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
       else
       {
-        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
       }
     }
     else
@@ -526,25 +542,43 @@ void loop(void)
     output += ", " + String(iaqSensor.humidity);
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (iaqSensor.humidity < 20)
+      if (iaqSensor.humidity < 20) // Far too dry
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.humidity < 30)
+      else if (iaqSensor.humidity < 30) // Too dry
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 40) // dry
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 50) //normal
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 60) // Slightly moist
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 65) // moist
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.humidity > 60)
+      else if (iaqSensor.humidity < 70) // very moist
       {
-        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.humidity > 70)
+      else // wet
       {
-        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
-      }
-      else
-      {
-        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Black, FillStyle(ALL_AT_ONCE));
+        FastLED.show();
+        delay(150);
+
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
+        FastLED.show();
+        delay(500);
       }
     }
     else
@@ -558,29 +592,39 @@ void loop(void)
     output += ", " + String(iaqSensor.staticIaq);
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (iaqSensor.iaq <= 50)
+      if (iaqSensor.iaq <= 50) // exellent
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.iaq <= 100)
+      else if (iaqSensor.iaq <= 100) // good
       {  
-        LEDsectionManager.fillSectionWithColor(4, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.iaq <= 150)
+      else if (iaqSensor.iaq <= 150) // lightly polluted. Ventilation suggested.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.iaq <= 200)
+      else if (iaqSensor.iaq <= 200) // moderately polluted. please ventilate.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.iaq < 250)
+      else if (iaqSensor.iaq < 250) // heavily polluted. please ventilate.
+      {  
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.iaq < 300) // severly polluted. please ventilate urgently.
       {  
         LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
-      else
+      else // extremly polluted. please ventilate urgently.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Black, FillStyle(ALL_AT_ONCE));
+        FastLED.show();
+        delay(150);
+
+        LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
+        FastLED.show();
+        delay(500);
       }
     }
     else
@@ -590,50 +634,60 @@ void loop(void)
 
 
 
-    output += ", " + String(iaqSensor.co2Equivalent);
+
     int MHZ19CO2 = myMHZ19.getCO2();
     int checkCO2 = MHZ19CO2;
+    output += ", " + String(iaqSensor.co2Equivalent);
+    output += ", " + String(iaqSensor.breathVocEquivalent);
+    output += ", " + String(MHZ19CO2);
     if (MHZ19CO2 == 0)
+    {
       checkCO2 = iaqSensor.co2Equivalent;
-
+    }
+      
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (checkCO2 < 600)
+      if (checkCO2 < 600) //outdoor air
+      {  
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Blue, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (checkCO2 < 800) // fresh indoor air
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 800)
+      else if (checkCO2 < 1000) // Indoor air
       {  
-        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 900)
+      else if (checkCO2 < 1200) // used interior air. please ventilate
       {  
          LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 1000)
+      else if (checkCO2 < 1400) //stale indoor air. please ventilate
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 1200)
+      else if (checkCO2 < 1600) // strongly stale indoor air. please ventilate urgently. thinking performance impaired
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
-      else
+      else // Tiredness, headache. please ventilate urgently.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Black, FillStyle(ALL_AT_ONCE));
+        FastLED.show();
+        delay(150);
+
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
+        FastLED.show();
+        delay(500);
       }
     }
-    else
-    { 
-      //LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
-    }
 
-    output += ", " + String(iaqSensor.breathVocEquivalent);
-    output += ", " + String(MHZ19CO2);
 
     Serial.println(output);
     FastLED.setBrightness(50);
     FastLED.show();
+
   }
   else
   {
