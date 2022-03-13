@@ -590,50 +590,60 @@ void loop(void)
 
 
 
-    output += ", " + String(iaqSensor.co2Equivalent);
+
     int MHZ19CO2 = myMHZ19.getCO2();
     int checkCO2 = MHZ19CO2;
+    output += ", " + String(iaqSensor.co2Equivalent);
+    output += ", " + String(iaqSensor.breathVocEquivalent);
+    output += ", " + String(MHZ19CO2);
     if (MHZ19CO2 == 0)
+    {
       checkCO2 = iaqSensor.co2Equivalent;
-
+    }
+      
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (checkCO2 < 600)
+      if (checkCO2 < 600) //outdoor air
+      {  
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Blue, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (checkCO2 < 800) // fresh indoor air
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 800)
+      else if (checkCO2 < 1000) // Indoor air
       {  
-        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 900)
+      else if (checkCO2 < 1200) // used interior air. please ventilate
       {  
          LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 1000)
+      else if (checkCO2 < 1400) //stale indoor air. please ventilate
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (checkCO2 < 1200)
+      else if (checkCO2 < 1600) // strongly stale indoor air. please ventilate urgently. thinking performance impaired
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
-      else
+      else // Tiredness, headache. please ventilate urgently.
       {  
-        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Black, FillStyle(ALL_AT_ONCE));
+        FastLED.show();
+        delay(150);
+
+        LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
+        FastLED.show();
+        delay(500);
       }
     }
-    else
-    { 
-      //LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
-    }
 
-    output += ", " + String(iaqSensor.breathVocEquivalent);
-    output += ", " + String(MHZ19CO2);
 
     Serial.println(output);
     FastLED.setBrightness(50);
     FastLED.show();
+
   }
   else
   {
