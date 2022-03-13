@@ -168,12 +168,12 @@ int ledloop = 0;
 void addLEDsection(void)
 {
   LEDsectionManager.addSections(6);
-  LEDsectionManager.addRangeToSection(LED_WLANCONNECT, 0, 0, false); // LED_WLAN
-  LEDsectionManager.addRangeToSection(LED_STATUS, 2, 5, false);      // LED_STATUS data Quality
-  LEDsectionManager.addRangeToSection(LED_TEMP, 7, 12, false);       // LED_TEMP
-  LEDsectionManager.addRangeToSection(LED_HUM, 14, 19, false);       // LED_HUM
-  LEDsectionManager.addRangeToSection(LED_AIRQ, 21, 26, false);      // LED_AIRQ
-  LEDsectionManager.addRangeToSection(LED_CO2, 28, 33, false);       // LED_CO2
+  LEDsectionManager.addRangeToSection(LED_WLANCONNECT, 0, 0,  false); // LED_WLAN
+  LEDsectionManager.addRangeToSection(LED_STATUS,      1, 1,  false); // LED_STATUS data Quality
+  LEDsectionManager.addRangeToSection(LED_TEMP,        3, 9,  false); // LED_TEMP
+  LEDsectionManager.addRangeToSection(LED_HUM,        11, 17, false); // LED_HUM
+  LEDsectionManager.addRangeToSection(LED_AIRQ,       19, 25, false); // LED_AIRQ
+  LEDsectionManager.addRangeToSection(LED_CO2,        27, 33, false); // LED_CO2
 
     //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
@@ -439,7 +439,7 @@ void loop(void)
 
   if (iaqSensor.iaqAccuracy == 0)
   {
-    ledloop = rainbowAllSections(20, ledloop, 6);
+    ledloop = rainbowAllSections(20, ledloop, 255);
   }
   unsigned long time_trigger = millis();
   if (iaqSensor.run())
