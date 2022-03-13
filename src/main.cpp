@@ -391,6 +391,7 @@ void handle_status(AsyncWebServerRequest *request)
           <td class="data" style="padding:0px 5px">{descr_MHZ19B_co2}</td>
         </tr>
         <tr>
+          <th class="title"> .....  </th>
         </tr>
          <tr>
           <th class="title">Air pressure</th>
@@ -403,9 +404,9 @@ void handle_status(AsyncWebServerRequest *request)
           <td class="data" style="padding:0px 5px">{data_gas} Ohm</td>
         </tr>
         <tr>
-          <th class="title">Volatile Organic Compounds (VOC)</th>
+          <th class="title">VOC</th>
           <td class="space"> </td>
-          <td class="data" style="padding:0px 5px">{data_breahtvoc} Ohm</td>
+          <td class="data" style="padding:0px 5px">{data_breahtvoc} ppm</td>
         </tr>  
 
       </table> 
@@ -429,7 +430,7 @@ void handle_status(AsyncWebServerRequest *request)
   header_data.replace("{descr_MHZ19B_co2}",descr_MHZ19B_co2);
   header_data.replace("{data_pressure}",data_pressure);
   header_data.replace("{data_gas}",data_gas);
-  header_data.replace("{data_breahtvoc}",data_breahtvoc);
+  header_data.replace("{data_breahtvoc}",data_breahtvoc); // Volatile Organic Compounds 
 
 
   request->send(200, "text/html; charset=utf-8", header_data);
@@ -577,7 +578,7 @@ void loop(void)
 
     if (iaqSensor.iaqAccuracy == 0)
     {
-      descr_iaqaccuracy = "calibration phase. please wait";
+      descr_iaqaccuracy = "Calibration phase. Please wait....";
     }
     else if (iaqSensor.iaqAccuracy == 1)
     {
