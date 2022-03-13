@@ -526,25 +526,43 @@ void loop(void)
     output += ", " + String(iaqSensor.humidity);
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (iaqSensor.humidity < 20)
+      if (iaqSensor.humidity < 20) // Far too dry
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.humidity < 30)
+      else if (iaqSensor.humidity < 30) // Too dry
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Yellow, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 40) // dry
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 50) //normal
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 60) //
+      {
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE)); 
+      }
+      else if (iaqSensor.humidity < 65) // moist
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Orange, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.humidity > 60)
+      else if (iaqSensor.humidity < 70) // Very moist
       {
-        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE)); 
       }
-      else if (iaqSensor.humidity > 70)
+      else // wet
       {
-        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Magenta, FillStyle(ALL_AT_ONCE)); 
-      }
-      else
-      {
-        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Black, FillStyle(ALL_AT_ONCE));
+        FastLED.show();
+        delay(150);
+
+        LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Magenta , FillStyle(ALL_AT_ONCE)); 
+        FastLED.show();
+        delay(500);
       }
     }
     else
