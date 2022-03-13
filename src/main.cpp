@@ -493,25 +493,41 @@ void loop(void)
     output += ", " + String(iaqSensor.temperature);
     if (iaqSensor.iaqAccuracy > 0)
     {
-      if (iaqSensor.temperature < 19)
+      if (iaqSensor.temperature < 16) // too cold
       {
-        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::LightBlue, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.temperature < 20)
+      else if (iaqSensor.temperature < 18) // cold
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Blue, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature < 20) // cool
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.temperature > 26)
+      else if (iaqSensor.temperature < 22) // normal
       {
-        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Orange, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
       }
-      else if (iaqSensor.temperature > 28)
+      else if (iaqSensor.temperature < 24) // cosy
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature < 26) // warm
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature < 28) // hot
+      {
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+      }
+      else if (iaqSensor.temperature > 28) // scalding hot
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Red, FillStyle(ALL_AT_ONCE));
       }
       else
       {
-        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
+        LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
       }
     }
     else
