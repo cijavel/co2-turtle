@@ -393,17 +393,17 @@ void handle_index(AsyncWebServerRequest *request)
         <meta name="viewport" content="width=device-width, initial-scale=1">
       </head>
       <body>
-        <div>
-          <div>
+        <div style="font-family: Arial, Helvetica, sans-serif;">
+          <div style="padding: 5 px;">
             <a href="/json">json file</a>
           </div>
-          <div>
+          <div style="padding: 5 px;">
             <a href="/dataonly">data string</a>
           </div>
-          <div>
+          <div style="padding: 5 px;">
             <a href="/CO2">Co2</a>
           </div>
-          <div>
+          <div style="padding: 5 px;">
             <a href="/status">Status</a>
           </div>
         </div>
@@ -546,7 +546,6 @@ void handle_status(AsyncWebServerRequest *request)
   header_data.replace("{data_date}",data_date);
   header_data.replace("{data_time}",data_time);
   header_data.replace("{deviceName}",deviceName);
-  
 
   request->send(200, "text/html; charset=utf-8", header_data);
 }
