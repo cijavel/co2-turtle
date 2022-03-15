@@ -8,6 +8,7 @@
 #include <ESPAsyncWebServer.h>
 #include <SectionManager.h>
 #include <helpers.h>
+#include <time.h>
 
 
 //https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
@@ -52,7 +53,7 @@ const uint8_t bsec_config_iaq[] = {
   #include "config/generic_33v_300s_4d/bsec_iaq.txt"
 };
 //save calibration data
-#define STATE_SAVE_PERIOD UINT32_C(720 * 60 * 1000) // 720 minutes - 2 times a day
+#define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
 MHZ19 myMHZ19; // Co2 sensor
 
 
@@ -77,11 +78,14 @@ const String name_iaqstatic           = "IAQ Static";
 const String name_co2equil            = "CO2 equivalentv";
 const String name_breahtvoc           = "breath VOC equivalent [ppm]";
 const String name_MHZ19B_co2          = "MHZ19B CO2 [ppm]";
+const String name_datetime            = "Date and Time";
+const String name_date                = "Date";
+const String name_time                = "Time";
 
 String data_timestamp           = "";
 String data_rawtemperatur       = "";
 String data_pressure            = "";
-String data_rawhumidity = "";
+String data_rawhumidity         = "";
 String data_gas                 = "";
 String data_iaq                 = "";
 String data_iaqaccuracy         = "";
@@ -91,6 +95,9 @@ String data_iaqstatic           = "";
 String data_co2equil            = "";
 String data_breahtvoc           = "";
 String data_MHZ19B_co2          = "";
+String data_datetime            = "";
+String data_date                = "";
+String data_time                = "";
 
 String color_iaqaccuracy      = "";
 String color_temp             = "";
@@ -104,8 +111,8 @@ String descr_relativehumidity = "";
 String descr_iaq              = "";
 String descr_MHZ19B_co2       = "";
 
-String header_data = "";
-String output      = "";
+String header_data            = "";
+String output                 = "";
 
 const String header =   
   name_timestamp           + ", " + 
@@ -223,7 +230,6 @@ int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 }
 
 
-
 // --------------------------------------------------------------------------
 // WLAN functions
 // --------------------------------------------------------------------------
@@ -297,6 +303,64 @@ void WiFiSetup()
 }
 
 
+// --------------------------------------------------------------------------
+// time functions
+// --------------------------------------------------------------------------
+
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 0;
+const int   daylightOffset_sec = 3600;
+
+String dateLocalTime()
+{
+  struct tm timeinfo;
+  String time = "";
+  char output[60];
+  
+  if(!getLocalTime(&timeinfo))
+  {
+    time = "Failed to obtain time";
+  }
+  else{
+    strftime(output, sizeof(output), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    time = String(output);
+  }
+  return time;
+}
+
+String localTime()
+{
+  struct tm timeinfo;
+  String time = "";
+  char output[60];
+  
+  if(!getLocalTime(&timeinfo))
+  {
+    time = "Failed to obtain time";
+  }
+  else{
+    strftime(output, sizeof(output), "%H:%M:%S", &timeinfo);
+    time = String(output);
+  }
+  return time;
+}
+
+String localDate()
+{
+  struct tm timeinfo;
+  String time = "";
+  char output[60];
+  
+  if(!getLocalTime(&timeinfo))
+  {
+    time = "Failed to obtain time";
+  }
+  else{
+    strftime(output, sizeof(output), "%Y-%m-%d", &timeinfo);
+    time = String(output);
+  }
+  return time;
+}
 
 
 // --------------------------------------------------------------------------
@@ -315,15 +379,46 @@ void handle_NotFound(AsyncWebServerRequest *request)
   request->send(404, "text/plain; charset=utf-8", "Not found");
 }
 
+void handle_index(AsyncWebServerRequest *request)
+{
+  String header = R"=====(
+  <!DOCTYPE HTML>
+    <html>
+      <head>
+        <title>Index</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+      </head>
+      <body>
+        <div style="font-family: Arial, Helvetica, sans-serif;">
+          <div style="padding: 5 px;">
+            <a href="/json">json file</a>
+          </div>
+          <div style="padding: 5 px;">
+            <a href="/dataonly">data string</a>
+          </div>
+          <div style="padding: 5 px;">
+            <a href="/CO2">Co2</a>
+          </div>
+          <div style="padding: 5 px;">
+            <a href="/status">Status</a>
+          </div>
+        </div>
+      </body>
+    </html>
+  )=====";
+  request->send(200, "text/html; charset=utf-8", header);
+}
+
 void handle_data(AsyncWebServerRequest *request)
 {
   header_data =
   "{\n\"" + 
   name_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
+  name_datetime            + "\":\"" + data_datetime            + "\",\n" + "\"" +
   name_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
   name_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
   name_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
-  name_rawhumidity         + "\":\"" + data_rawhumidity + "\",\n" + "\"" + 
+  name_rawhumidity         + "\":\"" + data_rawhumidity         + "\",\n" + "\"" + 
   name_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
   name_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
   name_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
@@ -343,7 +438,8 @@ void handle_status(AsyncWebServerRequest *request)
       <title>sensor status</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
-    <body>
+    <body style="font-family: Arial, Helvetica, sans-serif;">
+      <h1 style="font-size: 120%;">{deviceName}</h1>
       <table class="content" style="text-align: left;">
         <tr>
           <th class="title">Sensor Accuracy</th>
@@ -399,7 +495,7 @@ void handle_status(AsyncWebServerRequest *request)
           <td class="data" style="padding:0px 5px">{data_pressure} hPa</td>
         </tr>
         <tr>
-          <th class="title">gas resistance</th>
+          <th class="title">Gas resistance</th>
           <td class="space"> </td>
           <td class="data" style="padding:0px 5px">{data_gas} Ohm</td>
         </tr>
@@ -407,8 +503,20 @@ void handle_status(AsyncWebServerRequest *request)
           <th class="title">VOC</th>
           <td class="space"> </td>
           <td class="data" style="padding:0px 5px">{data_breahtvoc} ppm</td>
-        </tr>  
-
+        </tr>
+        <tr>
+          <th class="title"> .....  </th>
+        </tr>
+        <tr>
+          <th class="title">Date</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_date}</td>
+        </tr>
+        <tr>
+          <th class="title">Time</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_time}</td>
+        </tr>
       </table> 
     </body>
   </html>)=====";
@@ -431,7 +539,9 @@ void handle_status(AsyncWebServerRequest *request)
   header_data.replace("{data_pressure}",data_pressure);
   header_data.replace("{data_gas}",data_gas);
   header_data.replace("{data_breahtvoc}",data_breahtvoc); // Volatile Organic Compounds 
-
+  header_data.replace("{data_date}",data_date);
+  header_data.replace("{data_time}",data_time);
+  header_data.replace("{deviceName}",deviceName);
 
   request->send(200, "text/html; charset=utf-8", header_data);
 }
@@ -476,8 +586,11 @@ void setup(void)
   WiFiSetup();
 
 
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
   // webpages on server
-  server.on("/", HTTP_GET, handle_data);
+  server.on("/", HTTP_GET, handle_index);
+  server.on("/json", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
   server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
   server.on("/status", HTTP_GET, handle_status);
@@ -500,7 +613,7 @@ void setup(void)
 
   iaqSensor.setConfig(bsec_config_iaq);
   checkIaqSensorStatus();
- // clearState();
+  // clearState();
   loadState();
 
   bsec_virtual_sensor_t sensorList[10] = {
@@ -566,6 +679,9 @@ void loop(void)
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
     data_MHZ19B_co2          = String(myMHZ19.getCO2());
+    data_datetime            = dateLocalTime();
+    data_date                = localDate();
+    data_time                = localTime();
 
     output = String(time_trigger);
     output += ", " + String(iaqSensor.rawTemperature);
@@ -625,7 +741,7 @@ void loop(void)
       else if (iaqSensor.temperature < 22) // normal
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
-        color_temp = String (CRGB::Green,HEX);
+        color_temp = "00" + String (CRGB::Green,HEX);
         descr_temp = "normal";
       }
       else if (iaqSensor.temperature < 24) // cosy
@@ -691,7 +807,7 @@ void loop(void)
       else if (iaqSensor.humidity < 50) //normal
       {
         LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE)); 
-        color_relativehumidity = String (CRGB::Green,HEX);
+        color_relativehumidity = "00" + String (CRGB::Green,HEX);
         descr_relativehumidity = "normal";
       }
       else if (iaqSensor.humidity < 60) // Slightly moist
@@ -959,4 +1075,3 @@ void updateState(void)
     EEPROM.commit();
   }
 }
-
