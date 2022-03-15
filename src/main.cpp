@@ -230,12 +230,9 @@ int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 }
 
 
-
 // --------------------------------------------------------------------------
 // WLAN functions
 // --------------------------------------------------------------------------
-
-
 
 void WiFiReStart()
 {
@@ -331,7 +328,6 @@ String dateLocalTime()
   return time;
 }
 
-
 String localTime()
 {
   struct tm timeinfo;
@@ -349,7 +345,6 @@ String localTime()
   return time;
 }
 
-
 String localDate()
 {
   struct tm timeinfo;
@@ -366,6 +361,7 @@ String localDate()
   }
   return time;
 }
+
 
 // --------------------------------------------------------------------------
 // Web Server
@@ -593,7 +589,7 @@ void setup(void)
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
   // webpages on server
-    server.on("/", HTTP_GET, handle_index);
+  server.on("/", HTTP_GET, handle_index);
   server.on("/json", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
   server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
