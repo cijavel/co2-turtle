@@ -10,6 +10,8 @@
 #include <helpers.h>
 #include <time.h>
 
+#include <Credentials.h>
+
 
 //https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
 //https://www.rehva.eu/fileadmin/user_upload/REHVA_COVID-19_guidance_document_V3_03082020.pdf
@@ -28,9 +30,9 @@
 
 
 // WLAN
-const char *ssid     = "";
-const char *password = "";
-String deviceName    = "ESP32 SensorTurtle";
+const char *ssid     = WIFI_SSID;
+const char *password = WIFI_PW;
+String deviceName    = "SensorTurtle 3  ESP32";
 
 
 
