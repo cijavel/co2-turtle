@@ -32,7 +32,7 @@
 // WLAN
 const char *ssid     = WIFI_SSID;
 const char *password = WIFI_PW;
-String deviceName    = "SensorTurtle 3  ESP32";
+String deviceName    = "SensorTurtle 1";
 
 
 
@@ -49,6 +49,11 @@ void clearState(void);
 // --------------------------------------------------------------------------
 // sensor data
 // --------------------------------------------------------------------------
+#define RX_PIN 18
+#define TX_PIN 19
+#define BAUDRATE 9600
+
+HardwareSerial mySerial(1);
 
 const uint8_t bsec_config_iaq[] = {  
   //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
@@ -370,12 +375,6 @@ String localDate()
 // --------------------------------------------------------------------------
 AsyncWebServer server(80);
 
-#define RX_PIN 18
-#define TX_PIN 19
-#define BAUDRATE 9600
-
-HardwareSerial mySerial(1);
-
 void handle_NotFound(AsyncWebServerRequest *request)
 {
   request->send(404, "text/plain; charset=utf-8", "Not found");
@@ -599,6 +598,11 @@ void setup(void)
   server.onNotFound(handle_NotFound);
 
   server.begin();
+
+
+
+  
+
 
   EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
   mySerial.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN); // ESP32 Example
