@@ -24,15 +24,7 @@
 //https://github.com/FastLED/FastLED/wiki/Basic-usage
 //https://github.com/chris-schmitz/FastLED-Section-Manager?utm_source=platformio&utm_medium=piohome
 
-// ---------------------------------------------
-// Configuration
-// ---------------------------------------------
 
-
-// WLAN
-const char *ssid     = WIFI_SSID;
-const char *password = WIFI_PW;
-String deviceName    = "SensorTurtle 1";
 
 
 
@@ -46,12 +38,33 @@ void updateState(void);
 void clearState(void);
 
 
+// ---------------------------------------------
+// Configuration
+// ---------------------------------------------
+
+
+// WLAN
+const char *ssid     = WIFI_SSID;
+const char *password = WIFI_PW;
+String deviceName    = "SensorTurtle 1";
+
+// sensor
+#define PIN_MHZ19B_RX 18
+#define PIN_MHZ19B_TX 19
+#define BAUDRATE 9600
+
+// leds
+#define NUM_LEDS 34 //count
+#define PIN_LED_DATA 5
+
+// timezone
+const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
+
+
+
 // --------------------------------------------------------------------------
 // sensor data
 // --------------------------------------------------------------------------
-#define PIN_MHZ19B_TX 18
-#define PIN_MHZ19B_TX 19
-#define BAUDRATE 9600
 
 HardwareSerial mySerial(1);
 
@@ -185,8 +198,6 @@ void checkIaqSensorStatus(void)
 #define LED_CO2 5
 
 
-#define NUM_LEDS 34
-#define PIN_LED_DATA 5
 
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
@@ -320,12 +331,20 @@ const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
 
 
+void setTimezone(String timezone){
+  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
+  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  tzset();
+}
+
 String localTime()
 {
   struct tm timeinfo;
+  
   String time = "";
   char output[60];
-  
+  setTimezone(timezone);
+
   if(!getLocalTime(&timeinfo))
   {
     time = "Failed to obtain time";
@@ -342,6 +361,8 @@ String localDate()
   struct tm timeinfo;
   String time = "";
   char output[60];
+  setTimezone(timezone);
+
   
   if(!getLocalTime(&timeinfo))
   {
