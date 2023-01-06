@@ -186,7 +186,8 @@ void checkIaqSensorStatus(void)
 
 
 #define NUM_LEDS 34
-#define DATA_PIN 5
+#define PIN_LED_DATA 5
+
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
 int ledloop = 0;
@@ -201,8 +202,8 @@ void addLEDsection(void)
   LEDsectionManager.addRangeToSection(LED_AIRQ,       19, 25, false); // LED_AIRQ
   LEDsectionManager.addRangeToSection(LED_CO2,        27, 33, false); // LED_CO2
 
-    //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+    //FastLED.addLeds<NEOPIXEL, PIN_LED_DATA>(led, NUM_LEDS);
+  FastLED.addLeds<WS2812B, PIN_LED_DATA, GRB>(led, NUM_LEDS);
   FastLED.clear(true);
 
 }
