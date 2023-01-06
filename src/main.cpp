@@ -85,41 +85,40 @@ uint32_t millisOverflowCounter = 0;
 uint32_t lastTime = 0;
 int latest_accuracy = 0;
 
-const String name_timestamp           = "Timestamp [ms]";
-const String name_rawtemperatur       = "raw temperature [°C]";
-const String name_pressure            = "pressure [hPa]";
-const String name_rawhumidity         = "raw relative humidity [%]";
-const String name_gas                 = "gas [Ohm]";
-const String name_iaq                 = "IAQ";
-const String name_iaqaccuracy         = "IAQ accuracy";
-const String name_temp                = "temperature [°C]";
-const String name_relativehumidity    = "relative humidity [%]";
-const String name_iaqstatic           = "IAQ Static";
-const String name_co2equil            = "CO2 equivalentv";
-const String name_breahtvoc           = "breath VOC equivalent [ppm]";
-const String name_MHZ19B_co2          = "MHZ19B CO2 [ppm]";
-const String name_datetime            = "Date and Time";
-const String name_date                = "Date";
-const String name_time                = "Time";
-const String name_zone                = "Timezone";
+const String name_timestamp         = "Timestamp [ms]";
+const String name_rawtemperatur     = "raw temperature [°C]";
+const String name_pressure          = "pressure [hPa]";
+const String name_rawhumidity       = "raw relative humidity [%]";
+const String name_gas               = "gas [Ohm]";
+const String name_iaq               = "IAQ";
+const String name_iaqaccuracy       = "IAQ accuracy";
+const String name_temp              = "temperature [°C]";
+const String name_relativehumidity  = "relative humidity [%]";
+const String name_iaqstatic         = "IAQ Static";
+const String name_co2equil          = "CO2 equivalentv";
+const String name_breahtvoc         = "breath VOC equivalent [ppm]";
+const String name_MHZ19B_co2        = "MHZ19B CO2 [ppm]";
+const String name_datetime          = "Date and Time";
+const String name_date              = "Date";
+const String name_time              = "Time";
+const String name_zone              = "Timezone";
 
-String data_timestamp           = "";
-String data_rawtemperatur       = "";
-String data_pressure            = "";
-String data_rawhumidity         = "";
-String data_gas                 = "";
-String data_iaq                 = "";
-String data_iaqaccuracy         = "";
-String data_temp                = "";
-String data_relativehumidity    = "";
-String data_iaqstatic           = "";
-String data_co2equil            = "";
-String data_breahtvoc           = "";
-String data_MHZ19B_co2          = "";
-String data_datetime            = "";
-String data_date                = "";
-String data_time                = "";
-String data_zone                = "";
+String data_timestamp         = "";
+String data_rawtemperatur     = "";
+String data_pressure          = "";
+String data_rawhumidity       = "";
+String data_gas               = "";
+String data_iaq               = "";
+String data_iaqaccuracy       = "";
+String data_temp              = "";
+String data_relativehumidity  = "";
+String data_iaqstatic         = "";
+String data_co2equil          = "";
+String data_breahtvoc         = "";
+String data_MHZ19B_co2        = "";
+String data_date              = "";
+String data_time              = "";
+String data_zone              = "";
 
 String color_iaqaccuracy      = "";
 String color_temp             = "";
@@ -134,7 +133,7 @@ String descr_iaq              = "";
 String descr_MHZ19B_co2       = "";
 
 String header_data            = "";
-String consout                 = "";
+String consout                = "";
 
 // Helper function definitions
 void checkIaqSensorStatus(void)
@@ -323,8 +322,9 @@ void setTimezone(String timezone){
   tzset();
 }
 
-String localTime()
+String localTime(String format)
 {
+
   struct tm timeinfo;
   
   String time = "";
@@ -336,47 +336,10 @@ String localTime()
     time = "Failed to obtain time";
   }
   else{
-    strftime(toutp, sizeof(toutp), "%H:%M:%S", &timeinfo);
+    strftime(toutp, sizeof(toutp), format.c_str(), &timeinfo);
     time = String(toutp);
   }
   return time;
-}
-
-String localDate()
-{
-  struct tm dateinfo;
-  String date = "";
-  char doutp[60];
-  setTimezone(timezone);
-
-  
-  if(!getLocalTime(&dateinfo))
-  {
-    date = "Failed to obtain date";
-  }
-  else{
-    strftime(doutp, sizeof(doutp), "%Y-%m-%d", &dateinfo);
-    date = String(doutp);
-  }
-  return date;
-}
-
-String localZone()
-{
-  struct tm dateinfo;
-  String zone = "";
-  char zoutp[60];
-  setTimezone(timezone);
-
-  if(!getLocalTime(&dateinfo))
-  {
-    zone = "Failed to obtain zone";
-  }
-  else{
-    strftime(zoutp, sizeof(zoutp), "%Z %z", &dateinfo);
-    zone = String(zoutp);
-  }
-  return zone;
 }
 
 
@@ -418,21 +381,21 @@ void handle_data(AsyncWebServerRequest *request)
 {
   header_data =
   "{\n\"" + 
-  name_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
-  name_datetime            + "\":\"" + data_datetime            + "\",\n" + "\"" +
-  name_zone                + "\":\"" + data_zone                + "\",\n" + "\"" +
-  name_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
-  name_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
-  name_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
-  name_rawhumidity         + "\":\"" + data_rawhumidity         + "\",\n" + "\"" + 
-  name_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
-  name_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
-  name_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
-  name_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
-  name_iaqstatic           + "\":\"" + data_iaqstatic           + "\",\n" +  "\"" + 
-  name_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
-  name_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
-  name_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
+  name_timestamp        + "\":\"" + data_timestamp              + "\",\n" + "\"" +
+  name_datetime         + "\":\"" + data_date + " " + data_time + "\",\n" + "\"" +
+  name_zone             + "\":\"" + data_zone                   + "\",\n" + "\"" +
+  name_rawtemperatur    + "\":\"" + data_rawtemperatur          + "\",\n" + "\"" +
+  name_temp             + "\":\"" + data_temp                   + "\",\n" + "\"" + 
+  name_pressure         + "\":\"" + data_pressure               + "\",\n" + "\"" +
+  name_rawhumidity      + "\":\"" + data_rawhumidity            + "\",\n" + "\"" + 
+  name_relativehumidity + "\":\"" + data_relativehumidity       + "\",\n" + "\"" + 
+  name_gas              + "\":\"" + data_gas                    + "\",\n" + "\"" + 
+  name_iaq              + "\":\"" + data_iaq                    + "\",\n" + "\"" + 
+  name_iaqaccuracy      + "\":\"" + data_iaqaccuracy            + "\",\n" + "\"" + 
+  name_iaqstatic        + "\":\"" + data_iaqstatic              + "\",\n" +  "\"" + 
+  name_co2equil         + "\":\"" + data_co2equil               + "\",\n" + "\"" +
+  name_breahtvoc        + "\":\"" + data_breahtvoc              + "\",\n" + "\"" +
+  name_MHZ19B_co2       + "\":\"" + data_MHZ19B_co2             + "\"\n}";
   request->send(200, "application/json; charset=utf-8", header_data);
 }
 
@@ -662,10 +625,9 @@ void loop(void)
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
     data_MHZ19B_co2          = String(myMHZ19B.getCO2());
-    data_datetime            = localDate() + " " + localTime();
-    data_date                = localDate();
-    data_time                = localTime();
-    data_zone                = localZone();
+    data_date                = localTime("%Y-%m-%d");
+    data_time                = localTime("%H:%M:%S");
+    data_zone                = localTime("%Z %z");
 
     if (iaqSensor.iaqAccuracy == 0)
     {
@@ -750,11 +712,6 @@ void loop(void)
         descr_temp = "way too hot";
       }
     }
-    else
-    {
-      //LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Black, FillStyle(ALL_AT_ONCE));
-    }
-    
 
 
     if (iaqSensor.iaqAccuracy > 0)
@@ -815,10 +772,7 @@ void loop(void)
         descr_relativehumidity = "wet";
       }
     }
-    else
-    {
-         //LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
-    }
+ 
 
 
 
@@ -873,10 +827,6 @@ void loop(void)
         color_iaq = String (CRGB::Magenta,HEX);
         descr_iaq = "extremly polluted. please ventilate urgently.";
       }
-    }
-    else
-    { 
-      //LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Black, FillStyle(ALL_AT_ONCE));
     }
 
 
