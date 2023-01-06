@@ -319,22 +319,6 @@ const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
 
-String dateLocalTime()
-{
-  struct tm timeinfo;
-  String time = "";
-  char output[60];
-  
-  if(!getLocalTime(&timeinfo))
-  {
-    time = "Failed to obtain time";
-  }
-  else{
-    strftime(output, sizeof(output), "%Y-%m-%d %H:%M:%S", &timeinfo);
-    time = String(output);
-  }
-  return time;
-}
 
 String localTime()
 {
@@ -686,7 +670,7 @@ void loop(void)
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
     data_MHZ19B_co2          = String(myMHZ19.getCO2());
-    data_datetime            = dateLocalTime();
+    data_datetime            = localDate() + " " + localTime();
     data_date                = localDate();
     data_time                = localTime();
 
