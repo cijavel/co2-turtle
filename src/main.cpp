@@ -134,24 +134,7 @@ String descr_iaq              = "";
 String descr_MHZ19B_co2       = "";
 
 String header_data            = "";
-String output                 = "";
-
-const String header =   
-  name_timestamp           + ", " + 
-  name_zone                + ", " + 
-  name_rawtemperatur       + ", " +
-  name_temp                + ", " + 
-  name_pressure            + ", " + 
-  name_rawhumidity         + ", " + 
-  name_relativehumidity    + ", " + 
-  name_gas                 + ", " + 
-  name_iaq                 + ", " + 
-  name_iaqaccuracy         + ", " + 
-  name_iaqstatic           + ", " +  
-  name_co2equil            + ", " + 
-  name_breahtvoc           + ", " + 
-  name_MHZ19B_co2 ;
-
+String consout                 = "";
 
 // Helper function definitions
 void checkIaqSensorStatus(void)
@@ -160,15 +143,15 @@ void checkIaqSensorStatus(void)
   {
     if (iaqSensor.status < BSEC_OK)
     {
-      output = "BSEC error code : " + String(iaqSensor.status);
-      Serial.println(output);
+      consout = "BSEC error code : " + String(iaqSensor.status);
+      Serial.println(consout);
       for (;;)
         errLeds(); /* Halt in case of failure */
     }
     else
     {
-      output = "BSEC warning code : " + String(iaqSensor.status);
-      Serial.println(output);
+      consout = "BSEC warning code : " + String(iaqSensor.status);
+      Serial.println(consout);
     }
   }
 
@@ -176,15 +159,15 @@ void checkIaqSensorStatus(void)
   {
     if (iaqSensor.bme680Status < BME680_OK)
     {
-      output = "BME680 error code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
+      consout = "BME680 error code : " + String(iaqSensor.bme680Status);
+      Serial.println(consout);
       for (;;)
         errLeds(); /* Halt in case of failure */
     }
     else
     {
-      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
+      consout = "BME680 warning code : " + String(iaqSensor.bme680Status);
+      Serial.println(consout);
     }
   }
 }
@@ -345,7 +328,7 @@ String localTime()
   struct tm timeinfo;
   
   String time = "";
-  char output[60];
+  char toutp[60];
   setTimezone(timezone);
 
   if(!getLocalTime(&timeinfo))
@@ -353,8 +336,8 @@ String localTime()
     time = "Failed to obtain time";
   }
   else{
-    strftime(output, sizeof(output), "%H:%M:%S", &timeinfo);
-    time = String(output);
+    strftime(toutp, sizeof(toutp), "%H:%M:%S", &timeinfo);
+    time = String(toutp);
   }
   return time;
 }
@@ -363,7 +346,7 @@ String localDate()
 {
   struct tm dateinfo;
   String date = "";
-  char output[60];
+  char doutp[60];
   setTimezone(timezone);
 
   
@@ -372,8 +355,8 @@ String localDate()
     date = "Failed to obtain date";
   }
   else{
-    strftime(output, sizeof(output), "%Y-%m-%d", &dateinfo);
-    date = String(output);
+    strftime(doutp, sizeof(doutp), "%Y-%m-%d", &dateinfo);
+    date = String(doutp);
   }
   return date;
 }
@@ -382,7 +365,7 @@ String localZone()
 {
   struct tm dateinfo;
   String zone = "";
-  char output[60];
+  char zoutp[60];
   setTimezone(timezone);
 
   if(!getLocalTime(&dateinfo))
@@ -390,8 +373,8 @@ String localZone()
     zone = "Failed to obtain zone";
   }
   else{
-    strftime(output, sizeof(output), "%Z %z", &dateinfo);
-    zone = String(output);
+    strftime(zoutp, sizeof(zoutp), "%Z %z", &dateinfo);
+    zone = String(zoutp);
   }
   return zone;
 }
@@ -423,9 +406,6 @@ void handle_index(AsyncWebServerRequest *request)
           </div>
           <div style="padding: 5 px;">
             <a href="/json">json file</a>
-          </div>
-          <div style="padding: 5 px;">
-            <a href="/dataonly">data string</a>
           </div>
         </div>
       </body>
@@ -578,12 +558,6 @@ void handle_status(AsyncWebServerRequest *request)
   request->send(200, "text/html; charset=utf-8", header_data);
 }
 
-void handle_data_only(AsyncWebServerRequest *request)
-{
-  request->send(200, "text/plain; charset=utf-8", output);
-}
-
-
 
 // --------------------------------------------------------------------------
 //  MAIN
@@ -603,7 +577,6 @@ void setup(void)
   // webpages on server
   server.on("/", HTTP_GET, handle_index);
   server.on("/json", HTTP_GET, handle_data);
-  server.on("/dataonly", HTTP_GET, handle_data_only);
   server.on("/status", HTTP_GET, handle_status);
   server.onNotFound(handle_NotFound);
 
@@ -617,8 +590,8 @@ void setup(void)
   Wire.begin();
 
   iaqSensor.begin(0x77, Wire);
-  output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
-  Serial.println(output);
+  consout = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
+  Serial.println(consout);
   checkIaqSensorStatus();
 
   iaqSensor.setTemperatureOffset(4);
@@ -643,8 +616,6 @@ void setup(void)
 
   iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
   checkIaqSensorStatus();
-  
-  Serial.println(header); 
 }
 
 // Function that is looped forever
@@ -696,15 +667,6 @@ void loop(void)
     data_time                = localTime();
     data_zone                = localZone();
 
-    output = String(time_trigger);
-    output += ", " + String(iaqSensor.rawTemperature);
-    output += ", " + String(iaqSensor.pressure);
-    output += ", " + String(iaqSensor.rawHumidity);
-    output += ", " + String(iaqSensor.gasResistance);
-    output += ", " + String(iaqSensor.iaq);
-    output += ", " + String(iaqSensor.iaqAccuracy);
-
-
     if (iaqSensor.iaqAccuracy == 0)
     {
       descr_iaqaccuracy = "Calibration phase. Please wait....";
@@ -729,7 +691,7 @@ void loop(void)
       updateState(); //acurate data. save them
     }
 
-    output += ", " + String(iaqSensor.temperature);
+
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.temperature < 16) // too cold
@@ -795,8 +757,6 @@ void loop(void)
     
 
 
-
-    output += ", " + String(iaqSensor.humidity);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.humidity < 20) // Far too dry
@@ -862,8 +822,6 @@ void loop(void)
 
 
 
-
-    output += ", " + String(iaqSensor.staticIaq);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.iaq <= 50) // exellent
@@ -925,9 +883,6 @@ void loop(void)
 
     int MHZ19CO2 = myMHZ19B.getCO2();
     int checkCO2 = MHZ19CO2;
-    output += ", " + String(iaqSensor.co2Equivalent);
-    output += ", " + String(iaqSensor.breathVocEquivalent);
-    output += ", " + String(MHZ19CO2);
     if (MHZ19CO2 == 0)
     {
       checkCO2 = iaqSensor.co2Equivalent;
@@ -985,12 +940,8 @@ void loop(void)
         descr_MHZ19B_co2 = "Warning. Tiredness, headache. please ventilate urgently.";
       }
     }
-
-
-    Serial.println(output);
     FastLED.setBrightness(50);
     FastLED.show();
-
   }
   else
   {
