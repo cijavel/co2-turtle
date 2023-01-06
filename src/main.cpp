@@ -101,6 +101,7 @@ const String name_MHZ19B_co2          = "MHZ19B CO2 [ppm]";
 const String name_datetime            = "Date and Time";
 const String name_date                = "Date";
 const String name_time                = "Time";
+const String name_zone                = "Timezone";
 
 String data_timestamp           = "";
 String data_rawtemperatur       = "";
@@ -118,6 +119,7 @@ String data_MHZ19B_co2          = "";
 String data_datetime            = "";
 String data_date                = "";
 String data_time                = "";
+String data_zone                = "";
 
 String color_iaqaccuracy      = "";
 String color_temp             = "";
@@ -136,7 +138,8 @@ String output                 = "";
 
 const String header =   
   name_timestamp           + ", " + 
-  name_rawtemperatur       + ", " + 
+  name_zone                + ", " + 
+  name_rawtemperatur       + ", " +
   name_temp                + ", " + 
   name_pressure            + ", " + 
   name_rawhumidity         + ", " + 
@@ -358,21 +361,39 @@ String localTime()
 
 String localDate()
 {
-  struct tm timeinfo;
-  String time = "";
+  struct tm dateinfo;
+  String date = "";
   char output[60];
   setTimezone(timezone);
 
   
-  if(!getLocalTime(&timeinfo))
+  if(!getLocalTime(&dateinfo))
   {
-    time = "Failed to obtain time";
+    date = "Failed to obtain date";
   }
   else{
-    strftime(output, sizeof(output), "%Y-%m-%d", &timeinfo);
-    time = String(output);
+    strftime(output, sizeof(output), "%Y-%m-%d", &dateinfo);
+    date = String(output);
   }
-  return time;
+  return date;
+}
+
+String localZone()
+{
+  struct tm dateinfo;
+  String zone = "";
+  char output[60];
+  setTimezone(timezone);
+
+  if(!getLocalTime(&dateinfo))
+  {
+    zone = "Failed to obtain zone";
+  }
+  else{
+    strftime(output, sizeof(output), "%Z %z", &dateinfo);
+    zone = String(output);
+  }
+  return zone;
 }
 
 
@@ -422,6 +443,7 @@ void handle_data(AsyncWebServerRequest *request)
   "{\n\"" + 
   name_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
   name_datetime            + "\":\"" + data_datetime            + "\",\n" + "\"" +
+  name_zone                + "\":\"" + data_zone                + "\",\n" + "\"" +
   name_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
   name_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
   name_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
@@ -524,6 +546,11 @@ void handle_status(AsyncWebServerRequest *request)
           <td class="space"> </td>
           <td class="data" style="padding:0px 5px">{data_time}</td>
         </tr>
+        <tr>
+          <th class="title">Timezone</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_zone}</td>
+        </tr>
       </table> 
     </body>
   </html>)=====";
@@ -548,6 +575,7 @@ void handle_status(AsyncWebServerRequest *request)
   header_data.replace("{data_breahtvoc}",data_breahtvoc); // Volatile Organic Compounds 
   header_data.replace("{data_date}",data_date);
   header_data.replace("{data_time}",data_time);
+  header_data.replace("{data_zone}",data_zone);
   header_data.replace("{deviceName}",deviceName);
 
   request->send(200, "text/html; charset=utf-8", header_data);
@@ -694,6 +722,7 @@ void loop(void)
     data_datetime            = localDate() + " " + localTime();
     data_date                = localDate();
     data_time                = localTime();
+    data_zone                = localZone();
 
     output = String(time_trigger);
     output += ", " + String(iaqSensor.rawTemperature);
