@@ -419,13 +419,13 @@ void handle_index(AsyncWebServerRequest *request)
       <body>
         <div style="font-family: Arial, Helvetica, sans-serif;">
           <div style="padding: 5 px;">
+            <a href="/status">status</a>
+          </div>
+          <div style="padding: 5 px;">
             <a href="/json">json file</a>
           </div>
           <div style="padding: 5 px;">
             <a href="/dataonly">data string</a>
-          </div>
-          <div style="padding: 5 px;">
-            <a href="/status">Status</a>
           </div>
         </div>
       </body>
