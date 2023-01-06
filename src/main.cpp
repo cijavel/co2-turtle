@@ -49,8 +49,8 @@ void clearState(void);
 // --------------------------------------------------------------------------
 // sensor data
 // --------------------------------------------------------------------------
-#define PIN_RX 18
-#define PIN_TX 19
+#define PIN_MHZ19B_TX 18
+#define PIN_MHZ19B_TX 19
 #define BAUDRATE 9600
 
 HardwareSerial mySerial(1);
@@ -61,7 +61,7 @@ const uint8_t bsec_config_iaq[] = {
 };
 //save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
-MHZ19 myMHZ19; // Co2 sensor
+MHZ19 myMHZ19B; // Co2 sensor
 
 
 // Create an object of the class Bsec
@@ -543,7 +543,7 @@ void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
   {
     if (request->getParam("calibrateZero")->value() == "true")
     {
-      myMHZ19.calibrate();
+      myMHZ19B.calibrate();
       request->send(200, "text/plain; charset=utf-8", output);
     }
     else
@@ -590,9 +590,9 @@ void setup(void)
 
 
   EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
-  mySerial.begin(BAUDRATE, SERIAL_8N1, PIN_RX, PIN_TX); // ESP32 Example
-  myMHZ19.begin(mySerial);                              // *Important, Pass your Stream reference
-  myMHZ19.autoCalibration(true);                        // Turn Auto Calibration OFF
+  mySerial.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19B_RX, PIN_MHZ19B_TX); // ESP32 Example
+  myMHZ19B.begin(mySerial);                              // *Important, Pass your Stream reference
+  myMHZ19B.autoCalibration(true);                        // Turn Auto Calibration OFF
   Wire.begin();
 
   iaqSensor.begin(0x77, Wire);
@@ -669,7 +669,7 @@ void loop(void)
 		data_iaqstatic           = String(iaqSensor.staticIaq);
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
-    data_MHZ19B_co2          = String(myMHZ19.getCO2());
+    data_MHZ19B_co2          = String(myMHZ19B.getCO2());
     data_datetime            = localDate() + " " + localTime();
     data_date                = localDate();
     data_time                = localTime();
@@ -901,7 +901,7 @@ void loop(void)
 
 
 
-    int MHZ19CO2 = myMHZ19.getCO2();
+    int MHZ19CO2 = myMHZ19B.getCO2();
     int checkCO2 = MHZ19CO2;
     output += ", " + String(iaqSensor.co2Equivalent);
     output += ", " + String(iaqSensor.breathVocEquivalent);
@@ -1053,7 +1053,7 @@ void updateState(void)
   {
     iaqSensor.getState(bsecState);
     checkIaqSensorStatus();
-    //myMHZ19.calibrateZero();
+    //myMHZ19B.calibrateZero();
     Serial.println("Writing state to EEPROM");
 
     for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
