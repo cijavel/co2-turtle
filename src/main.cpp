@@ -425,9 +425,6 @@ void handle_index(AsyncWebServerRequest *request)
             <a href="/dataonly">data string</a>
           </div>
           <div style="padding: 5 px;">
-            <a href="/CO2">Co2</a>
-          </div>
-          <div style="padding: 5 px;">
             <a href="/status">Status</a>
           </div>
         </div>
@@ -586,26 +583,6 @@ void handle_data_only(AsyncWebServerRequest *request)
   request->send(200, "text/plain; charset=utf-8", output);
 }
 
-void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
-{
-  if (request->hasParam("calibrateZero"))
-  {
-    if (request->getParam("calibrateZero")->value() == "true")
-    {
-      myMHZ19B.calibrate();
-      request->send(200, "text/plain; charset=utf-8", output);
-    }
-    else
-    {
-      request->send(200, "text/plain; charset=utf-8", "Missing Get Param Value ?calibrateZero=true");
-    }
-  }
-  else
-  {
-    request->send(200, "text/plain; charset=utf-8", "Missing Get Param ?calibrateZero=true");
-  }
-}
-
 
 
 // --------------------------------------------------------------------------
@@ -627,15 +604,10 @@ void setup(void)
   server.on("/", HTTP_GET, handle_index);
   server.on("/json", HTTP_GET, handle_data);
   server.on("/dataonly", HTTP_GET, handle_data_only);
-  server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
   server.on("/status", HTTP_GET, handle_status);
   server.onNotFound(handle_NotFound);
 
   server.begin();
-
-
-
-  
 
 
   EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
