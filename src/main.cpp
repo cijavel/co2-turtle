@@ -49,7 +49,7 @@ void clearState(void);
 // --------------------------------------------------------------------------
 // sensor data
 // --------------------------------------------------------------------------
-#define RX_PIN 18
+#define PIN_RX 18
 #define TX_PIN 19
 #define BAUDRATE 9600
 
@@ -606,7 +606,7 @@ void setup(void)
 
 
   EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
-  mySerial.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN); // ESP32 Example
+  mySerial.begin(BAUDRATE, SERIAL_8N1, PIN_RX, TX_PIN); // ESP32 Example
   myMHZ19.begin(mySerial);                              // *Important, Pass your Stream reference
   myMHZ19.autoCalibration(true);                        // Turn Auto Calibration OFF
   Wire.begin();
