@@ -316,12 +316,6 @@ const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
 
 
-void setTimezone(String timezone){
-  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
-  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
-  tzset();
-}
-
 String localTime(String format)
 {
 
@@ -329,7 +323,9 @@ String localTime(String format)
   
   String time = "";
   char toutp[60];
-  setTimezone(timezone);
+  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
+  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  tzset();
 
   if(!getLocalTime(&timeinfo))
   {
