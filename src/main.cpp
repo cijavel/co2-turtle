@@ -10,7 +10,7 @@
 #include <helpers.h>
 #include <time.h>
 
-#include <Credentials.h>
+#include <credentials.h>
 
 
 //https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
