@@ -10,7 +10,8 @@
 #include <helpers.h>
 #include <time.h>
 
-#include <Credentials.h>
+// please rename credentials_example.h to credentials.h
+#include <credentials.h>
 
 
 //https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/bmesensor.cpp
@@ -24,15 +25,7 @@
 //https://github.com/FastLED/FastLED/wiki/Basic-usage
 //https://github.com/chris-schmitz/FastLED-Section-Manager?utm_source=platformio&utm_medium=piohome
 
-// ---------------------------------------------
-// Configuration
-// ---------------------------------------------
 
-
-// WLAN
-const char *ssid     = WIFI_SSID;
-const char *password = WIFI_PW;
-String deviceName    = "SensorTurtle 3  ESP32";
 
 
 
@@ -46,9 +39,35 @@ void updateState(void);
 void clearState(void);
 
 
+// ---------------------------------------------
+// Configuration
+// ---------------------------------------------
+
+
+// WLAN
+const char *ssid     = WIFI_SSID;
+const char *password = WIFI_PW;
+String deviceName    = "SensorTurtle 1";
+
+// sensor
+#define PIN_MHZ19B_RX 18
+#define PIN_MHZ19B_TX 19
+#define BAUDRATE 9600
+
+// leds
+#define NUM_LEDS 34 //count
+#define PIN_LED_DATA 5
+
+// timezone
+const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
+
+
+
 // --------------------------------------------------------------------------
 // sensor data
 // --------------------------------------------------------------------------
+
+HardwareSerial mySerial(1);
 
 const uint8_t bsec_config_iaq[] = {  
   //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
@@ -56,7 +75,7 @@ const uint8_t bsec_config_iaq[] = {
 };
 //save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
-MHZ19 myMHZ19; // Co2 sensor
+MHZ19 myMHZ19B; // Co2 sensor
 
 
 // Create an object of the class Bsec
@@ -67,39 +86,40 @@ uint32_t millisOverflowCounter = 0;
 uint32_t lastTime = 0;
 int latest_accuracy = 0;
 
-const String name_timestamp           = "Timestamp [ms]";
-const String name_rawtemperatur       = "raw temperature [°C]";
-const String name_pressure            = "pressure [hPa]";
-const String name_rawhumidity         = "raw relative humidity [%]";
-const String name_gas                 = "gas [Ohm]";
-const String name_iaq                 = "IAQ";
-const String name_iaqaccuracy         = "IAQ accuracy";
-const String name_temp                = "temperature [°C]";
-const String name_relativehumidity    = "relative humidity [%]";
-const String name_iaqstatic           = "IAQ Static";
-const String name_co2equil            = "CO2 equivalentv";
-const String name_breahtvoc           = "breath VOC equivalent [ppm]";
-const String name_MHZ19B_co2          = "MHZ19B CO2 [ppm]";
-const String name_datetime            = "Date and Time";
-const String name_date                = "Date";
-const String name_time                = "Time";
+const String name_timestamp         = "Timestamp [ms]";
+const String name_rawtemperatur     = "raw temperature [°C]";
+const String name_pressure          = "pressure [hPa]";
+const String name_rawhumidity       = "raw relative humidity [%]";
+const String name_gas               = "gas [Ohm]";
+const String name_iaq               = "IAQ";
+const String name_iaqaccuracy       = "IAQ accuracy";
+const String name_temp              = "temperature [°C]";
+const String name_relativehumidity  = "relative humidity [%]";
+const String name_iaqstatic         = "IAQ Static";
+const String name_co2equil          = "CO2 equivalentv";
+const String name_breahtvoc         = "breath VOC equivalent [ppm]";
+const String name_MHZ19B_co2        = "MHZ19B CO2 [ppm]";
+const String name_datetime          = "Date and Time";
+const String name_date              = "Date";
+const String name_time              = "Time";
+const String name_zone              = "Timezone";
 
-String data_timestamp           = "";
-String data_rawtemperatur       = "";
-String data_pressure            = "";
-String data_rawhumidity         = "";
-String data_gas                 = "";
-String data_iaq                 = "";
-String data_iaqaccuracy         = "";
-String data_temp                = "";
-String data_relativehumidity    = "";
-String data_iaqstatic           = "";
-String data_co2equil            = "";
-String data_breahtvoc           = "";
-String data_MHZ19B_co2          = "";
-String data_datetime            = "";
-String data_date                = "";
-String data_time                = "";
+String data_timestamp         = "";
+String data_rawtemperatur     = "";
+String data_pressure          = "";
+String data_rawhumidity       = "";
+String data_gas               = "";
+String data_iaq               = "";
+String data_iaqaccuracy       = "";
+String data_temp              = "";
+String data_relativehumidity  = "";
+String data_iaqstatic         = "";
+String data_co2equil          = "";
+String data_breahtvoc         = "";
+String data_MHZ19B_co2        = "";
+String data_date              = "";
+String data_time              = "";
+String data_zone              = "";
 
 String color_iaqaccuracy      = "";
 String color_temp             = "";
@@ -114,40 +134,24 @@ String descr_iaq              = "";
 String descr_MHZ19B_co2       = "";
 
 String header_data            = "";
-String output                 = "";
+String consout                = "";
 
-const String header =   
-  name_timestamp           + ", " + 
-  name_rawtemperatur       + ", " + 
-  name_temp                + ", " + 
-  name_pressure            + ", " + 
-  name_rawhumidity         + ", " + 
-  name_relativehumidity    + ", " + 
-  name_gas                 + ", " + 
-  name_iaq                 + ", " + 
-  name_iaqaccuracy         + ", " + 
-  name_iaqstatic           + ", " +  
-  name_co2equil            + ", " + 
-  name_breahtvoc           + ", " + 
-  name_MHZ19B_co2 ;
-
-
-// Helper function definitions
+// get data from IAQ
 void checkIaqSensorStatus(void)
 {
   if (iaqSensor.status != BSEC_OK)
   {
     if (iaqSensor.status < BSEC_OK)
     {
-      output = "BSEC error code : " + String(iaqSensor.status);
-      Serial.println(output);
+      consout = "BSEC error code : " + String(iaqSensor.status);
+      Serial.println(consout);
       for (;;)
         errLeds(); /* Halt in case of failure */
     }
     else
     {
-      output = "BSEC warning code : " + String(iaqSensor.status);
-      Serial.println(output);
+      consout = "BSEC warning code : " + String(iaqSensor.status);
+      Serial.println(consout);
     }
   }
 
@@ -155,22 +159,22 @@ void checkIaqSensorStatus(void)
   {
     if (iaqSensor.bme680Status < BME680_OK)
     {
-      output = "BME680 error code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
+      consout = "BME680 error code : " + String(iaqSensor.bme680Status);
+      Serial.println(consout);
       for (;;)
         errLeds(); /* Halt in case of failure */
     }
     else
     {
-      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
-      Serial.println(output);
+      consout = "BME680 warning code : " + String(iaqSensor.bme680Status);
+      Serial.println(consout);
     }
   }
 }
 
 
 // --------------------------------------------------------------------------
-// definition of LED
+// LED Sector Manager
 // --------------------------------------------------------------------------
 #define LED_WLANCONNECT 0
 #define LED_STATUS 1
@@ -179,9 +183,6 @@ void checkIaqSensorStatus(void)
 #define LED_AIRQ 4
 #define LED_CO2 5
 
-
-#define NUM_LEDS 34
-#define DATA_PIN 5
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
 int ledloop = 0;
@@ -196,8 +197,7 @@ void addLEDsection(void)
   LEDsectionManager.addRangeToSection(LED_AIRQ,       19, 25, false); // LED_AIRQ
   LEDsectionManager.addRangeToSection(LED_CO2,        27, 33, false); // LED_CO2
 
-    //FastLED.addLeds<NEOPIXEL, DATA_PIN>(led, NUM_LEDS);
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(led, NUM_LEDS);
+  FastLED.addLeds<WS2812B, PIN_LED_DATA, GRB>(led, NUM_LEDS);
   FastLED.clear(true);
 
 }
@@ -212,14 +212,14 @@ int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 
 
   int colorsteps = 230; // how many colors, 256 all color, 
-  int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
+  int colors = 9 ;      // circle. Distance between colors per cycle. the higher the finer
   uint16_t level ;
-  // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
-  for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
+  // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // show against clockwise
+  for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // show clockwise
   {
     uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
 
-    for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
+    for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--)      // change color clockwise
     {
       LEDsectionManager.setColorAtGlobalIndex(level, color);
     }
@@ -258,11 +258,6 @@ void WiFiReStart()
       Serial.println("");
       Serial.println("WiFi connected");
 
-      // Start the server
-      //server.begin();
-
-      //Serial.println("Server started");
-
       // Print the IP address
       Serial.println(WiFi.localIP());
     }
@@ -286,7 +281,7 @@ void WiFiSetup()
     FastLED.setBrightness(wifiWaitCount * 2);
     FastLED.show();
   }
-  // Print local IP address and start web server
+
   if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("WiFi connected.");
@@ -313,53 +308,25 @@ const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
 
-String dateLocalTime()
-{
-  struct tm timeinfo;
-  String time = "";
-  char output[60];
-  
-  if(!getLocalTime(&timeinfo))
-  {
-    time = "Failed to obtain time";
-  }
-  else{
-    strftime(output, sizeof(output), "%Y-%m-%d %H:%M:%S", &timeinfo);
-    time = String(output);
-  }
-  return time;
-}
 
-String localTime()
+String localTime(String format)
 {
-  struct tm timeinfo;
-  String time = "";
-  char output[60];
-  
-  if(!getLocalTime(&timeinfo))
-  {
-    time = "Failed to obtain time";
-  }
-  else{
-    strftime(output, sizeof(output), "%H:%M:%S", &timeinfo);
-    time = String(output);
-  }
-  return time;
-}
 
-String localDate()
-{
   struct tm timeinfo;
-  String time = "";
-  char output[60];
   
+  String time = "";
+  char toutp[60];
+  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
+  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  tzset();
+
   if(!getLocalTime(&timeinfo))
   {
     time = "Failed to obtain time";
   }
   else{
-    strftime(output, sizeof(output), "%Y-%m-%d", &timeinfo);
-    time = String(output);
+    strftime(toutp, sizeof(toutp), format.c_str(), &timeinfo);
+    time = String(toutp);
   }
   return time;
 }
@@ -369,12 +336,6 @@ String localDate()
 // Web Server
 // --------------------------------------------------------------------------
 AsyncWebServer server(80);
-
-#define RX_PIN 18
-#define TX_PIN 19
-#define BAUDRATE 9600
-
-HardwareSerial mySerial(1);
 
 void handle_NotFound(AsyncWebServerRequest *request)
 {
@@ -393,16 +354,10 @@ void handle_index(AsyncWebServerRequest *request)
       <body>
         <div style="font-family: Arial, Helvetica, sans-serif;">
           <div style="padding: 5 px;">
+            <a href="/status">status</a>
+          </div>
+          <div style="padding: 5 px;">
             <a href="/json">json file</a>
-          </div>
-          <div style="padding: 5 px;">
-            <a href="/dataonly">data string</a>
-          </div>
-          <div style="padding: 5 px;">
-            <a href="/CO2">Co2</a>
-          </div>
-          <div style="padding: 5 px;">
-            <a href="/status">Status</a>
           </div>
         </div>
       </body>
@@ -415,20 +370,21 @@ void handle_data(AsyncWebServerRequest *request)
 {
   header_data =
   "{\n\"" + 
-  name_timestamp           + "\":\"" + data_timestamp           + "\",\n" + "\"" +
-  name_datetime            + "\":\"" + data_datetime            + "\",\n" + "\"" +
-  name_rawtemperatur       + "\":\"" + data_rawtemperatur       + "\",\n" + "\"" +
-  name_temp                + "\":\"" + data_temp                + "\",\n" + "\"" + 
-  name_pressure            + "\":\"" + data_pressure            + "\",\n" + "\"" +
-  name_rawhumidity         + "\":\"" + data_rawhumidity         + "\",\n" + "\"" + 
-  name_relativehumidity    + "\":\"" + data_relativehumidity    + "\",\n" + "\"" + 
-  name_gas                 + "\":\"" + data_gas                 + "\",\n" + "\"" + 
-  name_iaq                 + "\":\"" + data_iaq                 + "\",\n" + "\"" + 
-  name_iaqaccuracy         + "\":\"" + data_iaqaccuracy         + "\",\n" + "\"" + 
-  name_iaqstatic           + "\":\"" + data_iaqstatic           + "\",\n" +  "\"" + 
-  name_co2equil            + "\":\"" + data_co2equil            + "\",\n" + "\"" +
-  name_breahtvoc           + "\":\"" + data_breahtvoc           + "\",\n" + "\"" +
-  name_MHZ19B_co2          + "\":\"" + data_MHZ19B_co2          + "\"\n}";
+  name_timestamp        + "\":\"" + data_timestamp              + "\",\n" + "\"" +
+  name_datetime         + "\":\"" + data_date + " " + data_time + "\",\n" + "\"" +
+  name_zone             + "\":\"" + data_zone                   + "\",\n" + "\"" +
+  name_rawtemperatur    + "\":\"" + data_rawtemperatur          + "\",\n" + "\"" +
+  name_temp             + "\":\"" + data_temp                   + "\",\n" + "\"" + 
+  name_pressure         + "\":\"" + data_pressure               + "\",\n" + "\"" +
+  name_rawhumidity      + "\":\"" + data_rawhumidity            + "\",\n" + "\"" + 
+  name_relativehumidity + "\":\"" + data_relativehumidity       + "\",\n" + "\"" + 
+  name_gas              + "\":\"" + data_gas                    + "\",\n" + "\"" + 
+  name_iaq              + "\":\"" + data_iaq                    + "\",\n" + "\"" + 
+  name_iaqaccuracy      + "\":\"" + data_iaqaccuracy            + "\",\n" + "\"" + 
+  name_iaqstatic        + "\":\"" + data_iaqstatic              + "\",\n" +  "\"" + 
+  name_co2equil         + "\":\"" + data_co2equil               + "\",\n" + "\"" +
+  name_breahtvoc        + "\":\"" + data_breahtvoc              + "\",\n" + "\"" +
+  name_MHZ19B_co2       + "\":\"" + data_MHZ19B_co2             + "\"\n}";
   request->send(200, "application/json; charset=utf-8", header_data);
 }
 
@@ -519,6 +475,11 @@ void handle_status(AsyncWebServerRequest *request)
           <td class="space"> </td>
           <td class="data" style="padding:0px 5px">{data_time}</td>
         </tr>
+        <tr>
+          <th class="title">Timezone</th>
+          <td class="space"> </td>
+          <td class="data" style="padding:0px 5px">{data_zone}</td>
+        </tr>
       </table> 
     </body>
   </html>)=====";
@@ -540,39 +501,14 @@ void handle_status(AsyncWebServerRequest *request)
   header_data.replace("{descr_MHZ19B_co2}",descr_MHZ19B_co2);
   header_data.replace("{data_pressure}",data_pressure);
   header_data.replace("{data_gas}",data_gas);
-  header_data.replace("{data_breahtvoc}",data_breahtvoc); // Volatile Organic Compounds 
+  header_data.replace("{data_breahtvoc}",data_breahtvoc); 
   header_data.replace("{data_date}",data_date);
   header_data.replace("{data_time}",data_time);
+  header_data.replace("{data_zone}",data_zone);
   header_data.replace("{deviceName}",deviceName);
 
   request->send(200, "text/html; charset=utf-8", header_data);
 }
-
-void handle_data_only(AsyncWebServerRequest *request)
-{
-  request->send(200, "text/plain; charset=utf-8", output);
-}
-
-void mh_z19b_calibrateZero(AsyncWebServerRequest *request)
-{
-  if (request->hasParam("calibrateZero"))
-  {
-    if (request->getParam("calibrateZero")->value() == "true")
-    {
-      myMHZ19.calibrate();
-      request->send(200, "text/plain; charset=utf-8", output);
-    }
-    else
-    {
-      request->send(200, "text/plain; charset=utf-8", "Missing Get Param Value ?calibrateZero=true");
-    }
-  }
-  else
-  {
-    request->send(200, "text/plain; charset=utf-8", "Missing Get Param ?calibrateZero=true");
-  }
-}
-
 
 
 // --------------------------------------------------------------------------
@@ -593,22 +529,20 @@ void setup(void)
   // webpages on server
   server.on("/", HTTP_GET, handle_index);
   server.on("/json", HTTP_GET, handle_data);
-  server.on("/dataonly", HTTP_GET, handle_data_only);
-  server.on("/CO2", HTTP_GET, mh_z19b_calibrateZero);
   server.on("/status", HTTP_GET, handle_status);
   server.onNotFound(handle_NotFound);
 
   server.begin();
 
-  EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
-  mySerial.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN); // ESP32 Example
-  myMHZ19.begin(mySerial);                              // *Important, Pass your Stream reference
-  myMHZ19.autoCalibration(true);                        // Turn Auto Calibration OFF
+  EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);                         // 1st address for the length
+  mySerial.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19B_RX, PIN_MHZ19B_TX); // ESP32 Example
+  myMHZ19B.begin(mySerial);                                           // *Important, Pass your Stream reference
+  myMHZ19B.autoCalibration(true);                                     // Turn Auto Calibration OFF
   Wire.begin();
 
   iaqSensor.begin(0x77, Wire);
-  output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
-  Serial.println(output);
+  consout = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
+  Serial.println(consout);
   checkIaqSensorStatus();
 
   iaqSensor.setTemperatureOffset(4);
@@ -633,15 +567,11 @@ void setup(void)
 
   iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
   checkIaqSensorStatus();
-  
-  Serial.println(header); 
 }
 
-// Function that is looped forever
+
 void loop(void)
 {
-  
-
   if (WiFi.status() != WL_CONNECTED)
   {
     LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
@@ -680,19 +610,10 @@ void loop(void)
 		data_iaqstatic           = String(iaqSensor.staticIaq);
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
-    data_MHZ19B_co2          = String(myMHZ19.getCO2());
-    data_datetime            = dateLocalTime();
-    data_date                = localDate();
-    data_time                = localTime();
-
-    output = String(time_trigger);
-    output += ", " + String(iaqSensor.rawTemperature);
-    output += ", " + String(iaqSensor.pressure);
-    output += ", " + String(iaqSensor.rawHumidity);
-    output += ", " + String(iaqSensor.gasResistance);
-    output += ", " + String(iaqSensor.iaq);
-    output += ", " + String(iaqSensor.iaqAccuracy);
-
+    data_MHZ19B_co2          = String(myMHZ19B.getCO2());
+    data_date                = localTime("%Y-%m-%d");
+    data_time                = localTime("%H:%M:%S");
+    data_zone                = localTime("%Z %z");
 
     if (iaqSensor.iaqAccuracy == 0)
     {
@@ -718,7 +639,7 @@ void loop(void)
       updateState(); //acurate data. save them
     }
 
-    output += ", " + String(iaqSensor.temperature);
+
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.temperature < 16) // too cold
@@ -777,15 +698,8 @@ void loop(void)
         descr_temp = "way too hot";
       }
     }
-    else
-    {
-      //LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Black, FillStyle(ALL_AT_ONCE));
-    }
-    
 
 
-
-    output += ", " + String(iaqSensor.humidity);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.humidity < 20) // Far too dry
@@ -844,15 +758,10 @@ void loop(void)
         descr_relativehumidity = "wet";
       }
     }
-    else
-    {
-         //LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Black, FillStyle(ALL_AT_ONCE)); 
-    }
+ 
 
 
 
-
-    output += ", " + String(iaqSensor.staticIaq);
     if (iaqSensor.iaqAccuracy > 0)
     {
       if (iaqSensor.iaq <= 50) // exellent
@@ -905,18 +814,11 @@ void loop(void)
         descr_iaq = "extremly polluted. please ventilate urgently.";
       }
     }
-    else
-    { 
-      //LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Black, FillStyle(ALL_AT_ONCE));
-    }
 
 
 
-    int MHZ19CO2 = myMHZ19.getCO2();
+    int MHZ19CO2 = myMHZ19B.getCO2();
     int checkCO2 = MHZ19CO2;
-    output += ", " + String(iaqSensor.co2Equivalent);
-    output += ", " + String(iaqSensor.breathVocEquivalent);
-    output += ", " + String(MHZ19CO2);
     if (MHZ19CO2 == 0)
     {
       checkCO2 = iaqSensor.co2Equivalent;
@@ -974,12 +876,8 @@ void loop(void)
         descr_MHZ19B_co2 = "Warning. Tiredness, headache. please ventilate urgently.";
       }
     }
-
-
-    Serial.println(output);
     FastLED.setBrightness(50);
     FastLED.show();
-
   }
   else
   {
@@ -1064,7 +962,7 @@ void updateState(void)
   {
     iaqSensor.getState(bsecState);
     checkIaqSensorStatus();
-    //myMHZ19.calibrateZero();
+    //myMHZ19B.calibrateZero();
     Serial.println("Writing state to EEPROM");
 
     for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
