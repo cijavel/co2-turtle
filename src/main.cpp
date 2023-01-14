@@ -10,6 +10,7 @@
 #include <helpers.h>
 #include <time.h>
 
+// please rename credentials_example.h to credentials.h
 #include <credentials.h>
 
 
@@ -135,7 +136,7 @@ String descr_MHZ19B_co2       = "";
 String header_data            = "";
 String consout                = "";
 
-// Helper function definitions
+// get data from IAQ
 void checkIaqSensorStatus(void)
 {
   if (iaqSensor.status != BSEC_OK)
@@ -173,7 +174,7 @@ void checkIaqSensorStatus(void)
 
 
 // --------------------------------------------------------------------------
-// definition of LED
+// LED Sector Manager
 // --------------------------------------------------------------------------
 #define LED_WLANCONNECT 0
 #define LED_STATUS 1
@@ -181,8 +182,6 @@ void checkIaqSensorStatus(void)
 #define LED_HUM 3
 #define LED_AIRQ 4
 #define LED_CO2 5
-
-
 
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
@@ -198,7 +197,6 @@ void addLEDsection(void)
   LEDsectionManager.addRangeToSection(LED_AIRQ,       19, 25, false); // LED_AIRQ
   LEDsectionManager.addRangeToSection(LED_CO2,        27, 33, false); // LED_CO2
 
-    //FastLED.addLeds<NEOPIXEL, PIN_LED_DATA>(led, NUM_LEDS);
   FastLED.addLeds<WS2812B, PIN_LED_DATA, GRB>(led, NUM_LEDS);
   FastLED.clear(true);
 
@@ -214,14 +212,14 @@ int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
 
 
   int colorsteps = 230; // how many colors, 256 all color, 
-  int colors = 9 ;  // circle Abstand zwischen den Farben pro takt. je höher desto feiner
+  int colors = 9 ;      // circle. Distance between colors per cycle. the higher the finer
   uint16_t level ;
-  // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // gegen uhrzeiger einblenden
-  for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // mit uhrzeiger einblenden
+  // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // show against clockwise
+  for (level = LEDsectionManager.getTotalLevels(); level > 0 ; level--)   // show clockwise
   {
     uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps); 
 
-    for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // mit uhrzeiger farbe ändern
+    for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--)      // change color clockwise
     {
       LEDsectionManager.setColorAtGlobalIndex(level, color);
     }
@@ -260,11 +258,6 @@ void WiFiReStart()
       Serial.println("");
       Serial.println("WiFi connected");
 
-      // Start the server
-      //server.begin();
-
-      //Serial.println("Server started");
-
       // Print the IP address
       Serial.println(WiFi.localIP());
     }
@@ -288,7 +281,7 @@ void WiFiSetup()
     FastLED.setBrightness(wifiWaitCount * 2);
     FastLED.show();
   }
-  // Print local IP address and start web server
+
   if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("WiFi connected.");
@@ -508,7 +501,7 @@ void handle_status(AsyncWebServerRequest *request)
   header_data.replace("{descr_MHZ19B_co2}",descr_MHZ19B_co2);
   header_data.replace("{data_pressure}",data_pressure);
   header_data.replace("{data_gas}",data_gas);
-  header_data.replace("{data_breahtvoc}",data_breahtvoc); // Volatile Organic Compounds 
+  header_data.replace("{data_breahtvoc}",data_breahtvoc); 
   header_data.replace("{data_date}",data_date);
   header_data.replace("{data_time}",data_time);
   header_data.replace("{data_zone}",data_zone);
@@ -541,11 +534,10 @@ void setup(void)
 
   server.begin();
 
-
-  EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);           // 1st address for the length
+  EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);                         // 1st address for the length
   mySerial.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19B_RX, PIN_MHZ19B_TX); // ESP32 Example
-  myMHZ19B.begin(mySerial);                              // *Important, Pass your Stream reference
-  myMHZ19B.autoCalibration(true);                        // Turn Auto Calibration OFF
+  myMHZ19B.begin(mySerial);                                           // *Important, Pass your Stream reference
+  myMHZ19B.autoCalibration(true);                                     // Turn Auto Calibration OFF
   Wire.begin();
 
   iaqSensor.begin(0x77, Wire);
@@ -577,11 +569,9 @@ void setup(void)
   checkIaqSensorStatus();
 }
 
-// Function that is looped forever
+
 void loop(void)
 {
-  
-
   if (WiFi.status() != WL_CONNECTED)
   {
     LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::DarkRed, FillStyle(ALL_AT_ONCE));
