@@ -732,6 +732,11 @@ void loop(void)
 
     if (iaqSensor.iaqAccuracy == 0)
     {
+        epd((char*)deviceName.c_str(), (char*)(data_date+ " " +data_time).c_str()  , (char*)data_temp.c_str(), (char*)data_relativehumidity.c_str(), (char*)data_iaq.c_str(), (char*)data_MHZ19B_co2.c_str());
+    }
+     
+    if (iaqSensor.iaqAccuracy == 0)
+    {
         descr_iaqaccuracy = "Calibration phase. Please wait....";
     }
       else if (iaqSensor.iaqAccuracy == 1)
