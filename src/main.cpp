@@ -71,11 +71,46 @@ String deviceName    = "SensorTurtle 1";
 
 // leds
 #define NUM_LEDS 34 //count
-#define PIN_LED_DATA 5
+#define PIN_LED_DATA 4
 
 // timezone
 const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
+// _______________
+// EPD ePaper eINK
+// ---------------
+// BUSY     -> -1			  Violett, 
+// RST      -> -1  		  RX2	Blau, 
+// DC       -> 17  		  TX2	grün, 
+// CS       -> SS(5)		gelb, 
+// CLK      -> SCK(18)	orange, 
+// DIN /SDI -> MOSI(23) weiß, 
+// GND      -> GND, 
+// 3.3V     -> 3.3V
+//#define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
+
+// _______________
+// LED
+// ---------------
+// DATA -> 5
+
+// _______________
+// MH-Z19B
+// ---------------
+// GND -> GND
+// VCC -> 5V
+// RX  -> 18  (Rx0)
+// TX  -> 19  (Tx0)
+
+// _______________
+// Bosch BME680
+// ---------------
+// GND -> GND
+// VCC -> 5V
+// SCL -> 22  (D22)
+// SDA -> 21  (D21)
+// SD0 -> -
+// CS  -> -
 
 
 // --------------------------------------------------------------------------
@@ -353,15 +388,6 @@ String localTime(String format)
 // --------------------------------------------------------------------------
 // EPD ePaper eINK
 // --------------------------------------------------------------------------
-// BUSY 	  -> -1			Violett, 
-// RST 	  	-> -1  		RX2	Blau, 
-// DC 	   	-> 17  		TX2	grün, 
-// CS 		  -> SS(5)		gelb, 
-// CLK 		  -> SCK(18)		orange, 
-// DIN /SDI -> MOSI(23) 	weiß, 
-// GND 		-> GND, 
-// 3.3V 	-> 3.3V
-//#define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
 void epd(char *epd_name, char *epd_time, char *data_temp, char *data_humidity, char *data_airq, char *data_co2  )
 {
     display.init(9600);
