@@ -64,9 +64,9 @@ const char *ssid     = WIFI_SSID;
 const char *password = WIFI_PW;
 String deviceName    = "SensorTurtle 1";
 
-// sensor
-#define PIN_MHZ19B_RX 18
-#define PIN_MHZ19B_TX 19
+// sensor MH-Z19B
+#define PIN_MHZ19B_RX 17
+#define PIN_MHZ19B_TX 16
 #define BAUDRATE 9600
 
 // leds
@@ -81,10 +81,10 @@ const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 // ---------------
 // BUSY     -> -1			  Violett, 
 // RST      -> -1  		  RX2	Blau, 
-// DC       -> 17  		  TX2	grün, 
+// DC       -> 19  		  TX2	grün, 
 // CS       -> SS(5)		gelb, 
-// CLK      -> SCK(18)	orange, 
-// DIN /SDI -> MOSI(23) weiß, 
+// CLK      -> SCK (~18)	orange, 
+// DIN /SDI -> MOSI (~23) weiß, 
 // GND      -> GND, 
 // 3.3V     -> 3.3V
 //#define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
@@ -92,15 +92,15 @@ const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 // _______________
 // LED
 // ---------------
-// DATA -> 5
+// DATA -> 4
 
 // _______________
 // MH-Z19B
 // ---------------
 // GND -> GND
 // VCC -> 5V
-// RX  -> 18  (Rx0)
-// TX  -> 19  (Tx0)
+// RX  -> 17 (Rx0) gelb
+// TX  -> 16 (Tx0) braun
 
 // _______________
 // Bosch BME680
@@ -366,7 +366,7 @@ String localTime(String format)
   
   String time = "";
   char toutp[60];
-  Serial.printf("  Setting Timezone to %s\n",timezone.c_str());
+  Serial.printf("  Set Timezone to %s\n",timezone.c_str());
   setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
   tzset();
 
@@ -469,6 +469,7 @@ void epd(char *epd_name, char *epd_time, char *data_temp, char *data_humidity, c
 
     display.hibernate();
     display.display(false); 
+    Serial.println("\n  epd updated ??");
 }
 
 
@@ -965,9 +966,14 @@ void loop(void)
 
     int MHZ19CO2 = myMHZ19B.getCO2();
     int checkCO2 = MHZ19CO2;
+    
     if (MHZ19CO2 == 0)
     {
       checkCO2 = iaqSensor.co2Equivalent;
+      Serial.println("co2 " + checkCO2);
+    }
+    else{
+      Serial.println("\n  no cO2 Senor");
     }
       
     if (iaqSensor.iaqAccuracy > 0)
