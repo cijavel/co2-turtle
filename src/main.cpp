@@ -117,24 +117,14 @@ const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 // sensor data
 // --------------------------------------------------------------------------
 
-HardwareSerial mySerial(1);
 
-const uint8_t bsec_config_iaq[] = {  
-  //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
-  #include "config/generic_33v_300s_4d/bsec_iaq.txt"
-};
+HardwareSerial mySerial(1);
 //save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
 MHZ19 myMHZ19B; // Co2 sensor
 
 
-// Create an object of the class Bsec
-Bsec iaqSensor;
-uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
-uint16_t stateUpdateCounter = 0;
-uint32_t millisOverflowCounter = 0;
-uint32_t lastTime = 0;
-int latest_accuracy = 0;
+
 
 const String name_timestamp         = "Timestamp [ms]";
 const String name_rawtemperatur     = "raw temperature [°C]";
@@ -186,7 +176,24 @@ String descr_MHZ19B_co2       = "";
 String header_data            = "";
 String consout                = "";
 
-// get data from IAQ
+
+// --------------------------------------------------------------------------
+// IAQ data
+// --------------------------------------------------------------------------
+
+
+const uint8_t bsec_config_iaq[] = {  
+  //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
+  #include "config/generic_33v_300s_4d/bsec_iaq.txt"
+};
+// Create an object of the class Bsec
+Bsec iaqSensor;
+uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
+uint16_t stateUpdateCounter = 0;
+
+uint32_t lastTime = 0;
+int latest_accuracy = 0;
+
 void checkIaqSensorStatus(void)
 {
   if (iaqSensor.status != BSEC_OK)
@@ -659,9 +666,11 @@ void handle_status(AsyncWebServerRequest *request)
 // Entry point for the example
 void setup(void)
 {
-  addLEDsection();
+  
 
   Serial.begin(9600);
+
+  addLEDsection();
 
   WiFiSetup();
 
@@ -683,7 +692,7 @@ void setup(void)
   Wire.begin();
 
   iaqSensor.begin(0x77, Wire);
-  consout = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
+  consout = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix + " \n ");
   Serial.println(consout);
   checkIaqSensorStatus();
 
@@ -798,7 +807,7 @@ void loop(void)
       else if (iaqSensor.temperature < 18) // cold
       {
         LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Blue, FillStyle(ALL_AT_ONCE));
-        color_temp = String (CRGB::Blue,HEX);
+        color_temp = "00" +  String (CRGB::Blue,HEX);
         descr_temp = "cold";
       }
       else if (iaqSensor.temperature < 20) // cool
@@ -981,7 +990,7 @@ void loop(void)
       if (checkCO2 < 600) //outdoor air
       {  
         LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Blue, FillStyle(ALL_AT_ONCE)); 
-        color_MHZ19B_co2 = String (CRGB::Blue,HEX);
+        color_MHZ19B_co2 = "00" + String (CRGB::Blue,HEX);
         descr_MHZ19B_co2 = "outdoor air";
       }
       else if (checkCO2 < 800) // fresh indoor air
