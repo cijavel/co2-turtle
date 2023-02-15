@@ -24,7 +24,8 @@
 #include "../Font/Inter_Bold12pt7b.h"
 #include "GxEPD2_display_selection_new_style.h"
 
-#include "symbol.h"
+// own files
+#include "symbol.h" // own symbol
 // please rename credentials_example.h to credentials.h
 #include <credentials.h>
 
