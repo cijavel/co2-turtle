@@ -389,69 +389,96 @@ String localTime(String format)
 // --------------------------------------------------------------------------
 // EPD ePaper eINK
 // --------------------------------------------------------------------------
-void epd(char *epd_name, char *epd_time, char *data_temp, char *data_humidity, char *data_airq, char *data_co2  )
+String after_comma(String data){
+  int a = data.toDouble();
+  int b = (data.toDouble() - a) * 100;
+  return String(b);
+}
+
+String before_comma(String data){
+  int a = data.toDouble();
+  return String(a);
+}
+
+void epd(String epd_name, String epd_time, String data_temp, String data_humidity, String data_airq, String data_co2  )
 {
     display.init(9600);
-    char *name_humi = " %" ;
-    char *name_airq     = " IAQ";
-    char *name_co2      = " ppm" ;
 
     uint16_t color_temp = GxEPD_BLACK;
     uint16_t color_hum = GxEPD_BLACK;
     uint16_t color_aiq = GxEPD_BLACK;
     uint16_t color_co2 = GxEPD_BLACK;
 
-    if (atof(data_temp)    < 26)   { color_temp = GxEPD_BLACK;} else { color_temp = GxEPD_RED;}
-    if (atof(data_humidity)< 70)   { color_hum  = GxEPD_BLACK;} else { color_hum  = GxEPD_RED;}
-    if (atof(data_airq)    < 300)  { color_aiq  = GxEPD_BLACK;} else { color_aiq  = GxEPD_RED;}
-    if (atof(data_co2)     < 1600) { color_co2  = GxEPD_BLACK;} else { color_co2  = GxEPD_RED;}
+    // Lines
+    int line1 = 30;
+    int line2 = 90;
+
+    //Abstand
+    int ab_temp = 20;
+    int ab_hum  = 52;
+    int ab_iaq  = 86;
+    int ab_co2  = 115;
+
+    //Limit
+    if ((data_temp.toDouble())    < 26)   { color_temp = GxEPD_BLACK;} else { color_temp = GxEPD_RED;}
+    if ((data_humidity.toDouble())< 70)   { color_hum  = GxEPD_BLACK;} else { color_hum  = GxEPD_RED;}
+    if ((data_airq.toDouble())    < 300)  { color_aiq  = GxEPD_BLACK;} else { color_aiq  = GxEPD_RED;}
+    if ((data_co2.toDouble())     < 1500) { color_co2  = GxEPD_BLACK;} else { color_co2  = GxEPD_RED;}
 
 
     display.fillScreen(GxEPD_WHITE); // set the background to white (fill the buffer with value for white)
     display.setFullWindow();
     display.setCursor(0, 0);
 
-    int line1 = 30;
-    int line2 = 100;
-
-    int ab_temp = 20;
-    int ab_hum  = 52;
-    int ab_iaq  = 86;
-    int ab_co2  = 115;
-
     display.setRotation(1); //0-3
     display.setFont(&Inter_Bold12pt7b); 
 
     display.setTextColor(color_temp);
     display.setCursor(line1, ab_temp);
-    display.print(data_temp); 
+    display.print(before_comma(data_temp)); 
+    display.setFont(&Inter_Bold10pt7b);
+    display.print(".");
+    display.print(after_comma(data_temp)); 
 
+
+    display.setFont(&Inter_Bold12pt7b); 
     display.setTextColor(color_hum);
     display.setCursor(line1, ab_hum );
-    display.print(data_humidity); 
+    display.print(before_comma(data_humidity)); 
+    display.setFont(&Inter_Bold10pt7b);
+    display.print("."); 
+    display.print(after_comma(data_humidity)); 
 
+
+    display.setFont(&Inter_Bold12pt7b); 
     display.setTextColor(color_aiq);
     display.setCursor(line1, ab_iaq );
-    display.print(data_airq);
+    display.print(before_comma(data_airq)); 
+    display.setFont(&Inter_Bold10pt7b);
+    display.print(".");
+    display.print(after_comma(data_airq)); 
 
+
+    display.setFont(&Inter_Bold12pt7b); 
     display.setTextColor(color_co2);
     display.setCursor(line1, ab_co2 + 5);
-    display.print(data_co2);
+    display.print(data_co2); 
 
 
     display.setFont(&Inter_Regular10pt7b);
 
+
     display.setTextColor(color_hum);
     display.setCursor(line2, ab_hum);
-    display.print(name_humi); 
+    display.print(" %"); 
 
     display.setTextColor(color_aiq);
     display.setCursor(line2, ab_iaq);
-    display.print(name_airq); 
+    display.print(" KOhms"); 
 
     display.setTextColor(color_co2);
     display.setCursor(line2, ab_co2+2 );
-    display.print(name_co2);
+    display.print(" ppm");
 
     display.drawInvertedBitmap(line2+5, ab_temp-20, bitmap_grad, 24, 24, color_temp); 
     display.drawInvertedBitmap(0      , ab_temp-20, bitmap_temp, 24, 24, color_temp); 
@@ -460,18 +487,18 @@ void epd(char *epd_name, char *epd_time, char *data_temp, char *data_humidity, c
     display.drawInvertedBitmap(0      , ab_co2 -14, bitmap_CO2 , 24, 24, color_co2); 
 
     display.setRotation(1); //0-3
-    display.setFont(&BabelSans7pt7b); 
+    display.setFont(&BabelSans8pt7b); 
     display.setTextColor(GxEPD_BLACK);
-    display.setCursor(165, 10);
+    display.setCursor(150, 11);
     display.print(epd_time); 
 
-    display.setCursor(165, 25);
+    display.setCursor(150, 28);
     display.print(epd_name); 
 
     display.hibernate();
     display.display(false); 
-    Serial.println("\n  epd updated ??");
 }
+
 
 
 
