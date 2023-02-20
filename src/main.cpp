@@ -1,19 +1,30 @@
 #include <Arduino.h>
+
+//Sensor
 #include "bsec.h"
+#include "Wire.h"
+#include <EEPROM.h>
+
+#include <SoftwareSerial.h>
 #include "MHZ19.h"
 
-#include <EEPROM.h>
+//Wifi
 #include <WiFi.h>
 
+//Web
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
+//LED
 #include <FastLED.h>
 #include <SectionManager.h>
 #include <helpers.h>
 
+//Time
 #include <time.h>
 
+
+//EPD
 #include <GxEPD2_BW.h>
 #include <GxEPD2_3C.h>
 
@@ -24,7 +35,7 @@
 #include "../Font/Inter_Bold12pt7b.h"
 #include "GxEPD2_display_selection_new_style.h"
 
-// own files
+//OWN FILES
 #include "symbol.h" // own symbol
 // please rename credentials_example.h to credentials.h
 #include <credentials.h>
@@ -69,6 +80,11 @@ String deviceName    = "SensorTurtle 1";
 #define PIN_MHZ19B_RX 17
 #define PIN_MHZ19B_TX 16
 #define BAUDRATE 9600
+
+// sensor BME680
+#define PIN_BME680_SDA 21
+#define PIN_BME680_SCL 22
+
 
 // leds
 #define NUM_LEDS 34 //count
