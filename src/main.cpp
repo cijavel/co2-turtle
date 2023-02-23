@@ -79,7 +79,6 @@ String deviceName    = "SensorTurtle 1";
 // sensor MH-Z19B
 #define PIN_MHZ19B_RX 17
 #define PIN_MHZ19B_TX 16
-#define BAUDRATE 9600
 
 // sensor BME680
 #define PIN_BME680_SDA 21
@@ -93,18 +92,21 @@ String deviceName    = "SensorTurtle 1";
 // timezone
 const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
+#define BAUDRATE 9600
+
 // _______________
 // EPD ePaper eINK
 // ---------------
-// BUSY     -> -1			  Violett, 
-// RST      -> -1  		  RX2	Blau, 
-// DC       -> 19  		  TX2	grün, 
-// CS       -> SS(5)		gelb, 
-// CLK      -> SCK (~18)	orange, 
-// DIN /SDI -> MOSI (~23) weiß, 
-// GND      -> GND, 
-// 3.3V     -> 3.3V
+// BUSY 	-> -1			Violett, 
+// RST 		-> -1 		RX2	Blau, 
+// DC 		-> 27  		TX2	grün, 
+// CS 		-> SS(5)		gelb, 
+// CLK 		-> SCK(18)		orange, 
+// DIN /SDI -> MOSI(23) 	weiß, 
+// GND 		-> GND, 
+// 3.3V 	-> 3.3V
 //#define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
+
 
 // _______________
 // LED
@@ -425,7 +427,7 @@ String before_comma(String data){
 
 void epd(String epd_name, String epd_time, String data_temp, String data_humidity, String data_airq, String data_co2  )
 {
-    display.init(9600);
+    display.init(BAUDRATE);
 
     uint16_t color_temp = GxEPD_BLACK;
     uint16_t color_hum = GxEPD_BLACK;
@@ -712,7 +714,7 @@ void setup(void)
 {
   
 
-  Serial.begin(9600);
+  Serial.begin(BAUDRATE);
 
   addLEDsection();
 
