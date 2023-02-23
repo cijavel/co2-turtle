@@ -59,7 +59,7 @@
 // ---------------------------------------------
 // Helper functions declarations
 // ---------------------------------------------
-void checkIaqSensorStatus(void);
+void checkSensorStatusBME(void);
 void errLeds(void);
 void loadState(void);
 void updateState(void);
@@ -197,7 +197,7 @@ String consout                = "";
 
 
 // --------------------------------------------------------------------------
-// IAQ data
+// BME680 data
 // --------------------------------------------------------------------------
 
 
@@ -213,7 +213,7 @@ uint16_t stateUpdateCounter = 0;
 uint32_t lastTime = 0;
 int latest_accuracy = 0;
 
-void checkIaqSensorStatus(void)
+void checkSensorStatusBME(void)
 {
   if (iaqSensor.status != BSEC_OK)
   {
@@ -249,6 +249,46 @@ void checkIaqSensorStatus(void)
 }
 
 
+void setupBME()
+{
+  EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);                         // 1st address for the length
+  Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
+  delay(1000);
+  pinMode(LED_BUILTIN, OUTPUT);
+
+
+  iaqSensor.begin(BME68X_I2C_ADDR_HIGH, Wire);
+  iaqSensor.setTemperatureOffset(4);
+  iaqSensor.setConfig(bsec_config_iaq);
+
+  output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
+  Serial.println(output);
+
+  checkSensorStatusBME();
+  // clearState();
+  loadState();
+
+  bsec_virtual_sensor_t sensorList[13] = {
+    BSEC_OUTPUT_IAQ,
+    BSEC_OUTPUT_STATIC_IAQ,
+    BSEC_OUTPUT_CO2_EQUIVALENT,
+    BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
+    BSEC_OUTPUT_RAW_TEMPERATURE,
+    BSEC_OUTPUT_RAW_PRESSURE,
+    BSEC_OUTPUT_RAW_HUMIDITY,
+    BSEC_OUTPUT_RAW_GAS,
+    BSEC_OUTPUT_STABILIZATION_STATUS,
+    BSEC_OUTPUT_RUN_IN_STATUS,
+    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
+    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
+    BSEC_OUTPUT_GAS_PERCENTAGE
+  };
+
+  iaqSensor.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
+  // iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
+  checkSensorStatusBME();
+
+}
 // --------------------------------------------------------------------------
 // LED Sector Manager
 // --------------------------------------------------------------------------
@@ -406,8 +446,6 @@ String localTime(String format)
   }
   return time;
 }
-
-
 
 
 
@@ -712,9 +750,7 @@ void handle_status(AsyncWebServerRequest *request)
 // Entry point for the example
 void setup(void)
 {
-  
-
-  Serial.begin(BAUDRATE);
+    Serial.begin(BAUDRATE);
 
   addLEDsection();
 
@@ -731,39 +767,18 @@ void setup(void)
 
   server.begin();
 
-  EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);                         // 1st address for the length
+
+
   mySerial.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19B_RX, PIN_MHZ19B_TX); // ESP32 Example
   myMHZ19B.begin(mySerial);                                           // *Important, Pass your Stream reference
   myMHZ19B.autoCalibration(true);                                     // Turn Auto Calibration OFF
-  Wire.begin();
 
-  iaqSensor.begin(0x77, Wire);
-  consout = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix + " \n ");
-  Serial.println(consout);
-  checkIaqSensorStatus();
 
-  iaqSensor.setTemperatureOffset(4);
+  setupBME()
+  
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 
-  iaqSensor.setConfig(bsec_config_iaq);
-  checkIaqSensorStatus();
-  // clearState();
-  loadState();
-
-  bsec_virtual_sensor_t sensorList[10] = {
-      BSEC_OUTPUT_RAW_TEMPERATURE,
-      BSEC_OUTPUT_RAW_PRESSURE,
-      BSEC_OUTPUT_RAW_HUMIDITY,
-      BSEC_OUTPUT_RAW_GAS,
-      BSEC_OUTPUT_IAQ,
-      BSEC_OUTPUT_STATIC_IAQ,
-      BSEC_OUTPUT_CO2_EQUIVALENT,
-      BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
-      BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
-      BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
-  };
-
-  iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
-  checkIaqSensorStatus();
 }
 
 
@@ -1088,7 +1103,7 @@ void loop(void)
   }
   else
   {
-    checkIaqSensorStatus();
+    checkSensorStatusBME();
   }
 }
 
@@ -1115,7 +1130,7 @@ void loadState(void)
     }
 
     iaqSensor.setState(bsecState);
-    checkIaqSensorStatus();
+    checkSensorStatusBME();
   }
   else
   {
@@ -1168,7 +1183,7 @@ void updateState(void)
   if (update)
   {
     iaqSensor.getState(bsecState);
-    checkIaqSensorStatus();
+    checkSensorStatusBME();
     //myMHZ19B.calibrateZero();
     Serial.println("Writing state to EEPROM");
 
