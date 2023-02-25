@@ -197,10 +197,10 @@ String consout                = "";
 
 
 // --------------------------------------------------------------------------
-// BME680 data
+// BME680 sensor
 // --------------------------------------------------------------------------
 
-
+#define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
 const uint8_t bsec_config_iaq[] = {  
   //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
   #include "config/generic_33v_300s_4d/bsec_iaq.txt"
@@ -419,7 +419,6 @@ void WiFiSetup()
 // --------------------------------------------------------------------------
 // time functions
 // --------------------------------------------------------------------------
-
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
