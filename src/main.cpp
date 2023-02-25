@@ -289,6 +289,104 @@ void setupBME()
   checkSensorStatusBME();
 
 }
+
+
+
+// --------------------------------------------------------------------------
+// MH-Z19 sensor Co2
+// --------------------------------------------------------------------------
+void errLeds(void)
+{
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(100);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(100);
+}
+
+void loadState(void)
+{
+  if (EEPROM.read(0) == BSEC_MAX_STATE_BLOB_SIZE)
+  {
+    // Existing state in EEPROM
+    Serial.println("Reading state from EEPROM");
+
+    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
+    {
+      bsecState[i] = EEPROM.read(i + 1);
+      Serial.println(bsecState[i], HEX);
+    }
+
+    iaqSensor.setState(bsecState);
+    checkSensorStatusBME();
+  }
+  else
+  {
+    // Erase the EEPROM with zeroes
+    Serial.println("Erasing EEPROM");
+
+    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE + 1; i++)
+      EEPROM.write(i, 0);
+
+    EEPROM.commit();
+  }
+}
+
+void clearState(void)
+{
+  // Erase the EEPROM with zeroes
+  Serial.println("Erasing EEPROM");
+
+  for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE + 1; i++)
+    EEPROM.write(i, 0);
+
+  EEPROM.commit();
+}
+
+void updateState(void)
+{
+  bool update = false;
+  if (stateUpdateCounter == 0)
+  {
+    /* Set a trigger to save the state. Here, the state is saved every STATE_SAVE_PERIOD with the first state being saved once the algorithm achieves full calibration, i.e. iaqAccuracy = 3 */
+    if (iaqSensor.iaqAccuracy >= 3)
+    {
+      update = true;
+      stateUpdateCounter++;
+    }
+  }
+  else
+  {
+    /* Update every STATE_SAVE_PERIOD milliseconds */
+    if ((stateUpdateCounter * STATE_SAVE_PERIOD) < millis())
+    {
+      if (iaqSensor.iaqAccuracy >= 3)
+      {
+        update = true;
+        stateUpdateCounter++;
+      }
+    }
+  }
+
+  if (update)
+  {
+    iaqSensor.getState(bsecState);
+    checkSensorStatusBME();
+    //myMHZ19B.calibrateZero();
+    Serial.println("Writing state to EEPROM");
+
+    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
+    {
+      EEPROM.write(i + 1, bsecState[i]);
+      Serial.println(bsecState[i], HEX);
+    }
+
+    EEPROM.write(0, BSEC_MAX_STATE_BLOB_SIZE);
+    EEPROM.commit();
+  }
+}
+
+
 // --------------------------------------------------------------------------
 // LED Sector Manager
 // --------------------------------------------------------------------------
@@ -1103,96 +1201,5 @@ void loop(void)
   else
   {
     checkSensorStatusBME();
-  }
-}
-
-void errLeds(void)
-{
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(100);
-}
-
-void loadState(void)
-{
-  if (EEPROM.read(0) == BSEC_MAX_STATE_BLOB_SIZE)
-  {
-    // Existing state in EEPROM
-    Serial.println("Reading state from EEPROM");
-
-    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
-    {
-      bsecState[i] = EEPROM.read(i + 1);
-      Serial.println(bsecState[i], HEX);
-    }
-
-    iaqSensor.setState(bsecState);
-    checkSensorStatusBME();
-  }
-  else
-  {
-    // Erase the EEPROM with zeroes
-    Serial.println("Erasing EEPROM");
-
-    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE + 1; i++)
-      EEPROM.write(i, 0);
-
-    EEPROM.commit();
-  }
-}
-
-void clearState(void)
-{
-  // Erase the EEPROM with zeroes
-  Serial.println("Erasing EEPROM");
-
-  for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE + 1; i++)
-    EEPROM.write(i, 0);
-
-  EEPROM.commit();
-}
-
-void updateState(void)
-{
-  bool update = false;
-  if (stateUpdateCounter == 0)
-  {
-    /* Set a trigger to save the state. Here, the state is saved every STATE_SAVE_PERIOD with the first state being saved once the algorithm achieves full calibration, i.e. iaqAccuracy = 3 */
-    if (iaqSensor.iaqAccuracy >= 3)
-    {
-      update = true;
-      stateUpdateCounter++;
-    }
-  }
-  else
-  {
-    /* Update every STATE_SAVE_PERIOD milliseconds */
-    if ((stateUpdateCounter * STATE_SAVE_PERIOD) < millis())
-    {
-      if (iaqSensor.iaqAccuracy >= 3)
-      {
-        update = true;
-        stateUpdateCounter++;
-      }
-    }
-  }
-
-  if (update)
-  {
-    iaqSensor.getState(bsecState);
-    checkSensorStatusBME();
-    //myMHZ19B.calibrateZero();
-    Serial.println("Writing state to EEPROM");
-
-    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
-    {
-      EEPROM.write(i + 1, bsecState[i]);
-      Serial.println(bsecState[i], HEX);
-    }
-
-    EEPROM.write(0, BSEC_MAX_STATE_BLOB_SIZE);
-    EEPROM.commit();
   }
 }
