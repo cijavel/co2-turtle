@@ -135,16 +135,6 @@ const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 // --------------------------------------------------------------------------
 // sensor data
 // --------------------------------------------------------------------------
-
-
-HardwareSerial mySerial(1);
-//save calibration data
-#define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
-MHZ19 myMHZ19B; // Co2 sensor
-
-
-
-
 const String name_timestamp         = "Timestamp [ms]";
 const String name_rawtemperatur     = "raw temperature [°C]";
 const String name_pressure          = "pressure [hPa]";
@@ -200,6 +190,7 @@ String consout                = "";
 // BME680 sensor
 // --------------------------------------------------------------------------
 
+//save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
 const uint8_t bsec_config_iaq[] = {  
   //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
@@ -295,6 +286,33 @@ void setupBME()
 // --------------------------------------------------------------------------
 // MH-Z19 sensor Co2
 // --------------------------------------------------------------------------
+MHZ19 myMHZ19;
+SoftwareSerial Serial_MHZ19(PIN_MHZ19B_RX, PIN_MHZ19B_TX);
+unsigned long getDataTimer = 0;
+void setRange(int range);
+
+void co2setup(){
+
+    Serial_MHZ19.begin(BAUDRATE);                                // Uno Example: Begin Stream with MHZ19 baudrate
+    myMHZ19.begin(Serial_MHZ19);                                 // *Important, Pass your Stream reference
+
+    delay(200);
+
+    myMHZ19.autoCalibration(true);
+    Serial.print("ABC Status: "); myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
+
+    char myVersion[4];
+    myMHZ19.getVersion(myVersion);
+    
+    Serial.print("Range: ");
+    Serial.println(myMHZ19.getRange());
+
+    //Serial.println("Calibrating..");
+    //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm
+    Serial.println("");
+}
+
+
 void errLeds(void)
 {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -372,7 +390,7 @@ void updateState(void)
   {
     iaqSensor.getState(bsecState);
     checkSensorStatusBME();
-    //myMHZ19B.calibrateZero();
+    //myMHZ19.calibrateZero();
     Serial.println("Writing state to EEPROM");
 
     for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
@@ -864,14 +882,9 @@ void setup(void)
 
   server.begin();
 
+  co2setup();
 
-
-  mySerial.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19B_RX, PIN_MHZ19B_TX); // ESP32 Example
-  myMHZ19B.begin(mySerial);                                           // *Important, Pass your Stream reference
-  myMHZ19B.autoCalibration(true);                                     // Turn Auto Calibration OFF
-
-
-  setupBME()
+  setupBME();
   
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
@@ -919,7 +932,7 @@ void loop(void)
 		data_iaqstatic           = String(iaqSensor.staticIaq);
 		data_co2equil            = String(iaqSensor.co2Equivalent);
 		data_breahtvoc           = String(iaqSensor.breathVocEquivalent);
-    data_MHZ19B_co2          = String(myMHZ19B.getCO2());
+    data_MHZ19B_co2          = String(myMHZ19.getCO2());
     data_date                = localTime("%Y-%m-%d");
     data_time                = localTime("%H:%M:%S");
     data_zone                = localTime("%Z %z");
@@ -1131,7 +1144,7 @@ void loop(void)
 
 
 
-    int MHZ19CO2 = myMHZ19B.getCO2();
+    int MHZ19CO2 = myMHZ19.getCO2();
     int checkCO2 = MHZ19CO2;
     
     if (MHZ19CO2 == 0)
