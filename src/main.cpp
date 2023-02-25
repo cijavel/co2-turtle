@@ -28,11 +28,12 @@
 #include <GxEPD2_BW.h>
 #include <GxEPD2_3C.h>
 
-#include "../Font/BabelSans7pt7b.h"
+#include "../Font/BabelSans8pt7b.h"
 #include "../Font/Inter_Regular12pt7b.h"
 #include "../Font/Inter_Regular11pt7b.h"
 #include "../Font/Inter_Regular10pt7b.h"
 #include "../Font/Inter_Bold12pt7b.h"
+#include "../Font/Inter_Bold10pt7b.h"
 #include "GxEPD2_display_selection_new_style.h"
 
 //OWN FILES
@@ -183,8 +184,8 @@ String descr_iaq              = "";
 String descr_MHZ19B_co2       = "";
 
 String header_data            = "";
-String consout                = "";
 
+String consout                = "";
 
 // --------------------------------------------------------------------------
 // BME680 sensor
@@ -192,10 +193,6 @@ String consout                = "";
 
 //save calibration data
 #define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
-const uint8_t bsec_config_iaq[] = {  
-  //#include "config/generic_33v_300s_28d/bsec_iaq.txt"
-  #include "config/generic_33v_300s_4d/bsec_iaq.txt"
-};
 // Create an object of the class Bsec
 Bsec iaqSensor;
 uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
@@ -252,8 +249,8 @@ void setupBME()
   iaqSensor.setTemperatureOffset(4);
   iaqSensor.setConfig(bsec_config_iaq);
 
-  output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
-  Serial.println(output);
+  consout = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
+  Serial.println(consout);
 
   checkSensorStatusBME();
   // clearState();
