@@ -60,7 +60,7 @@
 // ---------------------------------------------
 // Helper functions declarations
 // ---------------------------------------------
-void checkSensorStatusBME(void);
+void checkIaqSensorStatus(void);
 void errLeds(void);
 void loadState(void);
 void updateState(void);
@@ -84,7 +84,6 @@ String deviceName    = "SensorTurtle 1";
 // sensor BME680
 #define PIN_BME680_SDA 21
 #define PIN_BME680_SCL 22
-
 
 // leds
 #define NUM_LEDS 34 //count
@@ -201,58 +200,50 @@ uint16_t stateUpdateCounter = 0;
 uint32_t lastTime = 0;
 int latest_accuracy = 0;
 
-void checkSensorStatusBME(void)
+
+void checkIaqSensorStatus(void)
 {
-  if (iaqSensor.status != BSEC_OK)
-  {
-    if (iaqSensor.status < BSEC_OK)
-    {
-      consout = "BSEC error code : " + String(iaqSensor.status);
+  if (iaqSensor.bsecStatus != BSEC_OK) {
+    if (iaqSensor.bsecStatus < BSEC_OK) {
+      consout = "BSEC error code : " + String(iaqSensor.bsecStatus);
       Serial.println(consout);
       for (;;)
         errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      consout = "BSEC warning code : " + String(iaqSensor.status);
+    } else {
+      consout = "BSEC warning code : " + String(iaqSensor.bsecStatus);
       Serial.println(consout);
     }
   }
 
-  if (iaqSensor.bme680Status != BME680_OK)
-  {
-    if (iaqSensor.bme680Status < BME680_OK)
-    {
-      consout = "BME680 error code : " + String(iaqSensor.bme680Status);
+  if (iaqSensor.bme68xStatus != BME68X_OK) {
+    if (iaqSensor.bme68xStatus < BME68X_OK) {
+      consout = "BME68X error code : " + String(iaqSensor.bme68xStatus);
       Serial.println(consout);
       for (;;)
         errLeds(); /* Halt in case of failure */
-    }
-    else
-    {
-      consout = "BME680 warning code : " + String(iaqSensor.bme680Status);
+    } else {
+      consout = "BME68X warning code : " + String(iaqSensor.bme68xStatus);
       Serial.println(consout);
     }
   }
 }
 
 
+
 void setupBME()
 {
   EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1);                         // 1st address for the length
   Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
-  delay(1000);
   pinMode(LED_BUILTIN, OUTPUT);
 
 
   iaqSensor.begin(BME68X_I2C_ADDR_HIGH, Wire);
   iaqSensor.setTemperatureOffset(4);
-  iaqSensor.setConfig(bsec_config_iaq);
 
   consout = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
   Serial.println(consout);
 
-  checkSensorStatusBME();
+  checkIaqSensorStatus();
   // clearState();
   loadState();
 
@@ -274,7 +265,7 @@ void setupBME()
 
   iaqSensor.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
   // iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_ULP);
-  checkSensorStatusBME();
+  checkIaqSensorStatus();
 
 }
 
@@ -314,9 +305,9 @@ void errLeds(void)
 {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
+  delay(500);
   digitalWrite(LED_BUILTIN, LOW);
-  delay(100);
+  delay(500);
 }
 
 void loadState(void)
@@ -333,7 +324,7 @@ void loadState(void)
     }
 
     iaqSensor.setState(bsecState);
-    checkSensorStatusBME();
+    checkIaqSensorStatus();
   }
   else
   {
@@ -386,7 +377,7 @@ void updateState(void)
   if (update)
   {
     iaqSensor.getState(bsecState);
-    checkSensorStatusBME();
+    checkIaqSensorStatus();
     //myMHZ19.calibrateZero();
     Serial.println("Writing state to EEPROM");
 
@@ -529,6 +520,8 @@ void WiFiSetup()
 }
 
 
+
+
 // --------------------------------------------------------------------------
 // time functions
 // --------------------------------------------------------------------------
@@ -567,9 +560,12 @@ String localTime(String format)
 String after_comma(String data){
   int a = data.toDouble();
   int b = (data.toDouble() - a) * 100;
-  return String(b);
+  String sb = String(b);
+  if (b < 10) {
+    sb += "0";
+  }
+  return sb;
 }
-
 String before_comma(String data){
   int a = data.toDouble();
   return String(a);
@@ -1205,11 +1201,14 @@ void loop(void)
         descr_MHZ19B_co2 = "Warning. Tiredness, headache. please ventilate urgently.";
       }
     }
+    
+    
+    
     FastLED.setBrightness(50);
     FastLED.show();
   }
   else
   {
-    checkSensorStatusBME();
+    checkIaqSensorStatus();
   }
 }
