@@ -117,12 +117,8 @@ String data_bme680_zone                = "";
 // ---------------------------------------------
 // Helper functions declarations
 // ---------------------------------------------
-void checkIaqSensorStatus(void);
-void errLeds(void);
-void loadState(void);
-
-
-
+void BMEcheckIaqSensorStatus(void);
+void BMEerrLeds(void);
 
 
 // --------------------------------------------------------------------------
@@ -136,13 +132,13 @@ Bsec iaqSensor;
 uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
 uint16_t stateUpdateCounter = 0;
 
-void checkIaqSensorStatus(void){
+void BMEcheckIaqSensorStatus(void){
   if (iaqSensor.bsecStatus != BSEC_OK) {
     if (iaqSensor.bsecStatus < BSEC_OK) {
       consolOUT = "BSEC error code : " + String(iaqSensor.bsecStatus);
       Serial.println(consolOUT);
       for (;;)
-        errLeds(); /* Halt in case of failure */
+        BMEerrLeds(); /* Halt in case of failure */
     } else {
       consolOUT = "BSEC warning code : " + String(iaqSensor.bsecStatus);
       Serial.println(consolOUT);
@@ -154,7 +150,7 @@ void checkIaqSensorStatus(void){
       consolOUT = "BME68X error code : " + String(iaqSensor.bme68xStatus);
       Serial.println(consolOUT);
       for (;;)
-        errLeds(); /* Halt in case of failure */
+        BMEerrLeds(); /* Halt in case of failure */
     } else {
       consolOUT = "BME68X warning code : " + String(iaqSensor.bme68xStatus);
       Serial.println(consolOUT);
@@ -162,7 +158,7 @@ void checkIaqSensorStatus(void){
   }
 }
 
-void errLeds(void){
+void BMEerrLeds(void){
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
@@ -180,7 +176,7 @@ void BMEsetup(){
   iaqSensor.begin(BME68X_I2C_ADDR_HIGH, Wire);
   consolOUT = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
   Serial.println(consolOUT);
-  checkIaqSensorStatus();
+  BMEcheckIaqSensorStatus();
 
   bsec_virtual_sensor_t sensorList[13] = {
     BSEC_OUTPUT_IAQ,
@@ -199,7 +195,7 @@ void BMEsetup(){
   };
 
   iaqSensor.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
-  checkIaqSensorStatus();
+  BMEcheckIaqSensorStatus();
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
@@ -225,7 +221,7 @@ void BMEsetValues(){
     data_bme680_percentage          = String(iaqSensor.gasPercentage);
     digitalWrite(LED_BUILTIN, LOW);
   } else {
-    checkIaqSensorStatus();
+    BMEcheckIaqSensorStatus();
   }
 }
 
