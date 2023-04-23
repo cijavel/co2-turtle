@@ -40,7 +40,8 @@
 //Sensor
 #include "bsec.h"
 
-
+#include <SoftwareSerial.h>
+#include "MHZ19.h"
 
 // ---------------------------------------------
 // Configuration
@@ -54,7 +55,9 @@ String consolOUT;
 #define PIN_BME680_SDA 21
 #define PIN_BME680_SCL 22
 
-
+// sensor MH-Z19B
+#define PIN_MHZ19_RX 17
+#define PIN_MHZ19_TX 16
 
 // ---------------------------------------------
 // Declaration
@@ -63,13 +66,15 @@ String consolOUT;
 
 // Timer
 const long interval_BME680 = 15000;
+const long interval_MHZ19  = 30000;
 
 
 unsigned long prevtimer_BME680 = 0;
+unsigned long prevtimer_MHZ19  = 0;
 
 
 unsigned long currtimer_BME680 = 0;
-
+unsigned long currtimer_MHZ19  = 0;
 
 // --------------------------------------------------------------------------
 // sensor data
@@ -94,6 +99,22 @@ const String name_bme680_date                = "BME680 Date";
 const String name_bme680_time                = "BME680 Time";
 const String name_bme680_zone                = "BME680 Timezone";
 
+const String name_MHZ19_co2               = "MHZ19 CO2 [ppm]";
+const String name_MHZ19_co2_raw           = "MHZ19 CO2 raw [ppm]";
+const String name_MHZ19_co2_unlimited     = "MHZ19 unlimited";
+const String name_MHZ19_co2_limited       = "MHZ19 limited";
+const String name_MHZ19_co2_background    = "MHZ19 Background";
+const String name_MHZ19_co2_tempAdjust    = "MHZ19 Temperature Adjust";
+const String name_MHZ19_co2_temperatur    = "MHZ19 Temperature [C]";
+const String name_MHZ19_co2_Accuracy      = "MHZ19 Accuracy";
+const String name_MHZ19_timestamp         = "MHZ19 Timestamp [ms]";
+const String name_MHZ19_datetime          = "MHZ19 Date and Time";
+const String name_MHZ19_date              = "MHZ19 Date";
+const String name_MHZ19_time              = "MHZ19 Time";
+const String name_MHZ19_zone              = "MHZ19 Timezone";
+
+
+
 String data_bme680_timestamp           = "";
 String data_bme680_iaq                 = "";
 String data_bme680_iaq_accuracy        = "";
@@ -113,6 +134,18 @@ String data_bme680_date                = "";
 String data_bme680_time                = "";
 String data_bme680_zone                = "";
 
+String data_MHZ19_timestamp        = "";
+String data_MHZ19_co2              = "";
+String data_MHZ19_co2_raw          = "";
+String data_MHZ19_co2_unlimited    = "";
+String data_MHZ19_co2_limited      = "";
+String data_MHZ19_co2_background   = "";
+String data_MHZ19_co2_tempAdjust   = "";
+String data_MHZ19_co2_temperatur   = "";
+String data_MHZ19_co2_Accuracy     = "";
+String data_MHZ19_date             = "";
+String data_MHZ19_time             = "";
+String data_MHZ19_zone             = "";
 
 // ---------------------------------------------
 // Helper functions declarations
@@ -249,6 +282,78 @@ void BMEprintout(){
 
 
 // --------------------------------------------------------------------------
+// MH-Z19 sensor Co2
+// --------------------------------------------------------------------------
+MHZ19 myMHZ19;
+SoftwareSerial Serial_MHZ19(PIN_MHZ19_RX, PIN_MHZ19_TX);
+unsigned long getDataTimer = 0;
+void setRange(int range);
+
+void MHZ19setup(){
+
+    Serial_MHZ19.begin(BAUDRATE);                                // Uno Example: Begin Stream with MHZ19 baudrate
+    myMHZ19.begin(Serial_MHZ19);                                 // *Important, Pass your Stream reference
+
+    delay(200);
+    //myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
+
+    myMHZ19.autoCalibration(true);
+    Serial.print("ABC Status: "); myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
+
+    char myVersion[4];
+    myMHZ19.getVersion(myVersion);
+    
+    Serial.print("Range: ");
+    Serial.println(myMHZ19.getRange());
+
+    //Serial.println("Calibrating..");
+    //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
+
+    myMHZ19.verify();
+
+    Serial.println("");
+}
+
+
+
+void MHZ19setValues(){
+    if(myMHZ19.errorCode == RESULT_OK)
+    {
+      data_MHZ19_timestamp      = String(millis()); 
+      data_MHZ19_co2            = String(myMHZ19.getCO2());
+      data_MHZ19_co2_raw        = String(myMHZ19.getCO2Raw());
+      data_MHZ19_co2_unlimited  = String(myMHZ19.getCO2(true, true));
+      data_MHZ19_co2_limited    = String(myMHZ19.getCO2(false, true));
+      data_MHZ19_co2_background = String(myMHZ19.getBackgroundCO2());
+      data_MHZ19_co2_tempAdjust = String(myMHZ19.getTempAdjustment());
+      data_MHZ19_co2_Accuracy   = String(myMHZ19.getAccuracy());
+      data_MHZ19_co2_temperatur = String(myMHZ19.getTemperature());
+    }
+    else
+    {
+      Serial.println("Failed to recieve CO2 value - Error");
+      Serial.print("Response Code: ");
+      Serial.println(myMHZ19.errorCode);          // Get the Error Code value
+    }
+
+}
+
+
+void MHZ19printout(){
+  consolOUT = "MHZ19: \n";
+  consolOUT += name_MHZ19_timestamp             + ":     "            + data_MHZ19_timestamp          + ", \n";
+  consolOUT += name_MHZ19_co2                   + ":          "       + data_MHZ19_co2                + ", \n";   
+  consolOUT += name_MHZ19_co2_unlimited         + ":          "            + data_MHZ19_co2_unlimited           + ", \n";
+  consolOUT += name_MHZ19_co2_limited           + ":            "             + data_MHZ19_co2_limited           + ", \n"; 
+  consolOUT += name_MHZ19_co2_background        + ":         "         + data_MHZ19_co2_background         + ", \n";
+  consolOUT += name_MHZ19_co2_tempAdjust        + ": "           + data_MHZ19_co2_tempAdjust        + ", \n";
+  consolOUT += name_MHZ19_co2_Accuracy          + ":           "            + data_MHZ19_co2_Accuracy         + ", \n";
+  Serial.println(consolOUT);
+  consolOUT = "";
+}
+
+
+// --------------------------------------------------------------------------
 // MAIN
 // --------------------------------------------------------------------------
 void setup()
@@ -258,6 +363,7 @@ void setup()
   Serial.println();
 
   BMEsetup();
+  MHZ19setup();
 }
 
 
@@ -271,7 +377,13 @@ void loop() {
     BMEprintout();
     prevtimer_BME680 = currtimer_BME680;
   }
-
+  // MHZ19
+  currtimer_MHZ19 = millis();
+  if (currtimer_MHZ19 - prevtimer_MHZ19 >= interval_MHZ19){
+    MHZ19setValues();
+    MHZ19printout();
+    prevtimer_MHZ19 = currtimer_MHZ19;
+  }
 
 
 }
