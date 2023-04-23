@@ -192,24 +192,24 @@ uint16_t stateUpdateCounter = 0;
 void BMEcheckIaqSensorStatus(void){
   if (iaqSensor.bsecStatus != BSEC_OK) {
     if (iaqSensor.bsecStatus < BSEC_OK) {
-      consolOUT = "BSEC error code : " + String(iaqSensor.bsecStatus);
+      consolOUT = "BME: BSEC error code : " + String(iaqSensor.bsecStatus);
       Serial.println(consolOUT);
       for (;;)
         BMEerrLeds(); /* Halt in case of failure */
     } else {
-      consolOUT = "BSEC warning code : " + String(iaqSensor.bsecStatus);
+      consolOUT = "BME: BSEC warning code : " + String(iaqSensor.bsecStatus);
       Serial.println(consolOUT);
     }
   }
 
   if (iaqSensor.bme68xStatus != BME68X_OK) {
     if (iaqSensor.bme68xStatus < BME68X_OK) {
-      consolOUT = "BME68X error code : " + String(iaqSensor.bme68xStatus);
+      consolOUT = "BME: BME68X error code : " + String(iaqSensor.bme68xStatus);
       Serial.println(consolOUT);
       for (;;)
         BMEerrLeds(); /* Halt in case of failure */
     } else {
-      consolOUT = "BME68X warning code : " + String(iaqSensor.bme68xStatus);
+      consolOUT = "BME: BME68X warning code : " + String(iaqSensor.bme68xStatus);
       Serial.println(consolOUT);
     }
   }
@@ -231,7 +231,7 @@ void BMEsetup(){
 
   // WICHTIG
   iaqSensor.begin(BME68X_I2C_ADDR_HIGH, Wire);
-  consolOUT = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
+  consolOUT = "\nBME: BSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
   Serial.println(consolOUT);
   BMEcheckIaqSensorStatus();
 
@@ -322,15 +322,15 @@ void MHZ19setup(){
     //myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
 
     myMHZ19.autoCalibration(true);
-    Serial.print("ABC Status: "); myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
+    Serial.print("MHZ19: ABC Status: "); myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
 
     char myVersion[4];
     myMHZ19.getVersion(myVersion);
     
-    Serial.print("Range: ");
+    Serial.print("MHZ19: Range: ");
     Serial.println(myMHZ19.getRange());
 
-    //Serial.println("Calibrating..");
+    //Serial.println(""MHZ19: Calibrating..");
     //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
 
     myMHZ19.verify();
@@ -368,7 +368,7 @@ void MHZ19printout(){
   consolOUT += name_MHZ19_co2_limited     + ":            "+ data_MHZ19_co2_limited   + ", \n"; 
   consolOUT += name_MHZ19_co2_background  + ":         "   + data_MHZ19_co2_background+ ", \n";
   consolOUT += name_MHZ19_co2_tempAdjust  + ": "           + data_MHZ19_co2_tempAdjust+ ", \n";
-  consolOUT += name_MHZ19_co2_temperatur  + ": "           + data_MHZ19_co2_temperatur+ ", \n";
+  consolOUT += name_MHZ19_co2_temperatur  + ":    "           + data_MHZ19_co2_temperatur+ ", \n";
   consolOUT += name_MHZ19_co2_Accuracy    + ":           " + data_MHZ19_co2_Accuracy  + ", \n";
   Serial.println(consolOUT);
   consolOUT = "";
@@ -393,7 +393,6 @@ void WiFiReStart()
     while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
     {
       delay(250);
-      Serial.print(".");
       wifiWaitCount++;
     }
     if (WiFi.status() == WL_CONNECTED)
@@ -417,8 +416,7 @@ void WiFisetup()
 
   while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
   {
-    delay(800);
-    Serial.print(".");
+    delay(250);
     wifiWaitCount++;
   }
 
