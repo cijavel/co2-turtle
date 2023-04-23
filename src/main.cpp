@@ -46,7 +46,8 @@
 //Wifi
 #include <WiFi.h>
 
-
+//Time
+#include <time.h>
 
 //OWN FILES
 // please rename credentials_example.h to credentials.h
@@ -74,6 +75,8 @@ const char *ssid     = WIFI_SSID;
 const char *password = WIFI_PW;
 String deviceName    = "SensorTurtle 1";
 
+// timezone
+const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
 
 // ---------------------------------------------
@@ -82,9 +85,9 @@ String deviceName    = "SensorTurtle 1";
 
 
 // Timer
-const long interval_BME680 = 15000;
+const long interval_BME680 = 30000;
 const long interval_MHZ19  = 30000;
-const long interval_WIFI   = 60000*10;
+const long interval_WIFI   = 60000*1;
 
 
 unsigned long prevtimer_BME680 = 0;
@@ -157,6 +160,7 @@ String data_bme680_percentage          = "";
 String data_bme680_date                = "";
 String data_bme680_time                = "";
 String data_bme680_zone                = "";
+String data_bme680_datetime            = "";
 
 String data_MHZ19_timestamp        = "";
 String data_MHZ19_co2              = "";
@@ -170,12 +174,44 @@ String data_MHZ19_co2_Accuracy     = "";
 String data_MHZ19_date             = "";
 String data_MHZ19_time             = "";
 String data_MHZ19_zone             = "";
+String data_MHZ19_datetime         = "";
 
 // ---------------------------------------------
 // Helper functions declarations
 // ---------------------------------------------
 void BMEcheckIaqSensorStatus(void);
 void BMEerrLeds(void);
+
+
+// --------------------------------------------------------------------------
+// time functions
+// --------------------------------------------------------------------------
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 0;
+const int   daylightOffset_sec = 3600;
+
+
+String localTime(String format)
+{
+
+  struct tm timeinfo;
+  
+  String time = "";
+  char toutp[60];
+  // Serial.printf("  Set Timezone to %s\n",timezone.c_str());
+  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  tzset();
+
+  if(!getLocalTime(&timeinfo))
+  {
+    time = "TIME: Failed to obtain";
+  }
+  else{
+    strftime(toutp, sizeof(toutp), format.c_str(), &timeinfo);
+    time = String(toutp);
+  }
+  return time;
+}
 
 
 // --------------------------------------------------------------------------
@@ -262,6 +298,10 @@ void BMEsetValues(){
   if (iaqSensor.run()) { // If new data is available
     digitalWrite(LED_BUILTIN, HIGH);
     data_bme680_timestamp           = String(millis());
+    data_bme680_datetime            = localTime("%Y.%m.%d %H:%M");
+    data_bme680_date                = localTime("%Y.%m.%d");
+    data_bme680_time                = localTime("%H:%M");
+    data_bme680_zone                = localTime("%Z %z");
     data_bme680_iaq                 = String(iaqSensor.iaq);
     data_bme680_iaq_accuracy        = String(iaqSensor.iaqAccuracy);
     data_bme680_iaq_static          = String(iaqSensor.staticIaq);
@@ -285,6 +325,7 @@ void BMEsetValues(){
 void BMEprintout(){
   consolOUT = "BME680: \n";
   consolOUT += name_bme680_timestamp            + ":     "            + data_bme680_timestamp          + ", \n";
+  consolOUT += name_bme680_datetime             + ":      "           + data_bme680_datetime           + ", \n"; 
   consolOUT += name_bme680_iaq                  + ":                " + data_bme680_iaq                + ", \n"; 
   consolOUT += name_bme680_iaq_accuracy         + ":       "          + data_bme680_iaq_accuracy       + ", \n"; 
   consolOUT += name_bme680_iaq_static           + ":         "        + data_bme680_iaq_static         + ", \n"; 
@@ -342,6 +383,10 @@ void MHZ19setValues(){
     if(myMHZ19.errorCode == RESULT_OK)
     {
       data_MHZ19_timestamp      = String(millis()); 
+      data_MHZ19_datetime       = localTime("%Y.%m.%d %H:%M");
+      data_MHZ19_date           = localTime("%Y.%m.%d");
+      data_MHZ19_time           = localTime("%H:%M");
+      data_MHZ19_zone           = localTime("%Z %z");
       data_MHZ19_co2            = String(myMHZ19.getCO2());
       data_MHZ19_co2_raw        = String(myMHZ19.getCO2Raw());
       data_MHZ19_co2_unlimited  = String(myMHZ19.getCO2(true, true));
@@ -363,12 +408,13 @@ void MHZ19setValues(){
 void MHZ19printout(){
   consolOUT = "MHZ19: \n";
   consolOUT += name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     + ", \n";
+  consolOUT += name_MHZ19_datetime        + ":      "      + data_MHZ19_datetime      + ", \n";
   consolOUT += name_MHZ19_co2             + ":          "  + data_MHZ19_co2           + ", \n";   
   consolOUT += name_MHZ19_co2_unlimited   + ":          "  + data_MHZ19_co2_unlimited + ", \n";
   consolOUT += name_MHZ19_co2_limited     + ":            "+ data_MHZ19_co2_limited   + ", \n"; 
   consolOUT += name_MHZ19_co2_background  + ":         "   + data_MHZ19_co2_background+ ", \n";
   consolOUT += name_MHZ19_co2_tempAdjust  + ": "           + data_MHZ19_co2_tempAdjust+ ", \n";
-  consolOUT += name_MHZ19_co2_temperatur  + ":    "           + data_MHZ19_co2_temperatur+ ", \n";
+  consolOUT += name_MHZ19_co2_temperatur  + ":    "        + data_MHZ19_co2_temperatur+ ", \n";
   consolOUT += name_MHZ19_co2_Accuracy    + ":           " + data_MHZ19_co2_Accuracy  + ", \n";
   Serial.println(consolOUT);
   consolOUT = "";
@@ -446,7 +492,6 @@ void WiFiStatusCheck()
 
 
 
-
 // --------------------------------------------------------------------------
 // MAIN
 // --------------------------------------------------------------------------
@@ -459,6 +504,8 @@ void setup()
   WiFisetup();
   BMEsetup();
   MHZ19setup();
+
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
 
