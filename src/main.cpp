@@ -368,6 +368,7 @@ void MHZ19printout(){
   consolOUT += name_MHZ19_co2_limited     + ":            "+ data_MHZ19_co2_limited   + ", \n"; 
   consolOUT += name_MHZ19_co2_background  + ":         "   + data_MHZ19_co2_background+ ", \n";
   consolOUT += name_MHZ19_co2_tempAdjust  + ": "           + data_MHZ19_co2_tempAdjust+ ", \n";
+  consolOUT += name_MHZ19_co2_temperatur  + ": "           + data_MHZ19_co2_temperatur+ ", \n";
   consolOUT += name_MHZ19_co2_Accuracy    + ":           " + data_MHZ19_co2_Accuracy  + ", \n";
   Serial.println(consolOUT);
   consolOUT = "";
