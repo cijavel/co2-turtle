@@ -43,6 +43,15 @@
 #include <SoftwareSerial.h>
 #include "MHZ19.h"
 
+//Wifi
+#include <WiFi.h>
+
+
+
+//OWN FILES
+// please rename credentials_example.h to credentials.h
+#include <credentials.h>
+
 // ---------------------------------------------
 // Configuration
 // ---------------------------------------------
@@ -59,6 +68,14 @@ String consolOUT;
 #define PIN_MHZ19_RX 17
 #define PIN_MHZ19_TX 16
 
+
+// WLAN
+const char *ssid     = WIFI_SSID;
+const char *password = WIFI_PW;
+String deviceName    = "SensorTurtle 1";
+
+
+
 // ---------------------------------------------
 // Declaration
 // ---------------------------------------------
@@ -67,14 +84,21 @@ String consolOUT;
 // Timer
 const long interval_BME680 = 15000;
 const long interval_MHZ19  = 30000;
+const long interval_WIFI   = 60000*10;
 
 
 unsigned long prevtimer_BME680 = 0;
 unsigned long prevtimer_MHZ19  = 0;
+unsigned long prevtimer_WIFI   = 0;
+
+
 
 
 unsigned long currtimer_BME680 = 0;
 unsigned long currtimer_MHZ19  = 0;
+unsigned long currtimer_WIFI   = 0;
+
+
 
 // --------------------------------------------------------------------------
 // sensor data
@@ -314,8 +338,6 @@ void MHZ19setup(){
     Serial.println("");
 }
 
-
-
 void MHZ19setValues(){
     if(myMHZ19.errorCode == RESULT_OK)
     {
@@ -338,19 +360,92 @@ void MHZ19setValues(){
 
 }
 
-
 void MHZ19printout(){
   consolOUT = "MHZ19: \n";
-  consolOUT += name_MHZ19_timestamp             + ":     "            + data_MHZ19_timestamp          + ", \n";
-  consolOUT += name_MHZ19_co2                   + ":          "       + data_MHZ19_co2                + ", \n";   
-  consolOUT += name_MHZ19_co2_unlimited         + ":          "            + data_MHZ19_co2_unlimited           + ", \n";
-  consolOUT += name_MHZ19_co2_limited           + ":            "             + data_MHZ19_co2_limited           + ", \n"; 
-  consolOUT += name_MHZ19_co2_background        + ":         "         + data_MHZ19_co2_background         + ", \n";
-  consolOUT += name_MHZ19_co2_tempAdjust        + ": "           + data_MHZ19_co2_tempAdjust        + ", \n";
-  consolOUT += name_MHZ19_co2_Accuracy          + ":           "            + data_MHZ19_co2_Accuracy         + ", \n";
+  consolOUT += name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     + ", \n";
+  consolOUT += name_MHZ19_co2             + ":          "  + data_MHZ19_co2           + ", \n";   
+  consolOUT += name_MHZ19_co2_unlimited   + ":          "  + data_MHZ19_co2_unlimited + ", \n";
+  consolOUT += name_MHZ19_co2_limited     + ":            "+ data_MHZ19_co2_limited   + ", \n"; 
+  consolOUT += name_MHZ19_co2_background  + ":         "   + data_MHZ19_co2_background+ ", \n";
+  consolOUT += name_MHZ19_co2_tempAdjust  + ": "           + data_MHZ19_co2_tempAdjust+ ", \n";
+  consolOUT += name_MHZ19_co2_Accuracy    + ":           " + data_MHZ19_co2_Accuracy  + ", \n";
   Serial.println(consolOUT);
   consolOUT = "";
 }
+
+
+// --------------------------------------------------------------------------
+// WLAN functions
+// --------------------------------------------------------------------------
+
+void WiFiReStart()
+{
+  if (*ssid)
+  {
+    // Connect to WiFi network
+    Serial.println();
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+
+    WiFi.begin(ssid, password);
+    int wifiWaitCount = 0;
+    while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+    {
+      delay(250);
+      Serial.print(".");
+      wifiWaitCount++;
+    }
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      Serial.println("");
+      Serial.println("WiFi connected");
+
+      // Print the IP address
+      Serial.println(WiFi.localIP());
+    }
+  }
+}
+
+void WiFisetup()
+{
+  int wifiWaitCount = 0;
+  WiFi.setHostname(deviceName.c_str());
+  Serial.print("\nWIFI: Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
+  {
+    delay(800);
+    Serial.print(".");
+    wifiWaitCount++;
+  }
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println("WIFI: connected.");
+    Serial.print("WIFI: IP address: ");
+    Serial.println(WiFi.localIP());
+  }
+  else
+  {
+    Serial.println("WIFI: not connected");
+  }
+}
+
+void WiFiStatusCheck()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    WiFiReStart();
+  }
+  else
+  {
+    Serial.println("WIFI: Still connected");
+  }
+}
+
+
 
 
 // --------------------------------------------------------------------------
@@ -362,6 +457,7 @@ void setup()
   Serial.begin(BAUDRATE);
   Serial.println();
 
+  WiFisetup();
   BMEsetup();
   MHZ19setup();
 }
@@ -377,6 +473,7 @@ void loop() {
     BMEprintout();
     prevtimer_BME680 = currtimer_BME680;
   }
+
   // MHZ19
   currtimer_MHZ19 = millis();
   if (currtimer_MHZ19 - prevtimer_MHZ19 >= interval_MHZ19){
@@ -385,5 +482,11 @@ void loop() {
     prevtimer_MHZ19 = currtimer_MHZ19;
   }
 
+  // WiFi
+  currtimer_WIFI = millis();
+  if (currtimer_WIFI - prevtimer_WIFI >= interval_WIFI){
+    WiFiStatusCheck();
+    prevtimer_WIFI = currtimer_WIFI;
+  }
 
 }
