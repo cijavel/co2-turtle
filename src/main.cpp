@@ -106,25 +106,25 @@ const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
 
 // Timer
-const long interval_BME680 = 30000;
-const long interval_MHZ19  = 30000;
+const long interval_BME680 = 60000*0.5;
+const long interval_MHZ19  = 60000*0.5;
 const long interval_WIFI   = 60000*1;
 const long interval_EPD    = 60000*3;
-
+const long interval_RAM    = 60000*0.5;
 
 
 unsigned long prevtimer_BME680 = 0;
 unsigned long prevtimer_MHZ19  = 0;
 unsigned long prevtimer_WIFI   = 0;
 unsigned long prevtimer_EPD    = 0;
-
+unsigned long prevtimer_RAM    = 0;
 
 
 unsigned long currtimer_BME680 = 0;
 unsigned long currtimer_MHZ19  = 0;
 unsigned long currtimer_WIFI   = 0;
 unsigned long currtimer_EPD    = 0;
-
+unsigned long currtimer_RAM    = 0;
 
 // --------------------------------------------------------------------------
 // sensor data
@@ -163,8 +163,6 @@ const String name_MHZ19_date              = "MHZ19 Date";
 const String name_MHZ19_time              = "MHZ19 Time";
 const String name_MHZ19_zone              = "MHZ19 Timezone";
 
-
-
 String data_bme680_timestamp           = "";
 String data_bme680_iaq                 = "";
 String data_bme680_iaq_accuracy        = "";
@@ -198,6 +196,7 @@ String data_MHZ19_date             = "";
 String data_MHZ19_time             = "";
 String data_MHZ19_zone             = "";
 String data_MHZ19_datetime         = "";
+
 
 // ---------------------------------------------
 // Helper functions declarations
@@ -798,7 +797,14 @@ void loop() {
     epd_s(deviceName, localTime("%Y.%m.%d") , localTime("%H:%M") , data_bme680_temperatur_relative , data_bme680_humidity_relative , data_bme680_iaq , data_MHZ19_co2 );
     prevtimer_EPD = currtimer_EPD;
   }
- 
+
+    // RAM
+  currtimer_RAM = millis();
+  if (currtimer_RAM - prevtimer_RAM >= interval_RAM){
+   Serial.print("Memory Usage: ");
+   Serial.println(ESP.getFreeHeap());
+   prevtimer_RAM = currtimer_RAM;
+  }
 
 
 }
