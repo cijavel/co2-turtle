@@ -5,6 +5,7 @@
 #define interval_MHZ19_in_Seconds 30
 #define interval_BME680_in_Seconds 30
 #define interval_WiFiCheck_in_Seconds 60
+#define interval_RAMPrintout_in_Seconds 30
 #define PIN_BME680_SDA 21
 #define PIN_BME680_SCL 22
 #define PIN_MHZ19_RX 17
