@@ -11,7 +11,7 @@ public:
         return instance;// Instantiated on first use.
     }
     Bsec getData();
-    bool updateSensorData();
+    bool updateSensorData(const unsigned long currentSeconds);
     void printout() const;
 private:
     void checkSensorStatus() const;

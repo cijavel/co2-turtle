@@ -39,13 +39,11 @@
 
 //OOP
 #include "BME680Handler.h"
-
-
+#include "MHZ19Handler.h"
+#include "Configuration.h"
+#include "WiFiHandler.h"
 //Sensor
 #include "bsec.h"
-
-#include <SoftwareSerial.h>
-#include "MHZ19.h"
 
 //Wifi
 #include <WiFi.h>
@@ -75,21 +73,10 @@
 // please rename credentials_example.h to credentials.h
 #include <credentials.h>
 
+
 // ---------------------------------------------
 // Configuration
 // ---------------------------------------------
-#define BAUDRATE 9600
-String consolOUT;
-
-// sensor MH-Z19B
-#define PIN_MHZ19_RX 17
-#define PIN_MHZ19_TX 16
-
-
-// WLAN
-const char *ssid     = WIFI_SSID;
-const char *password = WIFI_PW;
-String deviceName    = "SensorTurtle 1";
 
 // timezone
 const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
@@ -98,57 +85,21 @@ const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 // in separate file
 #include "GxEPD2_display_selection_new_style.h"
 
+
 // ---------------------------------------------
 // Declaration
 // ---------------------------------------------
 
 
 // Timer
-const long interval_MHZ19  = 60000*0.5;
-const long interval_WIFI   = 60000*1;
 const long interval_EPD    = 60000*3;
 const long interval_RAM    = 60000*0.5;
 
-unsigned long prevtimer_MHZ19  = 0;
-unsigned long prevtimer_WIFI   = 0;
 unsigned long prevtimer_EPD    = 0;
 unsigned long prevtimer_RAM    = 0;
 
-unsigned long currtimer_MHZ19  = 0;
-unsigned long currtimer_WIFI   = 0;
 unsigned long currtimer_EPD    = 0;
 unsigned long currtimer_RAM    = 0;
-
-// --------------------------------------------------------------------------
-// sensor data
-// --------------------------------------------------------------------------
-const String name_MHZ19_co2               = "MHZ19 CO2 [ppm]";
-const String name_MHZ19_co2_raw           = "MHZ19 CO2 raw [ppm]";
-const String name_MHZ19_co2_unlimited     = "MHZ19 unlimited";
-const String name_MHZ19_co2_limited       = "MHZ19 limited";
-const String name_MHZ19_co2_background    = "MHZ19 Background";
-const String name_MHZ19_co2_tempAdjust    = "MHZ19 Temperature Adjust";
-const String name_MHZ19_co2_temperatur    = "MHZ19 Temperature [C]";
-const String name_MHZ19_co2_Accuracy      = "MHZ19 Accuracy";
-const String name_MHZ19_timestamp         = "MHZ19 Timestamp [ms]";
-const String name_MHZ19_datetime          = "MHZ19 Date and Time";
-const String name_MHZ19_date              = "MHZ19 Date";
-const String name_MHZ19_time              = "MHZ19 Time";
-const String name_MHZ19_zone              = "MHZ19 Timezone";
-
-String data_MHZ19_timestamp        = "";
-String data_MHZ19_co2              = "";
-String data_MHZ19_co2_raw          = "";
-String data_MHZ19_co2_unlimited    = "";
-String data_MHZ19_co2_limited      = "";
-String data_MHZ19_co2_background   = "";
-String data_MHZ19_co2_tempAdjust   = "";
-String data_MHZ19_co2_temperatur   = "";
-String data_MHZ19_co2_Accuracy     = "";
-String data_MHZ19_date             = "";
-String data_MHZ19_time             = "";
-String data_MHZ19_zone             = "";
-String data_MHZ19_datetime         = "";
 
 // --------------------------------------------------------------------------
 // time functions
@@ -178,159 +129,6 @@ String localTime(String format)
     time = String(toutp);
   }
   return time;
-}
-
-// --------------------------------------------------------------------------
-// BME680 sensor
-// --------------------------------------------------------------------------
-
-//save calibration data
-#define STATE_SAVE_PERIOD UINT32_C(1440 * 60 * 1000) // 1440 minutes - 1 times a day
-uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
-uint16_t stateUpdateCounter = 0;
-
-// --------------------------------------------------------------------------
-// MH-Z19 sensor Co2
-// --------------------------------------------------------------------------
-MHZ19 myMHZ19;
-SoftwareSerial Serial_MHZ19(PIN_MHZ19_RX, PIN_MHZ19_TX);
-unsigned long getDataTimer = 0;
-void setRange(int range);
-
-void MHZ19setup(){
-
-    Serial_MHZ19.begin(BAUDRATE);                                // Uno Example: Begin Stream with MHZ19 baudrate
-    myMHZ19.begin(Serial_MHZ19);                                 // *Important, Pass your Stream reference
-
-    delay(200);
-    //myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
-
-    myMHZ19.autoCalibration(true);
-    Serial.print("MHZ19: ABC Status: "); myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
-
-    char myVersion[4];
-    myMHZ19.getVersion(myVersion);
-
-    Serial.print("MHZ19: Range: ");
-    Serial.println(myMHZ19.getRange());
-
-    //Serial.println(""MHZ19: Calibrating..");
-    //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
-
-    myMHZ19.verify();
-
-    Serial.println("");
-}
-
-void MHZ19setValues(){
-    if(myMHZ19.errorCode == RESULT_OK)
-    {
-      data_MHZ19_timestamp      = String(millis());
-      data_MHZ19_datetime       = localTime("%Y.%m.%d %H:%M");
-      data_MHZ19_date           = localTime("%Y.%m.%d");
-      data_MHZ19_time           = localTime("%H:%M");
-      data_MHZ19_zone           = localTime("%Z %z");
-      data_MHZ19_co2            = String(myMHZ19.getCO2());
-      data_MHZ19_co2_raw        = String(myMHZ19.getCO2Raw());
-      data_MHZ19_co2_unlimited  = String(myMHZ19.getCO2(true, true));
-      data_MHZ19_co2_limited    = String(myMHZ19.getCO2(false, true));
-      data_MHZ19_co2_background = String(myMHZ19.getBackgroundCO2());
-      data_MHZ19_co2_tempAdjust = String(myMHZ19.getTempAdjustment());
-      data_MHZ19_co2_Accuracy   = String(myMHZ19.getAccuracy());
-      data_MHZ19_co2_temperatur = String(myMHZ19.getTemperature());
-    }
-    else
-    {
-      Serial.println("Failed to recieve CO2 value - Error");
-      Serial.print("Response Code: ");
-      Serial.println(myMHZ19.errorCode);          // Get the Error Code value
-    }
-
-}
-
-void MHZ19printout(){
-  consolOUT = "MHZ19: \n";
-  consolOUT += name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     + ", \n";
-  consolOUT += name_MHZ19_datetime        + ":      "      + data_MHZ19_datetime      + ", \n";
-  consolOUT += name_MHZ19_co2             + ":          "  + data_MHZ19_co2           + ", \n";
-  consolOUT += name_MHZ19_co2_unlimited   + ":          "  + data_MHZ19_co2_unlimited + ", \n";
-  consolOUT += name_MHZ19_co2_limited     + ":            "+ data_MHZ19_co2_limited   + ", \n";
-  consolOUT += name_MHZ19_co2_background  + ":         "   + data_MHZ19_co2_background+ ", \n";
-  consolOUT += name_MHZ19_co2_tempAdjust  + ": "           + data_MHZ19_co2_tempAdjust+ ", \n";
-  consolOUT += name_MHZ19_co2_temperatur  + ":    "        + data_MHZ19_co2_temperatur+ ", \n";
-  consolOUT += name_MHZ19_co2_Accuracy    + ":           " + data_MHZ19_co2_Accuracy  + ", \n";
-  Serial.println(consolOUT);
-  consolOUT = "";
-}
-
-
-// --------------------------------------------------------------------------
-// WLAN functions
-// --------------------------------------------------------------------------
-
-void WiFiReStart()
-{
-  if (*ssid)
-  {
-    // Connect to WiFi network
-    Serial.println();
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
-
-    WiFi.begin(ssid, password);
-    int wifiWaitCount = 0;
-    while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-    {
-      delay(250);
-      wifiWaitCount++;
-    }
-    if (WiFi.status() == WL_CONNECTED)
-    {
-      Serial.println("");
-      Serial.println("WiFi connected");
-
-      // Print the IP address
-      Serial.println(WiFi.localIP());
-    }
-  }
-}
-
-void WiFisetup()
-{
-  int wifiWaitCount = 0;
-  WiFi.setHostname(deviceName.c_str());
-  Serial.print("\nWIFI: Connecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED && wifiWaitCount < 20)
-  {
-    delay(250);
-    wifiWaitCount++;
-  }
-
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("WIFI: connected.");
-    Serial.print("WIFI: IP address: ");
-    Serial.println(WiFi.localIP());
-  }
-  else
-  {
-    Serial.println("WIFI: not connected");
-  }
-}
-
-void WiFiStatusCheck()
-{
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    WiFiReStart();
-  }
-  else
-  {
-    Serial.println("WIFI: Still connected");
-  }
 }
 
 // --------------------------------------------------------------------------
@@ -568,59 +366,56 @@ void epd_s(String epd_name, String epd_date, String epd_time, String data_temp, 
 // --------------------------------------------------------------------------
 void setup()
 {
-  delay(100);
-  Serial.begin(BAUDRATE);
-  Serial.println();
-
-  WiFisetup();
-  MHZ19setup();
-
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-
+    delay(100);
+    Serial.begin(BAUDRATE);
+    Serial.println();
+    WiFiHandler::initWifi();
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
 void loop() {
+    unsigned long currentSeconds = millis() / 1000;
 
     BME680Handler &bmehandler = BME680Handler::getInstance();
-    if (bmehandler.updateSensorData()){
+    if (bmehandler.updateSensorData(currentSeconds)) {
         bmehandler.printout();
     }
     Bsec data = bmehandler.getData();
-  // MHZ19
-  currtimer_MHZ19 = millis();
-  if (currtimer_MHZ19 - prevtimer_MHZ19 >= interval_MHZ19){
-    MHZ19setValues();
-    MHZ19printout();
-    prevtimer_MHZ19 = currtimer_MHZ19;
-  }
 
-  // WiFi
-  currtimer_WIFI = millis();
-  if (currtimer_WIFI - prevtimer_WIFI >= interval_WIFI){
-    WiFiStatusCheck();
-    prevtimer_WIFI = currtimer_WIFI;
-  }
+    // MHZ19
+    MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
+    if (mhz19Handler.runUpdate(currentSeconds)) {
+        mhz19Handler.printoutLastReadout();
+    }
 
-  // EPD
-  currtimer_EPD = millis();
-  if (currtimer_EPD - prevtimer_EPD >= interval_EPD){
-    Serial.print("EPD: updated");
-    Serial.println(data_MHZ19_timestamp);
-    epd_s(deviceName,
-          localTime("%Y.%m.%d") ,
-          localTime("%H:%M") ,
-          String(data.temperature),
-          String(data.humidity),
-          String(data.iaq),
-          data_MHZ19_co2 );
-    prevtimer_EPD = currtimer_EPD;
-  }
+    // WiFi
+    WiFiHandler::checkWifi(currentSeconds);
+
+    // EPD
+    currtimer_EPD = millis();
+    if (currtimer_EPD - prevtimer_EPD >= interval_EPD) {
+        Serial.print("EPD: updated");
+        epd_s(DeviceName,
+              localTime("%Y.%m.%d"),
+              localTime("%H:%M"),
+              String(data.temperature),
+              String(data.humidity),
+              String(data.iaq),
+              String(mhz19Handler.getLastReadout().getRegular()));
+        prevtimer_EPD = currtimer_EPD;
+    }
 
     // RAM
-  currtimer_RAM = millis();
-  if (currtimer_RAM - prevtimer_RAM >= interval_RAM){
-   Serial.print("Memory Usage: ");
-   Serial.println(ESP.getFreeHeap());
-   prevtimer_RAM = currtimer_RAM;
-  }
+    currtimer_RAM = millis();
+    if (currtimer_RAM - prevtimer_RAM >= interval_RAM) {
+        Serial.print("Memory Usage: ");
+        uint32_t freeHeap = ESP.getFreeHeap();
+        uint32_t maximumHeap = ESP.getHeapSize();
+        uint32_t usedHeap = maximumHeap - freeHeap;
+        Serial.print(usedHeap);
+        Serial.print("b | ");
+        Serial.print(maximumHeap);
+        Serial.println("b");
+        prevtimer_RAM = currtimer_RAM;
+    }
 }
