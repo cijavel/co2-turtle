@@ -93,13 +93,8 @@ const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
 // Timer
 const long interval_EPD    = 60000*3;
-const long interval_RAM    = 60000*0.5;
-
 unsigned long prevtimer_EPD    = 0;
-unsigned long prevtimer_RAM    = 0;
-
 unsigned long currtimer_EPD    = 0;
-unsigned long currtimer_RAM    = 0;
 
 // --------------------------------------------------------------------------
 // time functions
@@ -360,6 +355,18 @@ void epd_s(String epd_name, String epd_date, String epd_time, String data_temp, 
     display.display(false);
 }
 
+static void PrintRamUsage(unsigned long currentSeconds) {
+    if (currentSeconds % interval_RAMPrintout_in_Seconds == 0) {
+        Serial.print("Memory Usage: ");
+        uint32_t freeHeap = ESP.getFreeHeap();
+        uint32_t maximumHeap = ESP.getHeapSize();
+        uint32_t usedHeap = maximumHeap - freeHeap;
+        Serial.print(usedHeap);
+        Serial.print("b | ");
+        Serial.print(maximumHeap);
+        Serial.println("b");
+    }
+}
 
 // --------------------------------------------------------------------------
 // MAIN
@@ -382,13 +389,11 @@ void loop() {
     }
     Bsec data = bmehandler.getData();
 
-    // MHZ19
     MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
     if (mhz19Handler.runUpdate(currentSeconds)) {
         mhz19Handler.printoutLastReadout();
     }
 
-    // WiFi
     WiFiHandler::checkWifi(currentSeconds);
 
     // EPD
@@ -405,17 +410,5 @@ void loop() {
         prevtimer_EPD = currtimer_EPD;
     }
 
-    // RAM
-    currtimer_RAM = millis();
-    if (currtimer_RAM - prevtimer_RAM >= interval_RAM) {
-        Serial.print("Memory Usage: ");
-        uint32_t freeHeap = ESP.getFreeHeap();
-        uint32_t maximumHeap = ESP.getHeapSize();
-        uint32_t usedHeap = maximumHeap - freeHeap;
-        Serial.print(usedHeap);
-        Serial.print("b | ");
-        Serial.print(maximumHeap);
-        Serial.println("b");
-        prevtimer_RAM = currtimer_RAM;
-    }
+    PrintRamUsage(currentSeconds);
 }
