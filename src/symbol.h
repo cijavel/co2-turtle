@@ -100,7 +100,7 @@ const unsigned char bitmap_turtlesleep [] PROGMEM = {
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 480)
 const int bitmap_allArray_LEN = 12;
-const unsigned char* bitmap_allArray[12] = {
+static const unsigned char* bitmap_allArray[12] = {
 	bitmap_CO2,
 	bitmap_grad,
 	bitmap_grad18,

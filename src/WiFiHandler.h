@@ -1,7 +1,3 @@
-//
-// Created by Armin on 18.05.2023.
-//
-
 #ifndef CO2_TURTLE_WIFIHANDLER_H
 #define CO2_TURTLE_WIFIHANDLER_H
 class WiFiHandler{

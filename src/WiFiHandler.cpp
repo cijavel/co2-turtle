@@ -1,7 +1,3 @@
-//
-// Created by Armin on 18.05.2023.
-//
-
 #include <WiFi.h>
 #include "WiFiHandler.h"
 #include "Credentials.h"
