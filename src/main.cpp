@@ -44,6 +44,7 @@
 #include "bsec.h"
 #include <ctime>
 #include "EPDHandler.h"
+#include "WebServerHandler.h"
 
 // --------------------------------------------------------------------------
 // time functions
@@ -197,6 +198,8 @@ void setup() {
     Serial.println();
     WiFiHandler::initWifi();
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    WebServerHandler &webServer = WebServerHandler::getInstance();
+    webServer.start();
 }
 unsigned long last = 0;
 void loop() {
@@ -225,10 +228,11 @@ void loop() {
 #else
     mhz19Handler.runUpdate(currentSeconds);
 #endif
-
+    CO2Data mhz19Readout = mhz19Handler.getLastReadout();
     WiFiHandler::checkWifi(currentSeconds);
-
-    EPDHandler::updateEPDvertical(mhz19Handler.getLastReadout(), bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"),
+    WebServerHandler &webServer = WebServerHandler::getInstance();
+    webServer.setCo2AndData(&mhz19Readout, &bme_data);
+    EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"),
                                   currentSeconds);
 #ifdef DEBUG
     PrintRamUsage(currentSeconds);

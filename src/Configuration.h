@@ -2,7 +2,7 @@
 #define CO2_TURTLE_CONFIGURATION_H
 
 //uncomment to get debug in serial
-//#define DEBUG
+#define DEBUG
 
 #define interval_MHZ19_in_Seconds 30
 #define interval_BME680_in_Seconds 30
