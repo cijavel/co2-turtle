@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 // _______________
 // EPD ePaper eINK
 // ---------------
@@ -42,42 +41,9 @@
 #include "MHZ19Handler.h"
 #include "Configuration.h"
 #include "WiFiHandler.h"
-//Sensor
 #include "bsec.h"
-
-//Wifi
-#include <WiFi.h>
-
-//Time
-#include <time.h>
-
-//EPD
-
-
-
-//OWN FILES
-#include "symbol.h" // own symbol
+#include <ctime>
 #include "EPDHandler.h"
-// please rename credentials_example.h to credentials.h
-#include <credentials.h>
-
-
-// ---------------------------------------------
-// Configuration
-// ---------------------------------------------
-
-// timezone
-const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
-
-// EPD
-// in separate file
-
-
-
-// Timer
-const long interval_EPD    = 60000*3;
-unsigned long prevtimer_EPD    = 0;
-unsigned long currtimer_EPD    = 0;
 
 // --------------------------------------------------------------------------
 // time functions
@@ -85,28 +51,23 @@ unsigned long currtimer_EPD    = 0;
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
+const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
+String localTime(const String& format) {
+    struct tm timeinfo{};
 
-String localTime(String format)
-{
+    String time = "";
+    char toutp[60];
+    setenv("TZ", timezone.c_str(), 1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+    tzset();
 
-  struct tm timeinfo;
-
-  String time = "";
-  char toutp[60];
-  // Serial.printf("  Set Timezone to %s\n",timezone.c_str());
-  setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
-  tzset();
-
-  if(!getLocalTime(&timeinfo))
-  {
-    time = "TIME: Failed to obtain";
-  }
-  else{
-    strftime(toutp, sizeof(toutp), format.c_str(), &timeinfo);
-    time = String(toutp);
-  }
-  return time;
+    if (!getLocalTime(&timeinfo)) {
+        time = "TIME: Failed to obtain";
+    } else {
+        strftime(toutp, sizeof(toutp), format.c_str(), &timeinfo);
+        time = String(toutp);
+    }
+    return time;
 }
 
 //void epd_w(String epd_name, String epd_date, String epd_time, String data_temp, String data_humidity, String data_airq, String data_co2  )
@@ -228,23 +189,26 @@ static void PrintRamUsage(unsigned long currentSeconds) {
     }
 }
 
-void setup()
-{
+void setup() {
     delay(100);
     Serial.begin(BAUDRATE);
     Serial.println();
     WiFiHandler::initWifi();
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
-
+unsigned long last = 0;
 void loop() {
     unsigned long currentSeconds = millis() / 1000;
-
+    if (currentSeconds != last) {
+        Serial.print("Current loop second: ");
+        Serial.println(currentSeconds);
+        last = currentSeconds;
+    }
     BME680Handler &bmehandler = BME680Handler::getInstance();
     if (bmehandler.updateSensorData(currentSeconds)) {
         bmehandler.printout();
     }
-    Bsec data = bmehandler.getData();
+    Bsec bme_data = bmehandler.getData();
 
     MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
     if (mhz19Handler.runUpdate(currentSeconds)) {
@@ -253,13 +217,8 @@ void loop() {
 
     WiFiHandler::checkWifi(currentSeconds);
 
-    // EPD
-    currtimer_EPD = millis();
-    if (currtimer_EPD - prevtimer_EPD >= interval_EPD) {
-        Serial.print("EPD: updated");
-        EPDHandler::getInstance().printVertically(mhz19Handler.getLastReadout(), data, localTime("%Y.%m.%d"), localTime("%H:%M"));
-        prevtimer_EPD = currtimer_EPD;
-    }
+    EPDHandler::updateEPDvertical(mhz19Handler.getLastReadout(), bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"),
+                                  currentSeconds);
 
     PrintRamUsage(currentSeconds);
 }

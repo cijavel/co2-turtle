@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include "WiFiHandler.h"
+
+// please rename credentials_example.h to credentials.h
 #include "Credentials.h"
 #include "Configuration.h"
 
@@ -29,15 +31,17 @@ void WiFiHandler::initWifi() {
 }
 bool WiFiHandler::StatusCheck()
 {
-    if (WiFiClass::status() != WL_CONNECTED)
+    wl_status_t status = WiFiClass::status();
+    if (status != WL_CONNECTED)
     {
         ReStart();
     }
     else
     {
         Serial.println("WIFI: Still connected");
+        Serial.println();
     }
-    return WiFiClass::status() == WL_CONNECTED;
+    return status == WL_CONNECTED;
 }
 
 void WiFiHandler::ReStart()
@@ -56,7 +60,7 @@ void WiFiHandler::ReStart()
     }
     if (WiFiClass::status() == WL_CONNECTED)
     {
-        Serial.println("");
+        Serial.println();
         Serial.println("WiFi connected");
 
         // Print the IP address
