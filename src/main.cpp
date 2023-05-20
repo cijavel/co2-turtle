@@ -176,6 +176,7 @@ String localTime(const String& format) {
 //    display.display(false);
 //}
 
+#ifdef DEBUG
 static void PrintRamUsage(unsigned long currentSeconds) {
     if (currentSeconds % interval_RAMPrintout_in_Seconds == 0) {
         Serial.print("Memory Usage: ");
@@ -188,6 +189,7 @@ static void PrintRamUsage(unsigned long currentSeconds) {
         Serial.println("b");
     }
 }
+#endif
 
 void setup() {
     delay(100);
@@ -199,26 +201,36 @@ void setup() {
 unsigned long last = 0;
 void loop() {
     unsigned long currentSeconds = millis() / 1000;
+#ifdef DEBUG
     if (currentSeconds != last) {
         Serial.print("Current loop second: ");
         Serial.println(currentSeconds);
         last = currentSeconds;
     }
+#endif
     BME680Handler &bmehandler = BME680Handler::getInstance();
+#ifdef DEBUG
     if (bmehandler.updateSensorData(currentSeconds)) {
         bmehandler.printout();
     }
+#else
+    bmehandler.updateSensorData(currentSeconds);
+#endif
     Bsec bme_data = bmehandler.getData();
-
     MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
+#ifdef DEBUG
     if (mhz19Handler.runUpdate(currentSeconds)) {
         mhz19Handler.printoutLastReadout();
     }
+#else
+    mhz19Handler.runUpdate(currentSeconds);
+#endif
 
     WiFiHandler::checkWifi(currentSeconds);
 
     EPDHandler::updateEPDvertical(mhz19Handler.getLastReadout(), bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"),
                                   currentSeconds);
-
+#ifdef DEBUG
     PrintRamUsage(currentSeconds);
+#endif
 }

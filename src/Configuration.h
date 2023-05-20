@@ -1,7 +1,9 @@
 #ifndef CO2_TURTLE_CONFIGURATION_H
 #define CO2_TURTLE_CONFIGURATION_H
 
-// sensor BME680
+//uncomment to get debug in serial
+//#define DEBUG
+
 #define interval_MHZ19_in_Seconds 30
 #define interval_BME680_in_Seconds 30
 #define interval_WiFiCheck_in_Seconds 60

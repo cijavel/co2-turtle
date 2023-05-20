@@ -76,7 +76,9 @@ BME680Handler::BME680Handler(){
 
     // WICHTIG
     data.begin(BME68X_I2C_ADDR_HIGH, Wire);
+#ifdef DEBUG
     Serial.println("\nBME: BSEC library version " + String(data.version.major) + "." + String(data.version.minor) + "." + String(data.version.major_bugfix) + "." + String(data.version.minor_bugfix));
+#endif
     checkSensorStatus();
 
     bsec_virtual_sensor_t sensorList[13] = {

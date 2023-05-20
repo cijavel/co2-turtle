@@ -21,21 +21,24 @@ MHZ19Handler::MHZ19Handler() {
     //myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
 
     myMHZ19.autoCalibration(true);
+#ifdef DEBUG
     Serial.print("MHZ19: ABC Status: ");
     myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
-
+#endif
     char myVersion[4];
     myMHZ19.getVersion(myVersion);
-
+#ifdef DEBUG
     Serial.print("MHZ19: Range: ");
     Serial.println(myMHZ19.getRange());
-
+#endif
     //Serial.println(""MHZ19: Calibrating..");
     //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
     myMHZ19.verify();
-    Serial.println();
     _lastReadout = CO2Data();
+#ifdef DEBUG
+    Serial.println();
     Serial.println("MHZ19: OK");
+#endif
 }
 
 void MHZ19Handler::printoutCurrentValues() {
