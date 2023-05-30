@@ -115,12 +115,119 @@ void EPDHandler::printVertically(const CO2Data co2, const Bsec bme_data, const S
     display.end();
 }
 
+void EPDHandler::printHorizontally(const CO2Data co2, const Bsec bme_data, const String& epd_date, const String& epd_time)
+{
+    display.init(BAUDRATE);
+
+   uint16_t color_temp = GxEPD_BLACK;
+   uint16_t color_hum = GxEPD_BLACK;
+   uint16_t color_aiq = GxEPD_BLACK;
+   uint16_t color_co2 = GxEPD_BLACK;
+
+   // Lines
+   int line1 = 30;
+   int line2 = 90;
+
+   //Abstand
+   int ab_temp = 20;
+   int ab_hum  = 52;
+   int ab_iaq  = 86;
+   int ab_co2  = 115;
+
+    //Limit
+    if (bme_data.temperature < 26) {
+        color_temp = GxEPD_BLACK;
+    } else {
+        color_temp = GxEPD_RED;
+    }
+    if (bme_data.humidity < 70) {
+        color_hum = GxEPD_BLACK;
+    } else {
+        color_hum = GxEPD_RED;
+    }
+    if (bme_data.iaq < 300) {
+        color_aiq = GxEPD_BLACK;
+    } else {
+        color_aiq = GxEPD_RED;
+    }
+    if (co2.getRegular() < 1500) {
+        color_co2 = GxEPD_BLACK;
+    } else {
+        color_co2 = GxEPD_RED;
+    }
+
+
+    display.fillScreen(GxEPD_WHITE); // set the background to white (fill the buffer with value for white)
+    display.setFullWindow();
+    display.setCursor(0, 0);
+
+    display.setRotation(1); //0-3
+    char buffer[EPDPrintFormatBufferSize];
+    display.setFont(&Inter_Bold12pt7b);
+
+    PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
+    PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
+    PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.iaq);
+
+    display.setFont(&Inter_Bold12pt7b);
+    display.setTextColor(color_co2);
+    display.setCursor(line1, ab_co2 + 5);
+    snprintf(buffer, sizeof buffer, "%d", co2.getRegular());
+    display.print(buffer);
+
+
+   display.setFont(&Inter_Regular10pt7b);
+
+
+    display.setTextColor(color_hum);
+    display.setCursor(line2, ab_hum);
+    display.print(" %");
+
+    display.drawInvertedBitmap(line2+5, ab_iaq - 10, bitmap_iaq  , 18, 18, color_aiq);
+    display.drawInvertedBitmap(line2+5, ab_co2 - 10, bitmap_ppm18, 18, 18, color_co2);
+    display.drawInvertedBitmap(line2+5, ab_temp- 20, bitmap_grad , 24, 24, color_temp);
+    display.drawInvertedBitmap(0      , ab_temp- 20, bitmap_temp , 24, 24, color_temp);
+    display.drawInvertedBitmap(0      , ab_hum - 20, bitmap_hum  , 24, 24, color_hum);
+    display.drawInvertedBitmap(0      , ab_iaq - 20, bitmap_aiq  , 24, 24, color_aiq);
+    display.drawInvertedBitmap(0      , ab_co2 - 14, bitmap_CO2  , 24, 24, color_co2);
+
+   display.setRotation(1); //0-3
+   display.setFont(&BabelSans9pt7b);
+   display.setTextColor(GxEPD_BLACK);
+   display.setCursor(140, 14);
+   display.print(epd_time);
+
+   display.setFont(&BabelSans9pt7b);
+   display.setTextColor(GxEPD_BLACK);
+   display.setCursor(200, 14);
+   display.print(epd_date);
+
+   display.setCursor(140+20, 32);
+   display.setFont(&BabelSans8pt7b);
+   display.print(DeviceName);
+   display.drawInvertedBitmap(140  , 32-14, bitmap_turtle, 18, 18, GxEPD_RED);
+
+   display.hibernate();
+   display.display(false);
+}
+
+
+
+
+
 void EPDHandler::updateEPDvertical(const CO2Data co2, const Bsec bme_data, const String& epd_date, const String& epd_time, const unsigned long currentSeconds ) {
     if (currentSeconds % interval_EPD_in_Seconds == 0){
         printVertically(co2, bme_data, epd_date, epd_time);
     }
-
 }
+
+void EPDHandler::updateEPDhorizontal(const CO2Data co2, const Bsec bme_data, const String& epd_date, const String& epd_time, const unsigned long currentSeconds ) {
+    if (currentSeconds % interval_EPD_in_Seconds == 0){
+        printHorizontally(co2, bme_data, epd_date, epd_time);
+    }
+}
+
+
 
 void EPDHandler::PrintEspLine(char* buff, int16_t cursorX, int16_t cursorY, uint16_t color, float toPrint) {
     display.setTextColor(color);
