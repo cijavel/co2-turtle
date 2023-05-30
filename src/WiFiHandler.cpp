@@ -32,6 +32,7 @@ void WiFiHandler::initWifi() {
     }
 #endif
 }
+
 bool WiFiHandler::StatusCheck()
 {
     wl_status_t status = WiFiClass::status();
