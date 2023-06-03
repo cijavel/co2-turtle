@@ -16,4 +16,11 @@
 #define PIN_MHZ19_TX 16
 #define BAUDRATE 9600
 #define DeviceName "SensorTurtle 1"
+
+
+// leds
+#define NUM_LEDS 34 //count
+#define PIN_LED_DATA 4
+#define BRIGHTNESS_LEDS 50
+
 #endif //CO2_TURTLE_CONFIGURATION_H
