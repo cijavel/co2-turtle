@@ -45,6 +45,7 @@
 #include <ctime>
 #include "EPDHandler.h"
 #include "WebServerHandler.h"
+#include "FastLedHandler.h"
 
 // --------------------------------------------------------------------------
 // time functions
@@ -96,6 +97,9 @@ void setup() {
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.start();
 }
+
+
+
 unsigned long last = 0;
 void loop() {
     unsigned long currentSeconds = millis() / 1000;
@@ -107,6 +111,8 @@ void loop() {
     }
 #endif
     BME680Handler &bmehandler = BME680Handler::getInstance();
+
+
 #ifdef DEBUG
     if (bmehandler.updateSensorData(currentSeconds)) {
         bmehandler.printout();
@@ -116,6 +122,8 @@ void loop() {
 #endif
     Bsec bme_data = bmehandler.getData();
     MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
+
+
 #ifdef DEBUG
     if (mhz19Handler.runUpdate(currentSeconds)) {
         mhz19Handler.printoutLastReadout();
@@ -123,12 +131,23 @@ void loop() {
 #else
     mhz19Handler.runUpdate(currentSeconds);
 #endif
+
+
     CO2Data mhz19Readout = mhz19Handler.getLastReadout();
     WiFiHandler::checkWifi(currentSeconds);
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.setCo2AndData(&mhz19Readout, &bme_data);
     EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"),
                                   currentSeconds);
+
+    FastLedHandler &ledhandler = FastLedHandler::getInstance();
+    ledhandler.addLEDsection();
+    
+    ledhandler.fastLedBME();
+    ledhandler.fastLedCO2();
+    ledhandler.fastLedWiFi();
+
+
 #ifdef DEBUG
     PrintRamUsage(currentSeconds);
 #endif
