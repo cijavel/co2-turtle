@@ -15,7 +15,7 @@ public:
     void setCo2AndData(CO2Data* co2Sensordata, Bsec* enviromentdata);
 private:
     CO2Data* co2data;
-    Bsec* data;
+    Bsec* bmedata;
     AsyncWebServer server = AsyncWebServer(80);
     static void handle_index(AsyncWebServerRequest *request);
     void handle_data(AsyncWebServerRequest *request);
