@@ -96,6 +96,9 @@ void setup() {
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.start();
+
+    FastLedHandler &ledhandler = FastLedHandler::getInstance();
+    ledhandler.addLEDsection();
 }
 
 
@@ -140,12 +143,11 @@ void loop() {
     EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"),
                                   currentSeconds);
 
-    FastLedHandler &ledhandler = FastLedHandler::getInstance();
-    ledhandler.addLEDsection();
+    FastLedHandler &ledHandler = FastLedHandler::getInstance();
     
-    ledhandler.fastLedBME();
-    ledhandler.fastLedCO2();
-    ledhandler.fastLedWiFi();
+    ledHandler.fastLedBME();
+    ledHandler.fastLedCO2();
+    ledHandler.fastLedWiFi();
 
 
 #ifdef DEBUG
