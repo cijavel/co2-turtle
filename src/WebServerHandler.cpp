@@ -132,7 +132,7 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
           <td class="data" style="padding:0px 5px">{data_gas} Ohm</td>
         </tr>
         <tr>
-          <th class="title">VOC</th>
+          <th class="title">breath VOC Equivalent</th>
           <td class="space"> </td>
           <td class="data" style="padding:0px 5px">{data_breahtvoc} ppm</td>
         </tr>
@@ -159,15 +159,15 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
   </html>)=====";
 
   header_data.replace("{deviceName}", DeviceName);
-  header_data.replace("{data_gas}", bmedata->iaqAgasccuracy);
-  header_data.replace("{data_breahtvoc}", bmedata->breahtvoc);
-  header_data.replace("{data_pressure}", bmedata->pressure);
+  header_data.replace("{data_gas}", String(bmedata.gasPercentage));
+  header_data.replace("{data_breahtvoc}", String(bmedata.breathVocEquivalent));
+  header_data.replace("{data_pressure}", String(bmedata.pressure));
   // header_data.replace("{data_date}",data_date);
   // header_data.replace("{data_time}",data_time);
   // header_data.replace("{data_zone}",data_zone);
 
-  header_data.replace("{data_iaqaccuracy}", String(bmedata->iaqAccuracy));
-  switch (bmedata->iaqAccuracy)
+  header_data.replace("{data_iaqaccuracy}", String(bmedata.iaqAccuracy));
+  switch (bmedata.iaqAccuracy)
   {
   case 0:
   {
@@ -200,45 +200,45 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
   }
   }
 
-  header_data.replace("{data_temp}", String(bmedata->temperature));
-  if (bmedata->temperature)
+  header_data.replace("{data_temp}", String(bmedata.temperature));
+  if (bmedata.temperature)
   {
-    if (bmedata->temperature < 16) // too cold
+    if (bmedata.temperature < 16) // too cold
     {
       header_data.replace("{color_temp}", "add8e6"); // LightBlue
       header_data.replace("{descr_temp}", "too cold");
     }
-    else if (bmedata->temperature < 18) // cold
+    else if (bmedata.temperature < 18) // cold
     {
       header_data.replace("{color_temp}", "0000ff"); // Blue
       header_data.replace("{descr_temp}", "cold");
     }
-    else if (bmedata->temperature < 20) // cool
+    else if (bmedata.temperature < 20) // cool
     {
       header_data.replace("{color_temp}", "2e8b57"); // SeaGreen
       header_data.replace("{descr_temp}", "cool");
     }
-    else if (bmedata->temperature < 22) // normal
+    else if (bmedata.temperature < 22) // normal
     {
       header_data.replace("{color_temp}", "00ff00"); // Green
       header_data.replace("{descr_temp}", "normal");
     }
-    else if (bmedata->temperature < 24) // cosy
+    else if (bmedata.temperature < 24) // cosy
     {
       header_data.replace("{color_temp}", "adff2f"); // GreenYellow
       header_data.replace("{descr_temp}", "cosy");
     }
-    else if (bmedata->temperature < 26) // warm
+    else if (bmedata.temperature < 26) // warm
     {
       header_data.replace("{color_temp}", "ffff00"); // Yellow
       header_data.replace("{descr_temp}", "warm");
     }
-    else if (bmedata->temperature < 28) // hot
+    else if (bmedata.temperature < 28) // hot
     {
       header_data.replace("{color_temp}", "ffa500"); // orange
       header_data.replace("{descr_temp}", "hot");
     }
-    else if (bmedata->temperature > 28) // scalding hot
+    else if (bmedata.temperature > 28) // scalding hot
     {
       header_data.replace("{color_temp}", "ff0000"); // Red
       header_data.replace("{descr_temp}", "scalding hot");
@@ -250,86 +250,80 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
     }
   }
 
-  header_data.replace("{data_relativehumidity}", String(bmedata->humidity));
-  if (bmedata->humidity)
+  header_data.replace("{data_relativehumidity}", String(bmedata.humidity));
+  if (bmedata.humidity)
   {
-    if (bmedata->humidity < 20) // Far too dry
+    if (bmedata.humidity < 20) // Far too dry
     {
       header_data.replace("{color_relativehumidity}", "ff0000"); // Red
       header_data.replace("{descr_relativehumidity}", "Far too dry");
     }
-    else if (bmedata->humidity < 30) // Too dry
+    else if (bmedata.humidity < 30) // Too dry
     {
       header_data.replace("{color_relativehumidity}", "ffff00"); // Yellow
       header_data.replace("{descr_relativehumidity}", "too dry");
     }
-    else if (bmedata->humidity < 40) // dry
+    else if (bmedata.humidity < 40) // dry
     {
       header_data.replace("{color_relativehumidity}", "adff2f"); // GreenYellow
       header_data.replace("{descr_relativehumidity}", "dry");
     }
-    else if (bmedata->humidity < 50) // normal
+    else if (bmedata.humidity < 50) // normal
     {
       header_data.replace("{color_relativehumidity}", "00ff00"); // Green
       header_data.replace("{descr_relativehumidity}", "normal");
     }
-    else if (bmedata->humidity < 60) // Slightly moist
+    else if (bmedata.humidity < 60) // Slightly moist
     {
       header_data.replace("{color_relativehumidity}", "adff2f"); // YellowGreen
       header_data.replace("{descr_relativehumidity}", "Slightly moist");
     }
-    else if (bmedata->humidity < 65) // moist
+    else if (bmedata.humidity < 65) // moist
     {
       header_data.replace("{color_relativehumidity}", "ffa500"); // Orange
       header_data.replace("{descr_relativehumidity}", "moist");
     }
-    else if (bmedata->humidity < 70) // very moist
+    else if (bmedata.humidity < 70) // very moist
     {
       header_data.replace("{color_relativehumidity}", "ff0000"); // Red
       header_data.replace("{descr_relativehumidity}", "very moist");
     }
     else // wet
     {
-      header_data.replace("{color_relativehumidity}", "000000"); // Black
       header_data.replace("{descr_relativehumidity}", "wet");
-      FastLED.show();
-      delay(150);
-
       header_data.replace("{color_relativehumidity}", "ff00ff"); // Magenta
-      FastLED.show();
-      delay(500);
     }
   }
 
-  header_data.replace("{data_iaq}", String(bmedata->iaq));
-  if (bmedata->iaq > 0)
+  header_data.replace("{data_iaq}", String(bmedata.iaq));
+  if (bmedata.iaq > 0)
   {
-    if (bmedata->iaq <= 50) // exellent
+    if (bmedata.iaq <= 50) // exellent
     {
       header_data.replace("{color_iaq}", "2e8b57"); // SeaGreen
       header_data.replace("{descr_iaq}", "exellent");
     }
-    else if (bmedata->iaq <= 100) // good
+    else if (bmedata.iaq <= 100) // good
     {
       header_data.replace("{color_iaq}", "00ff00"); // Green
       header_data.replace("{descr_iaq}", "good");
     }
-    else if (bmedata->iaq <= 150) // lightly polluted. Ventilation suggested.
+    else if (bmedata.iaq <= 150) // lightly polluted. Ventilation suggested.
     {
       header_data.replace("{color_iaq}", "9acd32"); // YellowGreen
       header_data.replace("{descr_iaq}", "lightly polluted. Ventilation suggested.");
     }
-    else if (bmedata->iaq <= 200) // moderately polluted. please ventilate.
+    else if (bmedata.iaq <= 200) // moderately polluted. please ventilate.
     {
       header_data.replace("{color_iaq}", "ffff00"); // Yellow
       header_data.replace("{descr_iaq}", "moderately polluted. please ventilate.");
     }
-    else if (bmedata->iaq < 250) // heavily polluted. please ventilate.
+    else if (bmedata.iaq < 250) // heavily polluted. please ventilate.
     {
       header_data.replace("{color_iaq}", "ffa500"); // orange
       header_data.replace("{descr_iaq}", "heavily polluted. please ventilate.");
     }
-    else if (bmedata->iaq < 300) // severly polluted. please ventilate urgently.
+    else if (bmedata.iaq < 300) // severly polluted. please ventilate urgently.
     {
       header_data.replace("{color_iaq}", "ff0000"); // Red
       header_data.replace("{descr_iaq}", "severly polluted. please ventilate urgently.");
@@ -341,35 +335,35 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
     }
   }
 
-  header_data.replace("{data_MHZ19B_co2}", String(co2data->getLimited));
-  if (co2data->getAccuracy > 0)
+  header_data.replace("{data_MHZ19B_co2}", String(co2data.getRegular()));
+  if (co2data.getRegular() > 0)
   {
-    if (co2data->getLimited < 600) // outdoor air
+    if (co2data.getRegular() < 600) // outdoor air
     {
       header_data.replace("{descr_MHZ19B_co2}", "outdoor air");
       header_data.replace("{color_MHZ19B_co2}", "0000ff"); // Blue
     }
-    else if (co2data->getLimited < 800) // fresh indoor air
+    else if (co2data.getRegular() < 800) // fresh indoor air
     {
       header_data.replace("{descr_MHZ19B_co2}", "fresh indoor air");
       header_data.replace("{color_MHZ19B_co2}", "00ff00"); // Green
     }
-    else if (co2data->getLimited < 1000) // Indoor air
+    else if (co2data.getRegular() < 1000) // Indoor air
     {
       header_data.replace("{descr_MHZ19B_co2}", "Indoor air");
       header_data.replace("{color_MHZ19B_co2}", "adff2f"); // GreenYellow
     }
-    else if (co2data->getLimited < 1200) // used indoor air. please ventilate
+    else if (co2data.getRegular() < 1200) // used indoor air. please ventilate
     {
       header_data.replace("{descr_MHZ19B_co2}", "used indoor air. please ventilate");
       header_data.replace("{color_MHZ19B_co2}", "ffff00"); // Yellow
     }
-    else if (co2data->getLimited < 1400) // stale indoor air. please ventilate
+    else if (co2data.getRegular() < 1400) // stale indoor air. please ventilate
     {
       header_data.replace("{descr_MHZ19B_co2}", "stale indoor air. please ventilate");
       header_data.replace("{color_MHZ19B_co2}", "ffa500"); // Orange
     }
-    else if (co2data->getLimited < 1600) // strongly stale indoor air. please ventilate urgently. thinking performance impaired
+    else if (co2data.getRegular() < 1600) // strongly stale indoor air. please ventilate urgently. thinking performance impaired
     {
       header_data.replace("{descr_MHZ19B_co2}", "strongly stale indoor air. please ventilate urgently. thinking performance impaired");
       header_data.replace("{color_MHZ19B_co2}", "ff0000"); // Red
@@ -389,9 +383,9 @@ void WebServerHandler::handle_NotFound(AsyncWebServerRequest *request)
   request->send(404, "text/plain; charset=utf-8", "Not found");
 }
 
-void WebServerHandler::setCo2AndData(CO2Data *co2Sensordata, Bsec *enviromentdata)
+void WebServerHandler::setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata)
 {
-  this->data = enviromentdata;
+  this->bmedata = enviromentdata;
   this->co2data = co2Sensordata;
 }
 
