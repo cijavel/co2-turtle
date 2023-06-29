@@ -79,7 +79,7 @@ void FastLedHandler::fastLedWiFi()
 void FastLedHandler::fastLedBME()
 {
     FastLED.setBrightness(BRIGHTNESS_LEDS);
-    switch (bmedata->iaqAccuracy)
+    switch (bmedata.iaqAccuracy)
     {
     case 0:
     {
@@ -111,37 +111,37 @@ void FastLedHandler::fastLedBME()
     }
     }
 
-    if (bmedata->temperature)
+    if (bmedata.temperature)
     {
-        if (bmedata->temperature < 16) // too cold
+        if (bmedata.temperature < 16) // too cold
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::LightBlue, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->temperature < 18) // cold
+        else if (bmedata.temperature < 18) // cold
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Blue, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->temperature < 20) // cool
+        else if (bmedata.temperature < 20) // cool
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->temperature < 22) // normal
+        else if (bmedata.temperature < 22) // normal
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Green, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->temperature < 24) // cosy
+        else if (bmedata.temperature < 24) // cosy
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->temperature < 26) // warm
+        else if (bmedata.temperature < 26) // warm
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->temperature < 28) // hot
+        else if (bmedata.temperature < 28) // hot
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Orange, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->temperature > 28) // scalding hot
+        else if (bmedata.temperature > 28) // scalding hot
         {
             LEDsectionManager.fillSectionWithColor(LED_TEMP, CRGB::Red, FillStyle(ALL_AT_ONCE));
         }
@@ -151,33 +151,33 @@ void FastLedHandler::fastLedBME()
         }
     }
 
-    if (bmedata->humidity)
+    if (bmedata.humidity)
     {
-        if (bmedata->humidity < 20) // Far too dry
+        if (bmedata.humidity < 20) // Far too dry
         {
             LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->humidity < 30) // Too dry
+        else if (bmedata.humidity < 30) // Too dry
         {
             LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->humidity < 40) // dry
+        else if (bmedata.humidity < 40) // dry
         {
             LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->humidity < 50) // normal
+        else if (bmedata.humidity < 50) // normal
         {
             LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Green, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->humidity < 60) // Slightly moist
+        else if (bmedata.humidity < 60) // Slightly moist
         {
             LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->humidity < 65) // moist
+        else if (bmedata.humidity < 65) // moist
         {
             LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Orange, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->humidity < 70) // very moist
+        else if (bmedata.humidity < 70) // very moist
         {
             LEDsectionManager.fillSectionWithColor(LED_HUM, CRGB::Red, FillStyle(ALL_AT_ONCE));
         }
@@ -193,29 +193,29 @@ void FastLedHandler::fastLedBME()
         }
     }
 
-    if (bmedata->iaq > 0)
+    if (bmedata.iaq > 0)
     {
-        if (bmedata->iaq <= 50) // exellent
+        if (bmedata.iaq <= 50) // exellent
         {
             LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::SeaGreen, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->iaq <= 100) // good
+        else if (bmedata.iaq <= 100) // good
         {
             LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Green, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->iaq <= 150) // lightly polluted. Ventilation suggested.
+        else if (bmedata.iaq <= 150) // lightly polluted. Ventilation suggested.
         {
             LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::YellowGreen, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->iaq <= 200) // moderately polluted. please ventilate.
+        else if (bmedata.iaq <= 200) // moderately polluted. please ventilate.
         {
             LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->iaq < 250) // heavily polluted. please ventilate.
+        else if (bmedata.iaq < 250) // heavily polluted. please ventilate.
         {
             LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Orange, FillStyle(ALL_AT_ONCE));
         }
-        else if (bmedata->iaq < 300) // severly polluted. please ventilate urgently.
+        else if (bmedata.iaq < 300) // severly polluted. please ventilate urgently.
         {
             LEDsectionManager.fillSectionWithColor(LED_AIRQ, CRGB::Red, FillStyle(ALL_AT_ONCE));
         }
@@ -237,29 +237,29 @@ void FastLedHandler::fastLedCO2()
 {
     FastLED.setBrightness(BRIGHTNESS_LEDS);
 
-    if (co2data->getLimited > 0)
+    if (co2data.getRegular() > 0)
     {
-        if (co2data->getRegular < 600) // outdoor air
+        if (co2data.getRegular() < 600) // outdoor air
         {
             LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Blue, FillStyle(ALL_AT_ONCE));
         }
-        else if (co2data->getRegular < 800) // fresh indoor air
+        else if (co2data.getRegular() < 800) // fresh indoor air
         {
             LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Green, FillStyle(ALL_AT_ONCE));
         }
-        else if (co2data->getRegular < 1000) // Indoor air
+        else if (co2data.getRegular() < 1000) // Indoor air
         {
             LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
         }
-        else if (co2data->getRegular < 1200) // used indoor air. please ventilate
+        else if (co2data.getRegular() < 1200) // used indoor air. please ventilate
         {
             LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
         }
-        else if (co2data->getRegular < 1400) // stale indoor air. please ventilate
+        else if (co2data.getRegular() < 1400) // stale indoor air. please ventilate
         {
             LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Orange, FillStyle(ALL_AT_ONCE));
         }
-        else if (co2data->getRegular < 1600) // strongly stale indoor air. please ventilate urgently. thinking performance impaired
+        else if (co2data.getRegular() < 1600) // strongly stale indoor air. please ventilate urgently. thinking performance impaired
         {
             LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Red, FillStyle(ALL_AT_ONCE));
         }
