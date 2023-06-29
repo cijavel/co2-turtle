@@ -12,10 +12,10 @@ public:
         return instance;// Instantiated on first use.
     }
     void start();
-    void setCo2AndData(CO2Data* co2Sensordata, Bsec* enviromentdata);
+    void setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata);
 private:
-    CO2Data* co2data;
-    Bsec* bmedata;
+    CO2Data co2data;
+    Bsec bmedata;
     AsyncWebServer server = AsyncWebServer(80);
     static void handle_index(AsyncWebServerRequest *request);
     void handle_data(AsyncWebServerRequest *request);
