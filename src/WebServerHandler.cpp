@@ -140,9 +140,9 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
           <th class="title"> .....  </th>
         </tr>
         <tr>
-          <th class="title">Date</th>
+          <th class="title">Timestep</th>
           <td class="space"> </td>
-          <td class="data" style="padding:0px 5px">{data_date}</td>
+          <td class="data" style="padding:0px 5px">{data_timestep}</td>
         </tr>
         <tr>
           <th class="title">Time</th>
@@ -162,9 +162,9 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
   header_data.replace("{data_gas}", String(bmedata.gasPercentage));
   header_data.replace("{data_breahtvoc}", String(bmedata.breathVocEquivalent));
   header_data.replace("{data_pressure}", String(bmedata.pressure));
-  // header_data.replace("{data_date}",data_date);
-  // header_data.replace("{data_time}",data_time);
-  // header_data.replace("{data_zone}",data_zone);
+  header_data.replace("{data_timestep}",String(bmedata.outputTimestamp));
+  //header_data.replace("{data_time}",data_time);
+  //header_data.replace("{data_zone}",data_zone);
 
   header_data.replace("{data_iaqaccuracy}", String(bmedata.iaqAccuracy));
   switch (bmedata.iaqAccuracy)
