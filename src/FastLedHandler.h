@@ -4,10 +4,10 @@
 #include "Configuration.h"
 #include "CO2Data.h"
 #include "bsec.h"
-
+#define FASTLED_ALL_PINS_HARDWARE_SPI
+#include <SPI.h>
 #include <FastLED.h>
 #include <SectionManager.h>
-#include <helpers.h>
 
 class FastLedHandler{
 public:
@@ -18,10 +18,15 @@ public:
     void fastLedWiFi();
     void fastLedBME();
     void fastLedCO2();
+    void fastinit();
     void addLEDsection();
+    void setup_led();
+
+
 
 private:
-    int rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi);
+    uint16_t rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, uint16_t multi);
+
     CO2Data co2data;
     Bsec bmedata;
     FastLedHandler() {};                    // Constructor? (the {} brackets) are needed here.

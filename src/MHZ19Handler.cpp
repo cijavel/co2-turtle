@@ -46,13 +46,13 @@ void MHZ19Handler::printoutCurrentValues() {
         Serial.println("MHZ19 CurrentValues:");
 //        Serial.println(name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     );
 //        Serial.println(name_MHZ19_datetime        + ":      "      + data_MHZ19_datetime      );
-        Serial.println(name_MHZ19_co2             + ":          "   + myMHZ19.getCO2()                           );
-        Serial.println(name_MHZ19_co2_raw         + ":          "   + myMHZ19.getCO2Raw()                        );
-        Serial.println(name_MHZ19_co2_limited     + ":            " + myMHZ19.getCO2(false)                      );
-        Serial.println(name_MHZ19_co2_background  + ":         "    + myMHZ19.getBackgroundCO2()                 );
-        Serial.println(name_MHZ19_co2_tempAdjust  + ": "            + myMHZ19.getTempAdjustment()                );
-        Serial.println(name_MHZ19_co2_temperatur  + ":    "         + myMHZ19.getTemperature()                   );
-        Serial.println(name_MHZ19_co2_Accuracy    + ":           "  + myMHZ19.getAccuracy()                      );
+        Serial.println(name_MHZ19_co2             + ":          "   + myMHZ19.getCO2()            );
+        Serial.println(name_MHZ19_co2_raw         + ":       "      + myMHZ19.getCO2Raw()         );
+        Serial.println(name_MHZ19_co2_limited     + ":            " + myMHZ19.getCO2(false)       );
+        Serial.println(name_MHZ19_co2_background  + ":         "    + myMHZ19.getBackgroundCO2()  );
+        Serial.println(name_MHZ19_co2_tempAdjust  + ": "            + myMHZ19.getTempAdjustment() );
+        Serial.println(name_MHZ19_co2_temperatur  + ":    "         + myMHZ19.getTemperature()    );
+        Serial.println(name_MHZ19_co2_Accuracy    + ":           "  + myMHZ19.getAccuracy()       );
         Serial.println();
     }
     else {
