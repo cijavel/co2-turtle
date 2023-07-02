@@ -45,7 +45,7 @@
 #include <ctime>
 #include "EPDHandler.h"
 #include "WebServerHandler.h"
-//#include "FastLedHandler.h"
+#include "FastLedHandler.h"
 
 
 // --------------------------------------------------------------------------
@@ -98,9 +98,9 @@ void setup() {
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.start();
 
-    //FastLedHandler &ledhandler = FastLedHandler::getInstance();
-    //ledhandler.addLEDsection();
-    //ledhandler.setup_led();
+    FastLedHandler &ledhandler = FastLedHandler::getInstance();
+    ledhandler.addLEDsection();
+    ledhandler.setup_led();
 }
 
 
@@ -147,11 +147,11 @@ void loop() {
 
 
 
-    //FastLedHandler &ledHandler = FastLedHandler::getInstance();
-    //ledHandler.fastLedBME();
-    //ledHandler.fastLedCO2();
-    //ledHandler.fastLedWiFi();
-    //ledHandler.fastinit();
+    FastLedHandler &ledHandler = FastLedHandler::getInstance();
+    ledHandler.fastLedBME();
+    ledHandler.fastLedCO2();
+    ledHandler.fastLedWiFi();
+    ledHandler.fastinit();
 
 
 #ifdef DEBUG
