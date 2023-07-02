@@ -45,7 +45,8 @@
 #include <ctime>
 #include "EPDHandler.h"
 #include "WebServerHandler.h"
-#include "FastLedHandler.h"
+//#include "FastLedHandler.h"
+
 
 // --------------------------------------------------------------------------
 // time functions
@@ -97,8 +98,9 @@ void setup() {
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.start();
 
-    FastLedHandler &ledhandler = FastLedHandler::getInstance();
-    ledhandler.addLEDsection();
+    //FastLedHandler &ledhandler = FastLedHandler::getInstance();
+    //ledhandler.addLEDsection();
+    //ledhandler.setup_led();
 }
 
 
@@ -113,9 +115,9 @@ void loop() {
         last = currentSeconds;
     }
 #endif
+
+
     BME680Handler &bmehandler = BME680Handler::getInstance();
-
-
 #ifdef DEBUG
     if (bmehandler.updateSensorData(currentSeconds)) {
         bmehandler.printout();
@@ -123,10 +125,11 @@ void loop() {
 #else
     bmehandler.updateSensorData(currentSeconds);
 #endif
+
+
+
     Bsec bme_data = bmehandler.getData();
     MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
-
-
 #ifdef DEBUG
     if (mhz19Handler.runUpdate(currentSeconds)) {
         mhz19Handler.printoutLastReadout();
@@ -139,15 +142,16 @@ void loop() {
     CO2Data mhz19Readout = mhz19Handler.getLastReadout();
     WiFiHandler::checkWifi(currentSeconds);
     WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.setCo2AndData(&mhz19Readout, &bme_data);
-    EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"),
-                                  currentSeconds);
+    webServer.setCo2AndData(mhz19Readout, bme_data);
+    EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
 
-    FastLedHandler &ledHandler = FastLedHandler::getInstance();
-    
-    ledHandler.fastLedBME();
-    ledHandler.fastLedCO2();
-    ledHandler.fastLedWiFi();
+
+
+    //FastLedHandler &ledHandler = FastLedHandler::getInstance();
+    //ledHandler.fastLedBME();
+    //ledHandler.fastLedCO2();
+    //ledHandler.fastLedWiFi();
+    //ledHandler.fastinit();
 
 
 #ifdef DEBUG

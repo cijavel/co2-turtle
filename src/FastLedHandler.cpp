@@ -1,10 +1,13 @@
+#include "Configuration.h"
 #include "FastLedHandler.h"
 #include <WiFi.h>
-#include "Configuration.h"
+#include <helpers.h>
 
-CRGB led[NUM_LEDS];
-SectionManager LEDsectionManager = SectionManager(led);
-int ledloop = 0;
+FASTLED_USING_NAMESPACE
+
+#define MAX_POWER_MILLIAMPS 500
+#define LED_TYPE  WS2812B
+#define COLOR_ORDER GRB
 
 #define LED_WLANCONNECT 0
 #define LED_STATUS 1
@@ -12,6 +15,17 @@ int ledloop = 0;
 #define LED_HUM 3
 #define LED_AIRQ 4
 #define LED_CO2 5
+
+#define FASTLED_ALLOW_INTERRUPTS
+#define BRIGHTNESS_LEDS 10
+#define DATA_PIN 4
+#define NUM_LEDS 34
+
+CRGB led[NUM_LEDS];
+SectionManager LEDsectionManager = SectionManager(led);
+int ledloop = 0;
+
+
 
 void FastLedHandler::addLEDsection()
 {
@@ -23,11 +37,18 @@ void FastLedHandler::addLEDsection()
     LEDsectionManager.addRangeToSection(LED_AIRQ, 19, 25, false);      // LED_AIRQ
     LEDsectionManager.addRangeToSection(LED_CO2, 27, 33, false);       // LED_CO2
 
-    FastLED.addLeds<WS2812B, PIN_LED_DATA, GRB>(led, NUM_LEDS);
-    FastLED.clear(true);
 }
 
-int FastLedHandler::rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, int multi)
+void FastLedHandler::setup_led()
+{
+    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(led, NUM_LEDS);
+    FastLED.clear(true);
+    FastLED.setCorrection( TypicalLEDStrip );
+    FastLED.setMaxPowerInVoltsAndMilliamps( 5, MAX_POWER_MILLIAMPS);
+    FastLED.setBrightness(BRIGHTNESS_LEDS);
+}
+
+uint16_t FastLedHandler::rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, uint16_t multi)
 {
     if (NUM_LEDS * multi < wheelPosition)
     {
@@ -72,13 +93,11 @@ void FastLedHandler::fastLedWiFi()
         LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::LightSkyBlue, FillStyle(ALL_AT_ONCE));
         FastLED.show();
     }
-    FastLED.setBrightness(BRIGHTNESS_LEDS);
     FastLED.show();
 }
 
 void FastLedHandler::fastLedBME()
 {
-    FastLED.setBrightness(BRIGHTNESS_LEDS);
     switch (bmedata.iaqAccuracy)
     {
     case 0:
@@ -235,8 +254,6 @@ void FastLedHandler::fastLedBME()
 
 void FastLedHandler::fastLedCO2()
 {
-    FastLED.setBrightness(BRIGHTNESS_LEDS);
-
     if (co2data.getRegular() > 0)
     {
         if (co2data.getRegular() < 600) // outdoor air
@@ -274,5 +291,14 @@ void FastLedHandler::fastLedCO2()
             delay(500);
         }
     }
+    FastLED.show();
+}
+
+void FastLedHandler::fastinit()
+{
+  if (bmedata.iaqAccuracy == 0)
+  {
+    ledloop = rainbowAllSections(20, ledloop, 255);
+  }
     FastLED.show();
 }
