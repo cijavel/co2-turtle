@@ -1,13 +1,11 @@
 #include "Configuration.h"
 #include "FastLedHandler.h"
-#include <WiFi.h>
 #include <helpers.h>
 
-FASTLED_USING_NAMESPACE
+//#define FASTLED_RMT_MAX_CHANNELS 1
+//#define FASTLED_ALL_PINS_HARDWARE_SPI
+//#define FASTLED_ALLOW_INTERRUPTS
 
-#define MAX_POWER_MILLIAMPS 500
-#define LED_TYPE  WS2812B
-#define COLOR_ORDER GRB
 
 #define LED_WLANCONNECT 0
 #define LED_STATUS 1
@@ -16,15 +14,9 @@ FASTLED_USING_NAMESPACE
 #define LED_AIRQ 4
 #define LED_CO2 5
 
-#define FASTLED_ALLOW_INTERRUPTS
-#define BRIGHTNESS_LEDS 10
-#define DATA_PIN 4
-#define NUM_LEDS 34
 
 CRGB led[NUM_LEDS];
 SectionManager LEDsectionManager = SectionManager(led);
-int ledloop = 0;
-
 
 
 void FastLedHandler::addLEDsection()
@@ -36,47 +28,42 @@ void FastLedHandler::addLEDsection()
     LEDsectionManager.addRangeToSection(LED_HUM, 11, 17, false);       // LED_HUM
     LEDsectionManager.addRangeToSection(LED_AIRQ, 19, 25, false);      // LED_AIRQ
     LEDsectionManager.addRangeToSection(LED_CO2, 27, 33, false);       // LED_CO2
-
+    #ifdef DEBUG
+            Serial.println("FASTLED: Set LED sections");
+    #endif
 }
 
 void FastLedHandler::setup_led()
 {
-    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(led, NUM_LEDS);
+    FastLED.addLeds<LED_TYPE, DATA_LED_PIN, COLOR_ORDER>(led, NUM_LEDS);
     FastLED.clear(true);
     FastLED.setCorrection( TypicalLEDStrip );
     FastLED.setMaxPowerInVoltsAndMilliamps( 5, MAX_POWER_MILLIAMPS);
     FastLED.setBrightness(BRIGHTNESS_LEDS);
+
+    #ifdef DEBUG
+            Serial.println("FASTLED: Set LED configuration");
+    #endif
 }
 
-uint16_t FastLedHandler::rainbowAllSections(uint8_t pauseDuration, uint16_t wheelPosition, uint16_t multi)
+void FastLedHandler::setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata)
 {
-    if (NUM_LEDS * multi < wheelPosition)
-    {
-        wheelPosition = 0;
-    }
-    wheelPosition += 1;
-
-    int colorsteps = 230; // how many colors, 256 all color,
-    int colors = 9;       // circle. Distance between colors per cycle. the higher the finer
-    uint16_t level;
-    // for (level = 0; level > LEDsectionManager.getTotalLevels(); level++) // show against clockwise
-    for (level = LEDsectionManager.getTotalLevels(); level > 0; level--) // show clockwise
-    {
-        uint32_t color = Wheel((level * colors + wheelPosition) & colorsteps);
-
-        for (uint8_t i = LEDsectionManager.getTotalLevels(); i > 0; i--) // change color clockwise
-        {
-            LEDsectionManager.setColorAtGlobalIndex(level, color);
-        }
-
-        FastLED.setBrightness(50);
-        FastLED.show();
-        delay(pauseDuration);
-    }
-    return wheelPosition;
+  this->bmedata = enviromentdata;
+  this->co2data = co2Sensordata;
 }
 
-void FastLedHandler::fastLedWiFi()
+bool FastLedHandler::ledstatus(const unsigned long currentSeconds)
+{
+    if (currentSeconds % interval_LED_in_Seconds == 0){
+        ledStatusWiFi();
+        ledStatusBME();
+        ledStatusCO2();
+        return true;
+    }
+    return false;
+}
+
+void FastLedHandler::ledStatusWiFi()
 {
     if (WiFi.status() != WL_CONNECTED)
     {
@@ -86,48 +73,51 @@ void FastLedHandler::fastLedWiFi()
 
         LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::Black, FillStyle(ALL_AT_ONCE));
         FastLED.show();
-        delay(1000);
+        delay(150);
     }
     else
     {
         LEDsectionManager.fillSectionWithColor(LED_WLANCONNECT, CRGB::LightSkyBlue, FillStyle(ALL_AT_ONCE));
         FastLED.show();
     }
+    #ifdef DEBUG
+            Serial.println("FASTLED: before show WIFI");
+    #endif
     FastLED.show();
 }
 
-void FastLedHandler::fastLedBME()
+void FastLedHandler::ledStatusBME()
 {
     switch (bmedata.iaqAccuracy)
     {
-    case 0:
-    {
-        // Calibration phase. Please wait....
-        ledloop = rainbowAllSections(20, ledloop, 255);
-        break;
-    }
-    case 1:
-    {
-        // learning
-        LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
-        break;
-    }
-    case 2:
-    {
-        // good
-        LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
-        break;
-    }
-    case 3:
-    {
-        // good. start saving them.
-        LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
-        break;
-    }
-    default:
-    {
-        // this should never happen! iaqAccuracy < 0 || iaqAccuracy > 3");
-    }
+        case 0:
+        {
+            // Calibration phase. Please wait....
+            LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Red, FillStyle(ALL_AT_ONCE));
+            break;
+        }
+        case 1:
+        {
+            // learning
+            LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Yellow, FillStyle(ALL_AT_ONCE));
+            break;
+        }
+        case 2:
+        {
+            // good
+            LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::GreenYellow, FillStyle(ALL_AT_ONCE));
+            break;
+        }
+        case 3:
+        {
+            // good. start saving them.
+            LEDsectionManager.fillSectionWithColor(LED_STATUS, CRGB::Green, FillStyle(ALL_AT_ONCE));
+            break;
+        }
+        default:
+        {
+            // this should never happen! iaqAccuracy < 0 || iaqAccuracy > 3");
+        }
     }
 
     if (bmedata.temperature)
@@ -249,10 +239,21 @@ void FastLedHandler::fastLedBME()
             delay(500);
         }
     }
+    #ifdef DEBUG
+            Serial.print("iaqAccuracy: ");
+            Serial.println(String(bmedata.iaqAccuracy));
+            Serial.print("temperature: ");
+            Serial.println(String(bmedata.temperature));
+            Serial.print("humidity: ");
+            Serial.println(String(bmedata.humidity));
+            Serial.print("iaq: ");
+            Serial.println(String(bmedata.iaq));
+            Serial.println("FASTLED: before show bme");
+    #endif
     FastLED.show();
 }
 
-void FastLedHandler::fastLedCO2()
+void FastLedHandler::ledStatusCO2()
 {
     if (co2data.getRegular() > 0)
     {
@@ -288,17 +289,13 @@ void FastLedHandler::fastLedCO2()
 
             LEDsectionManager.fillSectionWithColor(LED_CO2, CRGB::Magenta, FillStyle(ALL_AT_ONCE));
             FastLED.show();
-            delay(500);
+            delay(150);
         }
     }
+    #ifdef DEBUG
+            Serial.println(String(co2data.getRegular()));
+            Serial.println("FASTLED: before show co2");
+    #endif
     FastLED.show();
 }
 
-void FastLedHandler::fastinit()
-{
-  if (bmedata.iaqAccuracy == 0)
-  {
-    ledloop = rainbowAllSections(20, ledloop, 255);
-  }
-    FastLED.show();
-}

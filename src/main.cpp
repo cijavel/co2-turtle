@@ -141,17 +141,17 @@ void loop() {
 
     CO2Data mhz19Readout = mhz19Handler.getLastReadout();
     WiFiHandler::checkWifi(currentSeconds);
+
+
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.setCo2AndData(mhz19Readout, bme_data);
+
+
     EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
 
-
-
     FastLedHandler &ledHandler = FastLedHandler::getInstance();
-    ledHandler.fastLedBME();
-    ledHandler.fastLedCO2();
-    ledHandler.fastLedWiFi();
-    ledHandler.fastinit();
+    ledHandler.setCo2AndData(mhz19Readout, bme_data);
+    ledHandler.ledstatus(currentSeconds);
 
 
 #ifdef DEBUG
