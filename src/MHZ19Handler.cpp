@@ -66,7 +66,7 @@ void MHZ19Handler::printoutCurrentValues() {
 void MHZ19Handler::printoutLastReadout() {
         Serial.println("MHZ19 LastReadout:");
         Serial.println(name_MHZ19_co2             + ":          "   + String(_lastReadout.getRegular()       ));
-        Serial.println(name_MHZ19_co2_raw         + ":          "   + String(_lastReadout.getRaw()           ));
+        Serial.println(name_MHZ19_co2_raw         + ":       "      + String(_lastReadout.getRaw()           ));
         Serial.println(name_MHZ19_co2_limited     + ":            " + String(_lastReadout.getLimited()       ));
         Serial.println(name_MHZ19_co2_background  + ":         "    + String(_lastReadout.getBackground()    ));
         Serial.println(name_MHZ19_co2_tempAdjust  + ": "            + String(_lastReadout.getTempAdjustment()));
