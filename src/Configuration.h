@@ -8,7 +8,7 @@
 #define interval_BME680_in_Seconds 60
 #define interval_WiFiCheck_in_Seconds 120
 #define interval_RAMPrintout_in_Seconds 600
-#define interval_EPD_in_Seconds 700
+#define interval_EPD_in_Seconds 900
 #define interval_LED_in_Seconds 60
 
 #define PIN_BME680_SDA 21
@@ -18,7 +18,7 @@
 #define BAUDRATE 9600
 #define DeviceName "SensorTurtle 1"
 
-
+#define SEALEVELPRESSURE_HPA 1015
 #define BRIGHTNESS_LEDS 10
 #define NUM_LEDS 34
 #define DATA_LED_PIN 4
