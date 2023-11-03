@@ -46,7 +46,7 @@ void FastLedHandler::setup_led()
     #endif
 }
 
-void FastLedHandler::setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata)
+void FastLedHandler::setInputDataforLED(CO2Data co2Sensordata, Bsec enviromentdata)
 {
   this->bmedata = enviromentdata;
   this->co2data = co2Sensordata;
