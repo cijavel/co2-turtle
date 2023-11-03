@@ -20,7 +20,7 @@ public:
     void addLEDsection();
     void setup_led();
     bool ledstatus(const unsigned long currentSeconds);
-    void setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata);
+    void setInputDataforLED(CO2Data co2Sensordata, Bsec enviromentdata);
 
 
 private:
