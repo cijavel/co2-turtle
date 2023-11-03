@@ -144,13 +144,13 @@ void loop() {
 
 
     WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.setCo2AndData(mhz19Readout, bme_data);
+    webServer.setInputDataforBody(mhz19Readout, bme_data);
 
 
     EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
 
     FastLedHandler &ledHandler = FastLedHandler::getInstance();
-    ledHandler.setCo2AndData(mhz19Readout, bme_data);
+    ledHandler.setInputDataforLED(mhz19Readout, bme_data);
     ledHandler.ledstatus(currentSeconds);
 
 
