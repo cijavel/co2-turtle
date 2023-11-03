@@ -164,7 +164,7 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
   header_data.replace("{data_pressure}", String(bmedata.pressure));
   header_data.replace("{data_timestep}",String(bmedata.outputTimestamp));
   //header_data.replace("{data_time}",data_time);
-  //header_data.replace("{data_zone}",data_zone);
+  header_data.replace("{data_zone}",TIMEZONE);
 
   header_data.replace("{data_iaqaccuracy}", String(bmedata.iaqAccuracy));
   switch (bmedata.iaqAccuracy)

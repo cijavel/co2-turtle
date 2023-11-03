@@ -16,7 +16,11 @@
 #define PIN_MHZ19_RX 17
 #define PIN_MHZ19_TX 16
 #define BAUDRATE 9600
-#define DeviceName "SensorTurtle 1"
+#define DeviceName "SensorTurtle"
+#define Version "dev"
+
+
+#define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 
 #define BRIGHTNESS_LEDS 10
