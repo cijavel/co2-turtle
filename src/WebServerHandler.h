@@ -12,7 +12,7 @@ public:
         return instance;// Instantiated on first use.
     }
     void start();
-    void setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata);
+    void setInputDataforBody(CO2Data co2Sensordata, Bsec enviromentdata);
 private:
     CO2Data co2data;
     Bsec bmedata;

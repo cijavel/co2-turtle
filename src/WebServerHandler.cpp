@@ -383,7 +383,7 @@ void WebServerHandler::handle_NotFound(AsyncWebServerRequest *request)
   request->send(404, "text/plain; charset=utf-8", "Not found");
 }
 
-void WebServerHandler::setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata)
+void WebServerHandler::setInputDataforBody(CO2Data co2Sensordata, Bsec enviromentdata)
 {
   this->bmedata = enviromentdata;
   this->co2data = co2Sensordata;
