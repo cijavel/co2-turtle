@@ -1,5 +1,5 @@
-#ifndef CO2_TURTLE_CO2DATA_H
-#define CO2_TURTLE_CO2DATA_H
+#ifndef CO2_TURTLE_DATACO2_H
+#define CO2_TURTLE_DATACO2_H
 
 #include <Arduino.h>
 

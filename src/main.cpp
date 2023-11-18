@@ -143,7 +143,7 @@ void loop() {
 
 
     WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.setInputDataforBody(mhz19Readout, bme_data);
+    webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M"));
 
 
     EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);

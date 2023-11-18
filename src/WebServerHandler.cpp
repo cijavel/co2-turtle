@@ -1,6 +1,8 @@
 #include "WebServerHandler.h"
 #include "Configuration.h"
 
+
+
 WebServerHandler::WebServerHandler()
 {
   server.on("/", HTTP_GET, handle_index);
@@ -165,6 +167,7 @@ void WebServerHandler::handle_status(AsyncWebServerRequest *request)
   header_data.replace("{data_timestep}",String(bmedata.outputTimestamp));
   //header_data.replace("{data_time}",data_time);
   header_data.replace("{data_zone}",TIMEZONE);
+  header_data.replace("{data_time}", acDate);
 
   header_data.replace("{data_iaqaccuracy}", String(bmedata.iaqAccuracy));
   switch (bmedata.iaqAccuracy)
@@ -383,10 +386,11 @@ void WebServerHandler::handle_NotFound(AsyncWebServerRequest *request)
   request->send(404, "text/plain; charset=utf-8", "Not found");
 }
 
-void WebServerHandler::setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata)
+void WebServerHandler::setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata, String sdate)
 {
   this->bmedata = enviromentdata;
   this->co2data = co2Sensordata;
+  acDate = sdate;
 }
 
 void WebServerHandler::start()

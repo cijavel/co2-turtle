@@ -12,11 +12,12 @@ public:
         return instance;// Instantiated on first use.
     }
     void start();
-    void setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata);
+    void setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata, String sdate);
 private:
     DataCO2 co2data;
     Bsec bmedata;
     AsyncWebServer server = AsyncWebServer(80);
+    String acDate;
     static void handle_index(AsyncWebServerRequest *request);
     void handle_data(AsyncWebServerRequest *request);
     void handle_status(AsyncWebServerRequest *request);
