@@ -18,7 +18,7 @@
 
 #define EPDPrintFormatBufferSize 5
 
-void EPDHandler::printVertically(const CO2Data co2, const Bsec bme_data, const String& epd_date, const String& epd_time) {
+void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const String& epd_date, const String& epd_time) {
     display.init(BAUDRATE);
 
     uint16_t color_temp = GxEPD_BLACK;
@@ -115,7 +115,7 @@ void EPDHandler::printVertically(const CO2Data co2, const Bsec bme_data, const S
     display.end();
 }
 
-void EPDHandler::printHorizontally(const CO2Data co2, const Bsec bme_data, const String& epd_date, const String& epd_time)
+void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const String& epd_date, const String& epd_time)
 {
     display.init(BAUDRATE);
 
@@ -215,13 +215,13 @@ void EPDHandler::printHorizontally(const CO2Data co2, const Bsec bme_data, const
 
 
 
-void EPDHandler::updateEPDvertical(const CO2Data co2, const Bsec bme_data, const String& epd_date, const String& epd_time, const unsigned long currentSeconds ) {
+void EPDHandler::updateEPDvertical(const DataCO2 co2, const Bsec bme_data, const String& epd_date, const String& epd_time, const unsigned long currentSeconds ) {
     if (currentSeconds % interval_EPD_in_Seconds == 0){
         printVertically(co2, bme_data, epd_date, epd_time);
     }
 }
 
-void EPDHandler::updateEPDhorizontal(const CO2Data co2, const Bsec bme_data, const String& epd_date, const String& epd_time, const unsigned long currentSeconds ) {
+void EPDHandler::updateEPDhorizontal(const DataCO2 co2, const Bsec bme_data, const String& epd_date, const String& epd_time, const unsigned long currentSeconds ) {
     if (currentSeconds % interval_EPD_in_Seconds == 0){
         printHorizontally(co2, bme_data, epd_date, epd_time);
     }

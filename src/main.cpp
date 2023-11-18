@@ -138,7 +138,7 @@ void loop() {
 #endif
 
 
-    CO2Data mhz19Readout = mhz19Handler.getLastReadout();
+    DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
     WiFiHandler::checkWifi(currentSeconds);
 
 
