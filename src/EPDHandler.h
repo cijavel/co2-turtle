@@ -1,7 +1,7 @@
 #ifndef CO2_TURTLE_EPDHANDLER_H
 #define CO2_TURTLE_EPDHANDLER_H
 
-#include "CO2Data.h"
+#include "DataCO2.h"
 #include "bsec.h"
 
 class EPDHandler{
@@ -10,11 +10,11 @@ public:
         static EPDHandler instance; // Guaranteed to be destroyed.
         return instance;// Instantiated on first use.
     }
-    static void updateEPDvertical(CO2Data co2, Bsec data, const String& epd_date, const String& epd_time, unsigned long currentSeconds);
-    static void updateEPDhorizontal(CO2Data co2, Bsec data, const String& epd_date, const String& epd_time, unsigned long currentSeconds);
+    static void updateEPDvertical(DataCO2 co2, Bsec data, const String& epd_date, const String& epd_time, unsigned long currentSeconds);
+    static void updateEPDhorizontal(DataCO2 co2, Bsec data, const String& epd_date, const String& epd_time, unsigned long currentSeconds);
 private:
-    static void printVertically(CO2Data co2, Bsec bme_data, const String& epd_date, const String& epd_time);
-    static void printHorizontally(CO2Data co2, Bsec bme_data, const String& epd_date, const String& epd_time);
+    static void printVertically(DataCO2 co2, Bsec bme_data, const String& epd_date, const String& epd_time);
+    static void printHorizontally(DataCO2 co2, Bsec bme_data, const String& epd_date, const String& epd_time);
     EPDHandler() {};                    // Constructor? (the {} brackets) are needed here.
     EPDHandler(EPDHandler const&);  // Don't Implement
     void operator=(EPDHandler const&); // Don't implement

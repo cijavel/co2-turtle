@@ -2,7 +2,7 @@
 #define CO2_TURTLE_FASTLEDHANDLER_H
 
 #include "Configuration.h"
-#include "CO2Data.h"
+#include "DataCO2.h"
 #include "bsec.h"
 
 #include <WiFi.h>
@@ -20,7 +20,7 @@ public:
     void addLEDsection();
     void setup_led();
     bool ledstatus(const unsigned long currentSeconds);
-    void setInputDataforLED(CO2Data co2Sensordata, Bsec enviromentdata);
+    void setInputDataforLED(DataCO2 co2Sensordata, Bsec enviromentdata);
 
 
 private:
@@ -28,7 +28,7 @@ private:
     void ledStatusBME();
     void ledStatusCO2();
     
-    CO2Data co2data;
+    DataCO2 co2data;
     Bsec bmedata;
     FastLedHandler() {};                    // Constructor? (the {} brackets) are needed here.
     FastLedHandler(FastLedHandler const&);  // Don't Implement
