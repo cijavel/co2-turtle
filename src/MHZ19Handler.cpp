@@ -34,7 +34,7 @@ MHZ19Handler::MHZ19Handler() {
     //Serial.println(""MHZ19: Calibrating..");
     //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
     myMHZ19.verify();
-    _lastReadout = CO2Data();
+    _lastReadout = DataCO2();
 #ifdef DEBUG
     Serial.println();
     Serial.println("MHZ19: OK");
@@ -75,13 +75,13 @@ void MHZ19Handler::printoutLastReadout() {
         Serial.println();
 }
 
-CO2Data MHZ19Handler::getLastReadout() {
+DataCO2 MHZ19Handler::getLastReadout() {
     return _lastReadout;
 }
 
 bool MHZ19Handler::updateLastReadout() {
     if(myMHZ19.errorCode == RESULT_OK) {
-        _lastReadout = CO2Data(
+        _lastReadout = DataCO2(
                 myMHZ19.getCO2(),
                 myMHZ19.getCO2Raw(),
                 myMHZ19.getCO2(false),
