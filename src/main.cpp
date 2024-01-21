@@ -46,7 +46,11 @@
 #include "EPDHandler.h"
 #include "WebServerHandler.h"
 #include "FastLedHandler.h"
+<<<<<<< HEAD
 #include "MqttClientHandler.h"
+=======
+//#include "MqttClientHandler.h"
+>>>>>>> f4c698f (Major: mqtt first try)
 
 // --------------------------------------------------------------------------
 // time functions
@@ -154,6 +158,10 @@ void loop() {
     FastLedHandler &ledHandler = FastLedHandler::getInstance();
     ledHandler.setInputDataforLED(mhz19Readout, bme_data);
     ledHandler.ledstatus(currentSeconds);
+
+    
+    //MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+    //MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
 
 
     MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
