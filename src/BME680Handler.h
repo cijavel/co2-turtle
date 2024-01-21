@@ -5,6 +5,7 @@
 #include <EEPROM.h>
 #include "bsec.h"
 
+
 class BME680Handler {
 public:
     static BME680Handler &getInstance() {

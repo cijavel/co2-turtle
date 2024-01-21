@@ -38,7 +38,7 @@ const String name_bme680_zone                = "BME680 Timezone";
     generic_33v_300s_28d
 */
     const uint8_t bsec_config_iaq[] = {
-    #include "config/generic_33v_3s_4d/bsec_iaq.txt"
+    #include "config/generic_33v_3s_4d/bsec_iaq.txt"  
     };
     #define STATE_SAVE_PERIOD	UINT32_C(360 * 60 * 1000) // 360 minutes - 4 times a day
 
@@ -105,12 +105,13 @@ BME680Handler::BME680Handler(){
 
     // WICHTIG
     data.begin(BME68X_I2C_ADDR_HIGH, Wire);
+    data.setConfig(bsec_config_iaq);
+    checkSensorStatus();
+    loadState();
+   
 #ifdef DEBUG
     Serial.println("\nBME: BSEC library version " + String(data.version.major) + "." + String(data.version.minor) + "." + String(data.version.major_bugfix) + "." + String(data.version.minor_bugfix));
 #endif
-    data.setConfig(bsec_config_iaq);
-    checkSensorStatus();
-
     bsec_virtual_sensor_t sensorList[13] = {
             BSEC_OUTPUT_IAQ,
             BSEC_OUTPUT_STATIC_IAQ,
@@ -128,33 +129,30 @@ BME680Handler::BME680Handler(){
     };
 
     data.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
-
     
-    checkSensorStatus();
-    loadState();
-
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
 }
 
 void BME680Handler::printout() const {
-    Serial.println("BME680:");
     Serial.println();
-    Serial.println(name_bme680_timestamp            + ":     "            + String(data.outputTimestamp)    );
-    Serial.println(name_bme680_iaq                  + ":                " + String(data.iaq)                );
-    Serial.println(name_bme680_iaq_accuracy         + ":       "          + String(data.iaqAccuracy)        );
-    Serial.println(name_bme680_iaq_static           + ":         "        + String(data.staticIaq)          );
-    Serial.println(name_bme680_gas                  + ":          "       + String(data.gasResistance)      );
-    Serial.println(name_bme680_pressure             + ":     "            + String(data.pressure)           );
-    Serial.println(name_bme680_co2equil             + ":    "             + String(data.co2Equivalent)      );
-    Serial.println(name_bme680_stab                 + ":        "         + String(data.stabStatus)         );
-    Serial.println(name_bme680_runinStatus          + ":      "           + String(data.runInStatus)        );
-    Serial.println(name_bme680_percentage           + ":     "            + String(data.gasPercentage)      );
-    Serial.println(name_bme680_temperatur_relative  + ":           "      + String(data.temperature)        );
-    Serial.println(name_bme680_temperatur_raw       + ":       "          + String(data.rawTemperature)     );
-    Serial.println(name_bme680_humidity_relative    + ":      "           + String(data.humidity)           );
-    Serial.println(name_bme680_humidity_raw         + ":  "               + String(data.rawHumidity)        );
-    Serial.println(name_bme680_breahtvoc            + ": "                + String(data.breathVocEquivalent));
+    Serial.println("BME680:"); 
+    Serial.println(name_bme680_timestamp            + ":              "            + String(data.outputTimestamp)    );
+    Serial.println(name_bme680_iaq                  + ":                         " + String(data.iaq)                );
+    Serial.println(name_bme680_iaq_accuracy         + ":                "          + String(data.iaqAccuracy)        );
+    Serial.println(name_bme680_iaq_static           + ":                  "        + String(data.staticIaq)          );
+    Serial.println(name_bme680_gas                  + ":                   "       + String(data.gasResistance)      );
+    Serial.println(name_bme680_pressure             + ":              "            + String(data.pressure)           );
+    Serial.println(name_bme680_co2equil             + ":             "             + String(data.co2Equivalent)      );
+    Serial.println(name_bme680_stab                 + ":                 "         + String(data.stabStatus)         );
+    Serial.println(name_bme680_runinStatus          + ":               "           + String(data.runInStatus)        );
+    Serial.println(name_bme680_percentage           + ":              "            + String(data.gasPercentage)      );
+
+    Serial.println(name_bme680_temperatur_relative  + ":            "      + String(data.temperature)        );
+    Serial.println(name_bme680_temperatur_raw       + ":        "          + String(data.rawTemperature)     );
+    Serial.println(name_bme680_humidity_relative    + ":       "           + String(data.humidity)           );
+    Serial.println(name_bme680_humidity_raw         + ":   "               + String(data.rawHumidity)        );
+    Serial.println(name_bme680_breahtvoc            + ": "                 + String(data.breathVocEquivalent));
     Serial.println();
 }
 
