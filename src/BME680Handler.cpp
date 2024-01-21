@@ -39,7 +39,7 @@ const String name_bme680_zone                = "BME680 Timezone";
     generic_33v_300s_28d
 */
     const uint8_t bsec_config_iaq[] = {
-    #include "config/generic_33v_3s_4d/bsec_iaq.txt"
+    #include "config/generic_33v_3s_4d/bsec_iaq.txt"  
     };
     #define STATE_SAVE_PERIOD	UINT32_C(360 * 60 * 1000) // 360 minutes - 4 times a day
 
@@ -113,9 +113,6 @@ BME680Handler::BME680Handler(){
 #ifdef DEBUG
     Serial.println("\nBME: BSEC library version " + String(data.version.major) + "." + String(data.version.minor) + "." + String(data.version.major_bugfix) + "." + String(data.version.minor_bugfix));
 #endif
-    data.setConfig(bsec_config_iaq);
-    checkSensorStatus();
-
     bsec_virtual_sensor_t sensorList[13] = {
             BSEC_OUTPUT_IAQ,
             BSEC_OUTPUT_STATIC_IAQ,
@@ -133,11 +130,7 @@ BME680Handler::BME680Handler(){
     };
 
     data.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
-
     
-    checkSensorStatus();
-    loadState();
-
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
 }
