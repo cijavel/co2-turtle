@@ -21,12 +21,9 @@ public:
 private:
     static void WiFiEvent(WiFiEvent_t event);
     static void connectToMqtt();
-    static void onMqttConnect(bool sessionPresent);
+    static void disconnectfromMqtt();
     static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
     static void onMqttPublish(uint16_t packetId);
-    static void onMqttSubscribe(uint16_t packetId, uint8_t qos);
-    static void onMqttUnsubscribe(uint16_t packetId);
-    static void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
 
 
