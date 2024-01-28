@@ -22,13 +22,13 @@ MHZ19Handler::MHZ19Handler() {
 
     myMHZ19.autoCalibration(true);
 #ifdef DEBUG
-    Serial.print("MHZ19: ABC Status: ");
+    Serial.print("[MHZ19] ABC Status: ");
     myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
 #endif
     char myVersion[4];
     myMHZ19.getVersion(myVersion);
 #ifdef DEBUG
-    Serial.print("MHZ19: Range: ");
+    Serial.print("[MHZ19] Range: ");
     Serial.println(myMHZ19.getRange());
 #endif
     //Serial.println(""MHZ19: Calibrating..");
@@ -37,13 +37,13 @@ MHZ19Handler::MHZ19Handler() {
     _lastReadout = CO2Data();
 #ifdef DEBUG
     Serial.println();
-    Serial.println("MHZ19: OK");
+    Serial.println("[MHZ19] OK");
 #endif
 }
 
 void MHZ19Handler::printoutCurrentValues() {
     if(myMHZ19.errorCode == RESULT_OK) {
-        Serial.println("MHZ19 CurrentValues:");
+        Serial.println("[MHZ19] CurrentValues:");
 //        Serial.println(name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     );
 //        Serial.println(name_MHZ19_datetime        + ":      "      + data_MHZ19_datetime      );
         Serial.println(name_MHZ19_co2             + ":          "   + myMHZ19.getCO2()            );
@@ -56,15 +56,15 @@ void MHZ19Handler::printoutCurrentValues() {
         Serial.println();
     }
     else {
-        Serial.println("Failed to recieve CO2 value - Error");
-        Serial.print("Response Code: ");
+        Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
+        Serial.print("[MHZ19] Response Code: ");
         Serial.println(myMHZ19.errorCode);          // Get the Error Code value
     }
 }
 
 
 void MHZ19Handler::printoutLastReadout() {
-        Serial.println("MHZ19 LastReadout:");
+        Serial.println("[MHZ19] LastReadout:");
         Serial.println(name_MHZ19_co2             + ":          "   + String(_lastReadout.getRegular()       ));
         Serial.println(name_MHZ19_co2_raw         + ":      "       + String(_lastReadout.getRaw()           ));
         Serial.println(name_MHZ19_co2_limited     + ":            " + String(_lastReadout.getLimited()       ));
@@ -93,8 +93,8 @@ bool MHZ19Handler::updateLastReadout() {
         return true;
     }
     else {
-        Serial.println("Failed to recieve CO2 value - Error");
-        Serial.print("Response Code: ");
+        Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
+        Serial.print("[MHZ19] Response Code: ");
         Serial.println(myMHZ19.errorCode);          // Get the Error Code value
         return false;
     }
