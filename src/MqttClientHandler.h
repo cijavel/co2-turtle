@@ -18,6 +18,7 @@ public:
     }
     static void publishData(const DataCO2 co2, const Bsec bme_data, unsigned long currentSeconds);
     void setup_Mqtt();
+
 private:
     static void WiFiEvent(WiFiEvent_t event);
     static void connectToMqtt();

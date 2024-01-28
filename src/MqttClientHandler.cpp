@@ -10,7 +10,6 @@ extern "C" {
 	#include "freertos/timers.h"
 }
 #include <AsyncMqttClient.h>
-
 AsyncMqttClient mqttClient;
 
 void MqttClientHandler::connectToMqtt() {
