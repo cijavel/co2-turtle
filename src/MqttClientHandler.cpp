@@ -1,98 +1,153 @@
 #include "MqttClientHandler.h"
 #include "Configuration.h"
+#include "Credentials.h"
+#include <WiFi.h>
 
-#if ASYNC_TCP_SSL_ENABLED
-  #define MQTT_SECURE true
-  #define MQTT_SERVER_FINGERPRINT {0x7e, 0x36, 0x22, 0x01, 0xf9, 0x7e, 0x99, 0x2f, 0xc5, 0xdb, 0x3d, 0xbe, 0xac, 0x48, 0x67, 0x5b, 0x5d, 0x47, 0x94, 0xd2}
-  #define MQTT_PORT 8883
-  #else
-  #define MQTT_PORT 1883
-#endif
 
-AsyncMqttClient mqttClient;
 
 extern "C" {
-  #include "freertos/FreeRTOS.h"
-  #include "freertos/timers.h"
+	#include "freertos/FreeRTOS.h"
+	#include "freertos/timers.h"
 }
+#include <AsyncMqttClient.h>
 
+AsyncMqttClient mqttClient;
 TimerHandle_t mqttReconnectTimer;
+TimerHandle_t wifiReconnectTimer;
+
 
 void MqttClientHandler::connectToMqtt() {
-  Serial.println("MQTT: Connecting to MQTT.");
+  Serial.println("Connecting to MQTT...");
   mqttClient.connect();
 }
 
 void MqttClientHandler::WiFiEvent(WiFiEvent_t event) {
-    Serial.printf("[WiFi-event] event: %d\n", event);
+    Serial.printf("[MQTT] event: %d\n", event);
     wl_status_t status = WiFiClass::status();
     if (status != WL_CONNECTED)
     {
-        Serial.println("MQTT: WiFi lost connection");
-        xTimerStop(mqttReconnectTimer, 0); // ensure we don't reconnect to MQTT while reconnecting to Wi-Fi
+        Serial.println("[MQTT] MQTT lost connection");
     }
     else {
+        Serial.println("[MQTT] MQTT reconnection");
         connectToMqtt();
     }
 }
 
+
 void MqttClientHandler::onMqttConnect(bool sessionPresent) {
-  Serial.println("MQTT: Connected to MQTT.");
-  Serial.print("Session present: ");
-  Serial.println(sessionPresent);
+    uint16_t packetIdSub01 = mqttClient.subscribe("sensor/bme680/temperature"           , 1);
+    uint16_t packetIdSub02 = mqttClient.subscribe("sensor/bme680/temperature_raw"       , 1);
+    uint16_t packetIdSub03 = mqttClient.subscribe("sensor/bme680/humidity"              , 1);
+    uint16_t packetIdSub04 = mqttClient.subscribe("sensor/bme680/humidity_raw"          , 1);
+    uint16_t packetIdSub05 = mqttClient.subscribe("sensor/bme680/pressure"              , 1);
+    uint16_t packetIdSub06 = mqttClient.subscribe("sensor/bme680/gas"                   , 1);
+    uint16_t packetIdSub07 = mqttClient.subscribe("sensor/bme680/bme68xStatus"          , 1);
+    uint16_t packetIdSub08 = mqttClient.subscribe("sensor/bme680/breathVocAccuracy"     , 1);
+    uint16_t packetIdSub09 = mqttClient.subscribe("sensor/bme680/breathVocEquivalent"   , 1);
+    uint16_t packetIdSub10 = mqttClient.subscribe("sensor/bme680/bsecStatus"            , 1);
+    uint16_t packetIdSub11 = mqttClient.subscribe("sensor/bme680/co2Accuracy"           , 1);
+    uint16_t packetIdSub12 = mqttClient.subscribe("sensor/bme680/co2Equivalent"         , 1);
+    uint16_t packetIdSub13 = mqttClient.subscribe("sensor/bme680/compGasAccuracy"       , 1);
+    uint16_t packetIdSub14 = mqttClient.subscribe("sensor/bme680/compGasValue"          , 1);
+    uint16_t packetIdSub15 = mqttClient.subscribe("sensor/bme680/gasPercentage"         , 1);
+    uint16_t packetIdSub16 = mqttClient.subscribe("sensor/bme680/gasPercentageAccuracy" , 1);
+    uint16_t packetIdSub17 = mqttClient.subscribe("sensor/bme680/iaq"                   , 1);
+    uint16_t packetIdSub18 = mqttClient.subscribe("sensor/bme680/iaqAccuracy"           , 1);
+    uint16_t packetIdSub19 = mqttClient.subscribe("sensor/bme680/staticIaqAccuracy"     , 1);
+   
+    uint16_t packetIdSub20 = mqttClient.subscribe("sensor/mhz19/Accuracy"       , 1);
+    uint16_t packetIdSub21 = mqttClient.subscribe("sensor/mhz19/Background"     , 1);
+    uint16_t packetIdSub22 = mqttClient.subscribe("sensor/mhz19/Limited"        , 1);
+    uint16_t packetIdSub23 = mqttClient.subscribe("sensor/mhz19/Raw"            , 1);
+    uint16_t packetIdSub24 = mqttClient.subscribe("sensor/mhz19/Regular"        , 1);
+    uint16_t packetIdSub25 = mqttClient.subscribe("sensor/mhz19/TempAdjustment" , 1);
+    uint16_t packetIdSub26 = mqttClient.subscribe("sensor/mhz19/Temperature"    , 1);
+
+  //Serial.println("Connected to MQTT.");
+  //Serial.print("Session present: ");
+  // Serial.println(sessionPresent);
+  uint16_t packetIdSub = mqttClient.subscribe("test/lol", 2);
+  //Serial.print("Subscribing at QoS 2, packetId: ");
+  //Serial.println(packetIdSub);
+  mqttClient.publish("test/lol", 0, true, "ping");
+  //Serial.println("Publishing at QoS 0");
+  uint16_t packetIdPub1 = mqttClient.publish("test/lol", 1, true, "test 2");
+  //Serial.print("Publishing at QoS 1, packetId: ");
+  //Serial.println(packetIdPub1);
+  uint16_t packetIdPub2 = mqttClient.publish("test/lol", 2, true, "test 3");
+  //Serial.print("Publishing at QoS 2, packetId: ");
+  //Serial.println(packetIdPub2);
 }
 
 void MqttClientHandler::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-  Serial.println("MQTT: Disconnected from MQTT.");
+  Serial.println("[MQTT] Disconnected from MQTT");
+
   if (WiFi.isConnected()) {
     xTimerStart(mqttReconnectTimer, 0);
   }
 }
 
+void MqttClientHandler::onMqttSubscribe(uint16_t packetId, uint8_t qos) {
+ Serial.println("[MQTT] Subscribe acknowledged.");
+ Serial.print("  packetId: ");
+ Serial.println(packetId);
+ Serial.print("  qos: ");
+ Serial.println(qos);
+}
+
+void MqttClientHandler::onMqttUnsubscribe(uint16_t packetId) {
+  //Serial.println("[MQTT] Unsubscribe acknowledged.");
+  //Serial.print("  packetId: ");
+  //Serial.println(packetId);
+}
+
+void MqttClientHandler::onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+  //Serial.println("[MQTT] Publish received.");
+  //Serial.print("  topic: ");
+  //Serial.println(topic);
+  //Serial.print("  qos: ");
+  //Serial.println(properties.qos);
+  //Serial.print("  dup: ");
+  //Serial.println(properties.dup);
+  //Serial.print("  retain: ");
+  //Serial.println(properties.retain);
+  //Serial.print("  len: ");
+  //Serial.println(len);
+  //Serial.print("  index: ");
+  //Serial.println(index);
+  //Serial.print("  total: ");
+  //Serial.println(total);
+}
+
 void MqttClientHandler::onMqttPublish(uint16_t packetId) {
-  Serial.print("MQTT: Publish acknowledged.");
+  Serial.println("[MQTT] Publish acknowledged");
   Serial.print("  packetId: ");
   Serial.println(packetId);
 }
 
+void MqttClientHandler::setup_Mqtt() {
+  WiFi.onEvent(WiFiEvent);
 
-void MqttClientHandler::setup_Mqtt(){
-
-    mqttReconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(2000), pdFALSE, (void*)0, reinterpret_cast<TimerCallbackFunction_t>(connectToMqtt));
-    mqttClient.setKeepAlive(interval_mqtt_in_Seconds);
-    WiFi.onEvent(WiFiEvent);
-
-
-    mqttClient.onConnect(onMqttConnect);
-    mqttClient.onDisconnect(onMqttDisconnect);
-    //mqttClient.onSubscribe(onMqttSubscribe);
-    //mqttClient.onUnsubscribe(onMqttUnsubscribe);
-    mqttClient.onPublish(onMqttPublish);
-    mqttClient.setServer(MQTT_HOST, MQTT_PORT);
-    // If your broker requires authentication (username and password), set them below
-    mqttClient.setCredentials("Sensorturtle", "FfGCfePxCqpIOmZHdkNX");
-
-
-    #if ASYNC_TCP_SSL_ENABLED
-      mqttClient.setSecure(MQTT_SECURE);
-      if (MQTT_SECURE) {
-      mqttClient.addServerFingerprint((const uint8_t[])MQTT_SERVER_FINGERPRINT);
-      }
-    #endif
-
-    #ifdef DEBUG
-            Serial.println("MQTT: Set MQTT configuration");
-            Serial.println("MQTT: clientID: " + String(mqttClient.getClientId()));
-            mqttClient.connected();
-          
-    #endif
-
+  mqttClient.onConnect(onMqttConnect);
+  mqttClient.onDisconnect(onMqttDisconnect);
+  mqttClient.onSubscribe(onMqttSubscribe);
+  mqttClient.onUnsubscribe(onMqttUnsubscribe);
+  mqttClient.onMessage(onMqttMessage);
+  mqttClient.onPublish(onMqttPublish);
+  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  mqttClient.setCredentials(MQTT_USER, MQTT_PASS);
+  Serial.println("[MQTT] MQTT connected");
 }
+
 
 
 void MqttClientHandler::publishData(const CO2Data data_co2, const Bsec data_bme, const unsigned long currentSeconds){
     if (currentSeconds % interval_mqtt_in_Seconds == 0){
 
+      connectToMqtt();
+
+    uint16_t packetIdPub1 = mqttClient.publish("test/lol", 0, true, "pong");
     uint16_t packetIdPub01 = mqttClient.publish("sensor/bme680/temperature"           , 1, true, String(data_bme.temperature).c_str());
     uint16_t packetIdPub02 = mqttClient.publish("sensor/bme680/temperature_raw"       , 1, true, String(data_bme.rawTemperature).c_str());
     uint16_t packetIdPub03 = mqttClient.publish("sensor/bme680/humidity"              , 1, true, String(data_bme.humidity).c_str());
@@ -205,6 +260,3 @@ void MqttClientHandler::publishData(const CO2Data data_co2, const Bsec data_bme,
 
     }
 }
-
-
-

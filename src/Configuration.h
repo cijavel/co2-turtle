@@ -4,13 +4,13 @@
 //uncomment to get debug in serial
 #define DEBUG 1
 
-#define interval_MHZ19_in_Seconds 60
-#define interval_BME680_in_Seconds 60
+#define interval_MHZ19_in_Seconds 30
+#define interval_BME680_in_Seconds 30
 #define interval_WiFiCheck_in_Seconds 120
 #define interval_RAMPrintout_in_Seconds 600
 #define interval_EPD_in_Seconds 900
 #define interval_LED_in_Seconds 60
-#define interval_mqtt_in_Seconds 60
+#define interval_mqtt_in_Seconds 30
 
 #define PIN_BME680_SDA 21
 #define PIN_BME680_SCL 22
@@ -31,10 +31,12 @@
 
 
 // Raspberry Pi Mosquitto MQTT Broker
-#define MQTT_HOST IPAddress(192, 168, 1, 38)
+#define MQTT_HOST IPAddress(192, 168, 178, 38)
 // For a cloud MQTT broker, type the domain name
 //#define MQTT_HOST "example.com"
 #define MQTT_PORT 1883
+#define MQTT_USER_ENABLED 1
+
 
 
 

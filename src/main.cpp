@@ -46,7 +46,7 @@
 #include "EPDHandler.h"
 #include "WebServerHandler.h"
 #include "FastLedHandler.h"
-//#include "MqttClientHandler.h"
+#include "MqttClientHandler.h"
 
 // --------------------------------------------------------------------------
 // time functions
@@ -102,8 +102,8 @@ void setup() {
     ledhandler.addLEDsection();
     ledhandler.setup_led();
 
-    // MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-    // MqttHandler.setup_Mqtt();
+    MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+    MqttHandler.setup_Mqtt();
 }
 
 
@@ -113,7 +113,7 @@ void loop() {
     unsigned long currentSeconds = millis() / 1000;
 #ifdef DEBUG
     if (currentSeconds != last) {
-        Serial.print("Current loop second: ");
+        Serial.print("loop second: ");
         Serial.println(currentSeconds);
         last = currentSeconds;
     }
@@ -156,11 +156,10 @@ void loop() {
     ledHandler.setCo2AndData(mhz19Readout, bme_data);
     ledHandler.ledstatus(currentSeconds);
 
+
+    MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+    MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
     
-    //MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-    //MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
-
-
 #ifdef DEBUG
     PrintRamUsage(currentSeconds);
 #endif
