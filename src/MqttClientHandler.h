@@ -23,10 +23,6 @@ private:
     static void connectToMqtt();
     static void disconnectfromMqtt();
     static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
-    static void onMqttPublish(uint16_t packetId);
-
-
-
 
 };
 #endif //CO2_TURTLE_MQTTCLIENTHANDLER_H
