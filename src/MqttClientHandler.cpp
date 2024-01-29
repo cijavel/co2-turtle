@@ -57,7 +57,7 @@ void MqttClientHandler::setup_Mqtt() {
 
 
 
-void MqttClientHandler::publishData(const CO2Data data_co2, const Bsec data_bme, const unsigned long currentSeconds){
+void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme, const unsigned long currentSeconds){
     if (currentSeconds % interval_mqtt_in_Seconds == 0){
 
         connectToMqtt();

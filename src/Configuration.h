@@ -19,7 +19,7 @@
 #define BAUDRATE 9600
 
 #define DeviceName "dev mqtt"
-
+#define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 #define SEALEVELPRESSURE_HPA 1015
 #define BRIGHTNESS_LEDS 1

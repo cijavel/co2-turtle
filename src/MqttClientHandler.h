@@ -5,7 +5,7 @@
 #include "WiFiHandler.h"
 #include <WiFi.h>
 
-#include "CO2Data.h"
+#include "DataCO2.h"
 #include "bsec.h"
 
 
@@ -16,7 +16,7 @@ public:
         return instance;// Instantiated on first use.
 
     }
-    static void publishData(const CO2Data co2, const Bsec bme_data, unsigned long currentSeconds);
+    static void publishData(const DataCO2 co2, const Bsec bme_data, unsigned long currentSeconds);
     void setup_Mqtt();
 private:
     static void WiFiEvent(WiFiEvent_t event);
