@@ -3,11 +3,11 @@
 // EPD ePaper eINK
 // ---------------
 // BUSY 	  -> -1			Violett,
-// RST 	  	-> -1 		RX2	Blau,
+// RST 	  	  -> -1 		RX2	Blau,
 // DC 		  -> 27  		TX2	grün,
 // CS 		  -> SS(5)		gelb,
-// CLK 		  -> SCK(18)		orange,
-// DIN /SDI -> MOSI(23) 	weiß,
+// CLK 		  -> SCK(18)	orange,
+// DIN /SDI   -> MOSI(23) 	weiß,
 // GND 		  -> GND,
 // 3.3V 	  -> 3.3V
 //#define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
@@ -46,7 +46,7 @@
 #include "EPDHandler.h"
 #include "WebServerHandler.h"
 #include "FastLedHandler.h"
-
+#include "MqttClientHandler.h"
 
 // --------------------------------------------------------------------------
 // time functions
@@ -100,6 +100,9 @@ void setup() {
     FastLedHandler &ledhandler = FastLedHandler::getInstance();
     ledhandler.addLEDsection();
     ledhandler.setup_led();
+
+    MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+    MqttHandler.setup_Mqtt();
 }
 
 
@@ -109,7 +112,7 @@ void loop() {
     unsigned long currentSeconds = millis() / 1000;
 #ifdef DEBUG
     if (currentSeconds != last) {
-        Serial.print("Current loop second: ");
+        Serial.print("loop second: ");
         Serial.println(currentSeconds);
         last = currentSeconds;
     }
@@ -153,6 +156,9 @@ void loop() {
     ledHandler.ledstatus(currentSeconds);
 
 
+    MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+    MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
+    
 #ifdef DEBUG
     PrintRamUsage(currentSeconds);
 #endif

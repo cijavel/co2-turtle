@@ -17,11 +17,41 @@ const String name_bme680_breahtvoc           = "BME680 breath VOC equivalent [pp
 const String name_bme680_runinStatus         = "BME680 run in status";
 const String name_bme680_percentage          = "BME680 gas percentage";
 
+
+const String name_bme680_datetime            = "BME680 Date and Time";
+const String name_bme680_date                = "BME680 Date";
+const String name_bme680_time                = "BME680 Time";
+const String name_bme680_zone                = "BME680 Timezone";
+
+
+
+/* Configure the BSEC library with information about the sensor
+    18v/33v = Voltage at Vdd. 1.8V or 3.3V
+    3s/300s = BSEC operating mode, BSEC_SAMPLE_RATE_LP or BSEC_SAMPLE_RATE_ULP
+    4d/28d = Operating age of the sensor in days
+    generic_18v_3s_4d
+    generic_18v_3s_28d
+    generic_18v_300s_4d
+    generic_18v_300s_28d
+    generic_33v_3s_4d
+    generic_33v_3s_28d
+    generic_33v_300s_4d
+    generic_33v_300s_28d
+*/
+    const uint8_t bsec_config_iaq[] = {
+    #include "config/generic_33v_3s_4d/bsec_iaq.txt"  
+    };
+    #define STATE_SAVE_PERIOD	UINT32_C(360 * 60 * 1000) // 360 minutes - 4 times a day
+
+    uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
+    uint16_t stateUpdateCounter = 0;
+    
 bool BME680Handler::updateSensorData(const unsigned long currentSeconds) {
     if (currentSeconds % interval_BME680_in_Seconds == 0){
         updateSensorDataInternal();
         return true;
     }
+    updateState();
     return false;
 }
 
@@ -43,6 +73,7 @@ void BME680Handler::executeLedError(){
         delay(500);
     }
 }
+
 void BME680Handler::checkSensorStatus() const{
     if (data.bsecStatus != BSEC_OK) {
         if (data.bsecStatus < BSEC_OK) {
@@ -63,6 +94,8 @@ void BME680Handler::checkSensorStatus() const{
         }
     }
 }
+
+// setup
 BME680Handler::BME680Handler(){
     // WICHTIG
     Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
@@ -71,11 +104,13 @@ BME680Handler::BME680Handler(){
 
     // WICHTIG
     data.begin(BME68X_I2C_ADDR_HIGH, Wire);
+    data.setConfig(bsec_config_iaq);
+    checkSensorStatus();
+    loadState();
+   
 #ifdef DEBUG
     Serial.println("\nBME: BSEC library version " + String(data.version.major) + "." + String(data.version.minor) + "." + String(data.version.major_bugfix) + "." + String(data.version.minor_bugfix));
 #endif
-    checkSensorStatus();
-
     bsec_virtual_sensor_t sensorList[13] = {
             BSEC_OUTPUT_IAQ,
             BSEC_OUTPUT_STATIC_IAQ,
@@ -93,33 +128,92 @@ BME680Handler::BME680Handler(){
     };
 
     data.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
-    checkSensorStatus();
-
+    
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
 }
 
 void BME680Handler::printout() const {
-    Serial.println("BME680:");
     Serial.println();
-    Serial.println(name_bme680_timestamp            + ":     "            + String(data.outputTimestamp)    );
-    Serial.println(name_bme680_iaq                  + ":                " + String(data.iaq)                );
-    Serial.println(name_bme680_iaq_accuracy         + ":       "          + String(data.iaqAccuracy)        );
-    Serial.println(name_bme680_iaq_static           + ":         "        + String(data.staticIaq)          );
-    Serial.println(name_bme680_gas                  + ":          "       + String(data.gasResistance)      );
-    Serial.println(name_bme680_pressure             + ":     "            + String(data.pressure)           );
-    Serial.println(name_bme680_co2equil             + ":    "             + String(data.co2Equivalent)      );
-    Serial.println(name_bme680_stab                 + ":        "         + String(data.stabStatus)         );
-    Serial.println(name_bme680_runinStatus          + ":      "           + String(data.runInStatus)        );
-    Serial.println(name_bme680_percentage           + ":     "            + String(data.gasPercentage)      );
-    Serial.println(name_bme680_temperatur_relative  + ":           "      + String(data.temperature)        );
-    Serial.println(name_bme680_temperatur_raw       + ":       "          + String(data.rawTemperature)     );
-    Serial.println(name_bme680_humidity_relative    + ":      "           + String(data.humidity)           );
-    Serial.println(name_bme680_humidity_raw         + ":  "               + String(data.rawHumidity)        );
-    Serial.println(name_bme680_breahtvoc            + ": "                + String(data.breathVocEquivalent));
+    Serial.println("BME680:"); 
+    Serial.println(name_bme680_timestamp            + ":              "            + String(data.outputTimestamp)    );
+    Serial.println(name_bme680_iaq                  + ":                         " + String(data.iaq)                );
+    Serial.println(name_bme680_iaq_accuracy         + ":                "          + String(data.iaqAccuracy)        );
+    Serial.println(name_bme680_iaq_static           + ":                  "        + String(data.staticIaq)          );
+    Serial.println(name_bme680_gas                  + ":                   "       + String(data.gasResistance)      );
+    Serial.println(name_bme680_pressure             + ":              "            + String(data.pressure)           );
+    Serial.println(name_bme680_co2equil             + ":             "             + String(data.co2Equivalent)      );
+    Serial.println(name_bme680_stab                 + ":                 "         + String(data.stabStatus)         );
+    Serial.println(name_bme680_runinStatus          + ":               "           + String(data.runInStatus)        );
+    Serial.println(name_bme680_percentage           + ":              "            + String(data.gasPercentage)      );
+
+    Serial.println(name_bme680_temperatur_relative  + ":            "      + String(data.temperature)        );
+    Serial.println(name_bme680_temperatur_raw       + ":        "          + String(data.rawTemperature)     );
+    Serial.println(name_bme680_humidity_relative    + ":       "           + String(data.humidity)           );
+    Serial.println(name_bme680_humidity_raw         + ":   "               + String(data.rawHumidity)        );
+    Serial.println(name_bme680_breahtvoc            + ": "                 + String(data.breathVocEquivalent));
     Serial.println();
 }
 
 Bsec BME680Handler::getData() {
     return data;
+}
+
+void BME680Handler::loadState(void)
+{
+  if (EEPROM.read(0) == BSEC_MAX_STATE_BLOB_SIZE) {
+    // Existing state in EEPROM
+    Serial.println("Reading state from EEPROM");
+
+    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++) {
+      bsecState[i] = EEPROM.read(i + 1);
+      Serial.println(bsecState[i], HEX);
+    }
+
+    data.setState(bsecState);
+
+    checkSensorStatus();
+
+  } else {
+    // Erase the EEPROM with zeroes
+    Serial.println("Erasing EEPROM");
+
+    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE + 1; i++)
+      EEPROM.write(i, 0);
+
+    EEPROM.commit();
+  }
+}
+
+void BME680Handler::updateState(void)
+{
+  bool update = false;
+  if (stateUpdateCounter == 0) {
+    /* First state update when IAQ accuracy is >= 3 */
+    if (data.iaqAccuracy >= 3) {
+      update = true;
+      stateUpdateCounter++;
+    }
+  } else {
+    /* Update every STATE_SAVE_PERIOD minutes */
+    if ((stateUpdateCounter * STATE_SAVE_PERIOD) < millis()) {
+      update = true;
+      stateUpdateCounter++;
+    }
+  }
+
+  if (update) {
+    data.getState(bsecState);
+    checkSensorStatus();
+
+    Serial.println("Writing state to EEPROM");
+
+    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE ; i++) {
+      EEPROM.write(i + 1, bsecState[i]);
+      Serial.println(bsecState[i], HEX);
+    }
+
+    EEPROM.write(0, BSEC_MAX_STATE_BLOB_SIZE);
+    EEPROM.commit();
+  }
 }
