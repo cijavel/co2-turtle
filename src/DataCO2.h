@@ -1,9 +1,9 @@
-#ifndef CO2_TURTLE_CO2DATA_H
-#define CO2_TURTLE_CO2DATA_H
+#ifndef CO2_TURTLE_DATACO2_H
+#define CO2_TURTLE_DATACO2_H
 
 #include <Arduino.h>
 
-class CO2Data {
+class DataCO2 {
 private:
     int regular{};
     unsigned int raw{};
@@ -13,9 +13,9 @@ private:
     float temperature{};
     byte accuracy{};
 public:
-    CO2Data(int regular, unsigned int raw, int limited, int background, byte tempAdjustment, float temperature,
+    DataCO2(int regular, unsigned int raw, int limited, int background, byte tempAdjustment, float temperature,
             byte accuracy);
-    CO2Data();
+    DataCO2();
 
     int getRegular() const;
     void setRegular(int regular);

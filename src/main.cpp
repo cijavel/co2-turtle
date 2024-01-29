@@ -54,14 +54,13 @@
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 0;
 const int   daylightOffset_sec = 3600;
-const String timezone = "CET-1CEST,M3.5.0,M10.5.0/3";
 
 String localTime(const String& format) {
     struct tm timeinfo{};
 
     String time = "";
     char toutp[60];
-    setenv("TZ", timezone.c_str(), 1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+    setenv("TZ", TIMEZONE , 1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
     tzset();
 
     if (!getLocalTime(&timeinfo)) {
@@ -142,18 +141,18 @@ void loop() {
 #endif
 
 
-    CO2Data mhz19Readout = mhz19Handler.getLastReadout();
+    DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
     WiFiHandler::checkWifi(currentSeconds);
 
 
     WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.setCo2AndData(mhz19Readout, bme_data);
+    webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M"));
 
 
     EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
 
     FastLedHandler &ledHandler = FastLedHandler::getInstance();
-    ledHandler.setCo2AndData(mhz19Readout, bme_data);
+    ledHandler.setInputDataforLED(mhz19Readout, bme_data);
     ledHandler.ledstatus(currentSeconds);
 
 

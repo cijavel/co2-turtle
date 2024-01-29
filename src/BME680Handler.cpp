@@ -17,6 +17,7 @@ const String name_bme680_breahtvoc           = "BME680 breath VOC equivalent [pp
 const String name_bme680_runinStatus         = "BME680 run in status";
 const String name_bme680_percentage          = "BME680 gas percentage";
 
+
 const String name_bme680_datetime            = "BME680 Date and Time";
 const String name_bme680_date                = "BME680 Date";
 const String name_bme680_time                = "BME680 Time";
@@ -45,8 +46,6 @@ const String name_bme680_zone                = "BME680 Timezone";
     uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
     uint16_t stateUpdateCounter = 0;
     
-
-
 bool BME680Handler::updateSensorData(const unsigned long currentSeconds) {
     if (currentSeconds % interval_BME680_in_Seconds == 0){
         updateSensorDataInternal();

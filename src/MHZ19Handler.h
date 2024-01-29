@@ -4,7 +4,7 @@
 #include "MHZ19.h"
 #include "Arduino.h"
 #include "Configuration.h"
-#include "CO2Data.h"
+#include "DataCO2.h"
 
 class MHZ19Handler {
 public:
@@ -14,11 +14,11 @@ public:
     }
     void printoutCurrentValues();
     void printoutLastReadout();
-    CO2Data getLastReadout();
+    DataCO2 getLastReadout();
     bool runUpdate(unsigned long currentSeconds);
 private:
     bool updateLastReadout();
-    CO2Data _lastReadout;
+    DataCO2 _lastReadout;
     MHZ19 myMHZ19;
     SoftwareSerial* Serial_MHZ19;
     MHZ19Handler();                    // Constructor? (the {} brackets) are needed here.

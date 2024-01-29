@@ -2,7 +2,7 @@
 #define CO2_TURTLE_WEBSERVERHANDLER_H
 
 #include "ESPAsyncWebServer.h"
-#include "CO2Data.h"
+#include "DataCO2.h"
 #include "bsec.h"
 
 class WebServerHandler {
@@ -12,11 +12,12 @@ public:
         return instance;// Instantiated on first use.
     }
     void start();
-    void setCo2AndData(CO2Data co2Sensordata, Bsec enviromentdata);
+    void setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata, String sdate);
 private:
-    CO2Data co2data;
+    DataCO2 co2data;
     Bsec bmedata;
     AsyncWebServer server = AsyncWebServer(80);
+    String acDate;
     static void handle_index(AsyncWebServerRequest *request);
     void handle_data(AsyncWebServerRequest *request);
     void handle_status(AsyncWebServerRequest *request);

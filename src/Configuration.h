@@ -17,7 +17,9 @@
 #define PIN_MHZ19_RX 17
 #define PIN_MHZ19_TX 16
 #define BAUDRATE 9600
+
 #define DeviceName "dev mqtt"
+
 
 #define SEALEVELPRESSURE_HPA 1015
 #define BRIGHTNESS_LEDS 1
