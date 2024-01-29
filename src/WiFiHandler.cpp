@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include "WiFiHandler.h"
 
-// please rename credentials_example.h to credentials.h
+// please rename credentials_example.h to credentials.h and set your WIFI Credentials there
 #include "Credentials.h"
 #include "Configuration.h"
 
@@ -9,7 +9,7 @@ void WiFiHandler::initWifi() {
     int wifiWaitCount = 0;
     WiFiClass::setHostname(DeviceName); //maybe cstr
 #ifdef DEBUG
-    Serial.print("\nWIFI: Connecting to ");
+    Serial.print("\n[WIFI] Connecting to ");
     Serial.println(WIFI_SSID);
 #endif
     WiFi.begin(WIFI_SSID, WIFI_PW);
@@ -22,13 +22,13 @@ void WiFiHandler::initWifi() {
 #ifdef DEBUG
     if (WiFiClass::status() == WL_CONNECTED)
     {
-        Serial.println("WIFI: connected.");
-        Serial.print("WIFI: IP address: ");
+        Serial.println("[WIFI] connected.");
+        Serial.print("[WIFI] IP address: ");
         Serial.println(WiFi.localIP());
     }
     else
     {
-        Serial.println("WIFI: not connected");
+        Serial.println("[WIFI] not connected");
     }
 #endif
 }
@@ -43,7 +43,7 @@ bool WiFiHandler::StatusCheck()
 #ifdef DEBUG
     else
     {
-        Serial.println("WIFI: Still connected");
+        Serial.println("[WIFI] Still connected");
         Serial.println();
     }
 #endif
@@ -55,7 +55,7 @@ void WiFiHandler::ReStart()
 #ifdef DEBUG
     // Connect to WiFi network
     Serial.println();
-    Serial.print("Connecting to ");
+    Serial.print("[WIFI] Connecting to ");
     Serial.println(WIFI_SSID);
 #endif
     WiFi.begin(WIFI_SSID, WIFI_PW);
@@ -69,7 +69,7 @@ void WiFiHandler::ReStart()
     if (WiFiClass::status() == WL_CONNECTED)
     {
         Serial.println();
-        Serial.println("WiFi connected");
+        Serial.println("[WIFI] WiFi connected");
 
         // Print the IP address
         Serial.println(WiFi.localIP());

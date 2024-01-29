@@ -29,7 +29,7 @@ void FastLedHandler::addLEDsection()
     LEDsectionManager.addRangeToSection(LED_AIRQ, 19, 25, false);      // LED_AIRQ
     LEDsectionManager.addRangeToSection(LED_CO2, 27, 33, false);       // LED_CO2
     #ifdef DEBUG
-            Serial.println("FASTLED: Set LED sections");
+            Serial.println("[FASTLED] Set LED sections");
     #endif
 }
 
@@ -42,7 +42,7 @@ void FastLedHandler::setup_led()
     FastLED.setBrightness(BRIGHTNESS_LEDS);
 
     #ifdef DEBUG
-            Serial.println("FASTLED: Set LED configuration");
+            Serial.println("[FASTLED] Set LED configuration");
     #endif
 }
 
@@ -81,7 +81,7 @@ void FastLedHandler::ledStatusWiFi()
         FastLED.show();
     }
     #ifdef DEBUG
-            Serial.println("FASTLED: before show WIFI");
+            Serial.println("[FASTLED] before show WIFI");
     #endif
     FastLED.show();
 }
@@ -240,15 +240,14 @@ void FastLedHandler::ledStatusBME()
         }
     }
     #ifdef DEBUG
-            Serial.print("iaqAccuracy: ");
+            Serial.print("[FASTLED] iaqAccuracy: ");
             Serial.println(String(bmedata.iaqAccuracy));
-            Serial.print("temperature: ");
+            Serial.print("[FASTLED] temperature: ");
             Serial.println(String(bmedata.temperature));
-            Serial.print("humidity: ");
+            Serial.print("[FASTLED] humidity: ");
             Serial.println(String(bmedata.humidity));
-            Serial.print("iaq: ");
+            Serial.print("[FASTLED] iaq: ");
             Serial.println(String(bmedata.iaq));
-            Serial.println("FASTLED: before show bme");
     #endif
     FastLED.show();
 }
@@ -293,8 +292,8 @@ void FastLedHandler::ledStatusCO2()
         }
     }
     #ifdef DEBUG
+            Serial.print("[FASTLED] co2data: ");
             Serial.println(String(co2data.getRegular()));
-            Serial.println("FASTLED: before show co2");
     #endif
     FastLED.show();
 }

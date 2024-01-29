@@ -167,7 +167,7 @@ void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const
 
     PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
     PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
-    PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.iaq);
+    PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.staticIaq);
 
     display.setFont(&Inter_Bold12pt7b);
     display.setTextColor(color_co2);
