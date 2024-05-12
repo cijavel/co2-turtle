@@ -164,12 +164,6 @@ void loop() {
     MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
     
 
-    //MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-    //MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
-
-
-    MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-    MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
     
 
 #ifdef DEBUG
