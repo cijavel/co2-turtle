@@ -1,17 +1,17 @@
-#include "MHZ19Handler.h"
+#include "MHZ19Handler.h" //myMHZ19.calibrate();    // Take a reading which be used as the zero point f
 
-const String name_MHZ19_co2               = "MHZ19 CO2 [ppm]";
-const String name_MHZ19_co2_raw           = "MHZ19 CO2 raw [ppm]";
-const String name_MHZ19_co2_limited       = "MHZ19 limited";
-const String name_MHZ19_co2_background    = "MHZ19 Background";
-const String name_MHZ19_co2_tempAdjust    = "MHZ19 Temperature Adjust";
-const String name_MHZ19_co2_temperatur    = "MHZ19 Temperature [C]";
-const String name_MHZ19_co2_Accuracy      = "MHZ19 Accuracy";
-const String name_MHZ19_timestamp         = "MHZ19 Timestamp [ms]";
-const String name_MHZ19_datetime          = "MHZ19 Date and Time";
-const String name_MHZ19_date              = "MHZ19 Date";
-const String name_MHZ19_time              = "MHZ19 Time";
-const String name_MHZ19_zone              = "MHZ19 Timezone";
+const String name_MHZ19_co2               = "[MHZ19] CO2 [ppm]";
+const String name_MHZ19_co2_raw           = "[MHZ19] CO2 raw [ppm]";
+const String name_MHZ19_co2_limited       = "[MHZ19] limited";
+const String name_MHZ19_co2_background    = "[MHZ19] Background";
+const String name_MHZ19_co2_tempAdjust    = "[MHZ19] Temperature Adjust";
+const String name_MHZ19_co2_temperatur    = "[MHZ19] Temperature [C]";
+const String name_MHZ19_co2_Accuracy      = "[MHZ19] Accuracy";
+const String name_MHZ19_timestamp         = "[MHZ19] Timestamp [ms]";
+const String name_MHZ19_datetime          = "[MHZ19] Date and Time";
+const String name_MHZ19_date              = "[MHZ19] Date";
+const String name_MHZ19_time              = "[MHZ19] Time";
+const String name_MHZ19_zone              = "[MHZ19] Timezone";
 
 MHZ19Handler::MHZ19Handler() {
     Serial_MHZ19 = new SoftwareSerial(PIN_MHZ19_RX, PIN_MHZ19_TX);
@@ -31,7 +31,10 @@ MHZ19Handler::MHZ19Handler() {
     Serial.print("[MHZ19] Range: ");
     Serial.println(myMHZ19.getRange());
 #endif
-    //Serial.println(""MHZ19: Calibrating..");
+
+    //CALIBRATION
+    // reset the MH-Z19B sensor by connecting "GND" pin and the "HD" pin for 7-10 seconds!!! This worked and I calibrated the sensor by running him at the open window and it is now starting up with 400~410 PPM.
+    //Serial.println("MHZ19: Calibrating..");
     //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
     myMHZ19.verify();
     _lastReadout = DataCO2();
