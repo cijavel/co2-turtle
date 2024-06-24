@@ -143,14 +143,17 @@ void loop() {
 #else
     mhz19Handler.runUpdate(currentSeconds);
 #endif
-
+    
 
     DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
+
+
+    
     WiFiHandler::checkWifi(currentSeconds);
 
 
     WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M"));
+    webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));
 
 
     EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
