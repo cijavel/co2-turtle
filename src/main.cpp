@@ -101,12 +101,19 @@ void setup() {
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.start();
 
-    FastLedHandler &ledhandler = FastLedHandler::getInstance();
-    ledhandler.addLEDsection();
-    ledhandler.setup_led();
+    
 
-    MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-    MqttHandler.setup_Mqtt();
+    #ifdef switch_LED
+        FastLedHandler &ledhandler = FastLedHandler::getInstance();
+        ledhandler.setup_led();
+    #endif
+
+    #ifdef switch_mqtt
+        MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+        MqttHandler.setup_Mqtt();
+    #endif
+    
+
 }
 
 
@@ -123,7 +130,11 @@ void loop() {
 #endif
 
 
-    BME680Handler &bmehandler = BME680Handler::getInstance();
+
+
+BME680Handler &bmehandler = BME680Handler::getInstance();
+Bsec bme_data = bmehandler.getData();
+
 #ifdef DEBUG
     if (bmehandler.updateSensorData(currentSeconds)) {
         bmehandler.printout();
@@ -134,8 +145,7 @@ void loop() {
 
 
 
-    Bsec bme_data = bmehandler.getData();
-    MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
+MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
 #ifdef DEBUG
     if (mhz19Handler.runUpdate(currentSeconds)) {
         mhz19Handler.printoutLastReadout();
@@ -143,28 +153,39 @@ void loop() {
 #else
     mhz19Handler.runUpdate(currentSeconds);
 #endif
+DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
+
+
+#ifdef switch_WiFiCheck
+        WiFiHandler::checkWifi(currentSeconds);
+#endif
+   
+
+#ifdef switch_Webserver
+        WebServerHandler &webServer = WebServerHandler::getInstance();
+        webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));   
+#endif
     
 
-    DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
+#ifdef switch_EPD
+        EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
+#endif
 
 
+#ifdef switch_LED
+        FastLedHandler &ledHandler = FastLedHandler::getInstance();
+        ledHandler.setInputDataforLED(mhz19Readout, bme_data);
+        ledHandler.ledstatus(currentSeconds);
+#else
+        FastLedHandler &ledHandler = FastLedHandler::getInstance();
+        ledHandler.setup_black(currentSeconds);
+#endif
     
-    WiFiHandler::checkWifi(currentSeconds);
 
-
-    WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));
-
-
-    EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
-
-    FastLedHandler &ledHandler = FastLedHandler::getInstance();
-    ledHandler.setInputDataforLED(mhz19Readout, bme_data);
-    ledHandler.ledstatus(currentSeconds);
-
-
-    MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-    MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
+#ifdef switch_mqtt
+        MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+        MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
+#endif
     
 
     
