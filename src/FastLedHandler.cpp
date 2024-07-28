@@ -6,8 +6,7 @@ CRGB leds[NUM_LEDS];
 
 // Map section names to their corresponding sections
 SectionStruc sections[NUM_SECTIONS] = {
-    {0, 0},   // LED_WLANCONNECT
-    {1, 1},   // LED_STATUS
+    {0, 1},   // LED_WLANCONNECT
     {3, 9},   // LED_TEMP
     {11, 17}, // LED_HUM
     {19, 25}, // LED_AIRQ
@@ -68,43 +67,10 @@ void FastLedHandler::ledStatusWiFi()
     #ifdef DEBUG
             Serial.println("[FASTLED] before show WIFI");
     #endif
-    FastLED.show();
 }
 
 void FastLedHandler::ledStatusBME()
 {
-    switch (bmedata.iaqAccuracy)
-    {
-        case 0:
-        {
-            // Calibration phase. Please wait....
-            setSectionColor(LED_STATUS, CRGB::Red);
-            break;
-        }
-        case 1:
-        {
-            // learning
-            setSectionColor(LED_STATUS, CRGB::Yellow);
-            break;
-        }
-        case 2:
-        {
-            // good
-            setSectionColor(LED_STATUS, CRGB::GreenYellow);
-            break;
-        }
-        case 3:
-        {
-            // good. start saving them.
-            setSectionColor(LED_STATUS, CRGB::Green);
-            break;
-        }
-        default:
-        {
-            // this should never happen! iaqAccuracy < 0 || iaqAccuracy > 3");
-        }
-    }
-
     if (bmedata.temperature)
     {
         if (bmedata.temperature < 16) // too cold
@@ -221,8 +187,6 @@ void FastLedHandler::ledStatusBME()
         }
     }
     #ifdef DEBUG
-            Serial.print("[FASTLED] iaqAccuracy: ");
-            Serial.println(String(bmedata.iaqAccuracy));
             Serial.print("[FASTLED] temperature: ");
             Serial.println(String(bmedata.temperature));
             Serial.print("[FASTLED] humidity: ");
@@ -230,7 +194,6 @@ void FastLedHandler::ledStatusBME()
             Serial.print("[FASTLED] iaq: ");
             Serial.println(String(bmedata.iaq));
     #endif
-    FastLED.show();
 }
 
 void FastLedHandler::ledStatusCO2()
@@ -274,7 +237,6 @@ void FastLedHandler::ledStatusCO2()
             Serial.print("[FASTLED] co2data: ");
             Serial.println(String(co2data.getRegular()));
     #endif
-    FastLED.show();
 }
 
 bool FastLedHandler::setup_black(const unsigned long currentSeconds)
