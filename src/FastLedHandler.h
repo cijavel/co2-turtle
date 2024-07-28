@@ -4,11 +4,11 @@
 #include "Configuration.h"
 #include "DataCO2.h"
 #include "bsec.h"
-
 #include <WiFi.h>
 #include <SPI.h>
 #include <FastLED.h>
-#include <SectionManager.h>
+#include "sectionLed.h"
+
 
 class FastLedHandler{
 public:
@@ -17,13 +17,14 @@ public:
         return instance;// Instantiated on first use.
     }
 
-    void addLEDsection();
     void setup_led();
+    bool setup_black(const unsigned long currentSeconds);
     bool ledstatus(const unsigned long currentSeconds);
     void setInputDataforLED(DataCO2 co2Sensordata, Bsec enviromentdata);
 
 
 private:
+    void setSectionColor(SectionName sectionName, CRGB color);
     void ledStatusWiFi();
     void ledStatusBME();
     void ledStatusCO2();
