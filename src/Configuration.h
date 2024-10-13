@@ -26,10 +26,11 @@
 #define PIN_MHZ19_TX 16
 #define BAUDRATE 9600
 
-#define DeviceName "Sensorturtle_1"
+#define DeviceName "Sensorturtle_1_13.10.2024"
 #define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 #define SEALEVELPRESSURE_HPA 1015
+#define TEMPERATUR_OFFSET -3.5
 #define BRIGHTNESS_LEDS 2 // dont set 1. it will all leds set to red
 #define NUM_LEDS 34
 #define DATA_LED_PIN 4

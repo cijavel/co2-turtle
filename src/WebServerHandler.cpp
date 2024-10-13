@@ -37,23 +37,36 @@ void WebServerHandler::handle_index(AsyncWebServerRequest *request)
 
 void WebServerHandler::handle_data(AsyncWebServerRequest *request)
 {
-  String header_data = "";
-  //            "{\n\"" +
-  //            name_timestamp        + "\":\"" + data_timestamp              + "\",\n" + "\"" +
-  //            name_datetime         + "\":\"" + data_date + " " + data_time + "\",\n" + "\"" +
-  //            name_zone             + "\":\"" + data_zone                   + "\",\n" + "\"" +
-  //            name_rawtemperatur    + "\":\"" + data_rawtemperatur          + "\",\n" + "\"" +
-  //            name_temp             + "\":\"" + data_temp                   + "\",\n" + "\"" +
-  //            name_pressure         + "\":\"" + data_pressure               + "\",\n" + "\"" +
-  //            name_rawhumidity      + "\":\"" + data_rawhumidity            + "\",\n" + "\"" +
-  //            name_relativehumidity + "\":\"" + data_relativehumidity       + "\",\n" + "\"" +
-  //            name_gas              + "\":\"" + data_gas                    + "\",\n" + "\"" +
-  //            name_iaq              + "\":\"" + data_iaq                    + "\",\n" + "\"" +
-  //            name_iaqaccuracy      + "\":\"" + data_iaqaccuracy            + "\",\n" + "\"" +
-  //            name_iaqstatic        + "\":\"" + data_iaqstatic              + "\",\n" +  "\"" +
-  //            name_co2equil         + "\":\"" + data_co2equil               + "\",\n" + "\"" +
-  //            name_breahtvoc        + "\":\"" + data_breahtvoc              + "\",\n" + "\"" +
-  //            name_MHZ19B_co2       + "\":\"" + data_MHZ19B_co2             + "\"\n}";
+  String header_data = '{\n\"bme680/temperature'           + '\":\"' + String(bmedata.temperature)                  + '\",\n' + '\"' +
+                          '\"bme680/temperature_offset'    + '\":\"' + String(bmedata.temperature+TEMPERATUR_OFFSET)+ '\",\n' + '\"' +
+                          '\"bme680/temperature_raw'       + '\":\"' + String(bmedata.rawTemperature)               + '\",\n' + '\"' +
+                          '\"bme680/humidity'              + '\":\"' + String(bmedata.humidity)                     + '\",\n' + '\"' +
+                          '\"bme680/humidity_raw'          + '\":\"' + String(bmedata.rawHumidity)                  + '\",\n' + '\"' +
+                          '\"bme680/pressure'              + '\":\"' + String(bmedata.pressure)                     + '\",\n' + '\"' +
+                          '\"bme680/gas'                   + '\":\"' + String(bmedata.gasResistance)                + '\",\n' + '\"' +
+                          '\"bme680/bme68xStatus'          + '\":\"' + String(bmedata.bme68xStatus)                 + '\",\n' + '\"' +
+                          '\"bme680/breathVocAccuracy'     + '\":\"' + String(bmedata.breathVocAccuracy)            + '\",\n' + '\"' +
+                          '\"bme680/breathVocEquivalent'   + '\":\"' + String(bmedata.breathVocEquivalent)          + '\",\n' + '\"' +
+                          '\"bme680/bsecStatus'            + '\":\"' + String(bmedata.bsecStatus)                   + '\",\n' + '\"' +
+                          '\"bme680/co2Accuracy'           + '\":\"' + String(bmedata.co2Accuracy)                  + '\",\n' + '\"' +
+                          '\"bme680/co2Equivalent'         + '\":\"' + String(bmedata.co2Equivalent)                + '\",\n' + '\"' +
+                          '\"bme680/compGasAccuracy'       + '\":\"' + String(bmedata.compGasAccuracy)              + '\",\n' + '\"' +
+                          '\"bme680/compGasValue'          + '\":\"' + String(bmedata.compGasValue)                 + '\",\n' + '\"' +
+                          '\"bme680/gasPercentage'         + '\":\"' + String(bmedata.gasPercentage)                + '\",\n' + '\"' +
+                          '\"bme680/gasPercentageAccuracy' + '\":\"' + String(bmedata.gasPercentageAccuracy)        + '\",\n' + '\"' +
+                          '\"bme680/iaq'                   + '\":\"' + String(bmedata.iaq)                          + '\",\n' + '\"' +
+                          '\"bme680/iaqAccuracy'           + '\":\"' + String(bmedata.iaqAccuracy)                  + '\",\n' + '\"' +
+                          '\"bme680/staticIaqAccuracy'     + '\":\"' + String(bmedata.staticIaqAccuracy)            + '\",\n' + '\"' +
+                          '\"mhz19/Accuracy'               + '\":\"' + String(co2data.getAccuracy())                + '\",\n' + '\"' +
+                          '\"mhz19/Background'             + '\":\"' + String(co2data.getBackground())              + '\",\n' + '\"' +
+                          '\"mhz19/Limited'                + '\":\"' + String(co2data.getLimited())                 + '\",\n' + '\"' +
+                          '\"mhz19/Raw'                    + '\":\"' + String(co2data.getRaw())                     + '\",\n' + '\"' +
+                          '\"mhz19/Regular'                + '\":\"' + String(co2data.getRegular())                 + '\",\n' + '\"' +
+                          '\"mhz19/TempAdjustment'         + '\":\"' + String(co2data.getTempAdjustment())          + '\",\n' + '\"' +
+                          '\"mhz19/Temperature'            + '\":\"' + String(co2data.getTemperature())             + '\"\n}';
+
+
+
   request->send(200, "application/json; charset=utf-8", header_data);
 }
 

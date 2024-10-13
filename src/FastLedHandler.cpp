@@ -6,9 +6,9 @@ CRGB leds[NUM_LEDS];
 
 // Map section names to their corresponding sections
 SectionStruc sections[NUM_SECTIONS] = {
-    {0, 1},   // LED_WLANCONNECT
-    {3, 9},   // LED_TEMP
-    {11, 17}, // LED_HUM
+    {0, 6},   // LED_TEMP
+    {8, 14},  // LED_HUM
+    {16, 17}, // LED_WLANCONNECT
     {19, 25}, // LED_AIRQ
     {27, 33}  // LED_CO2
 };
@@ -20,6 +20,7 @@ void FastLedHandler::setSectionColor(SectionName sectionName, CRGB color) {
     }
     FastLED.show();
 }
+
 void FastLedHandler::setup_led()
 {
     FastLED.addLeds<LED_TYPE, DATA_LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
@@ -71,37 +72,38 @@ void FastLedHandler::ledStatusWiFi()
 
 void FastLedHandler::ledStatusBME()
 {
-    if (bmedata.temperature)
+    long temperature = bmedata.temperature+TEMPERATUR_OFFSET;
+    if (temperature)
     {
-        if (bmedata.temperature < 16) // too cold
+        if (temperature < 400) // wet
         {
             setSectionColor(LED_TEMP, CRGB::LightBlue);
         }
-        else if (bmedata.temperature < 18) // cold
+        else if (temperature < 18) // cold
         {
             setSectionColor(LED_TEMP, CRGB::Blue);
         }
-        else if (bmedata.temperature < 20) // cool
+        else if (temperature < 20) // cool
         {
             setSectionColor(LED_TEMP, CRGB::SeaGreen);
         }
-        else if (bmedata.temperature < 22) // normal
+        else if (temperature < 22) // normal
         {
             setSectionColor(LED_TEMP, CRGB::Green);
         }
-        else if (bmedata.temperature < 24) // cosy
+        else if (temperature < 24) // cosy
         {
             setSectionColor(LED_TEMP, CRGB::GreenYellow);
         }
-        else if (bmedata.temperature < 26) // warm
+        else if (temperature < 26) // warm
         {
             setSectionColor(LED_TEMP, CRGB::Yellow);
         }
-        else if (bmedata.temperature < 28) // hot
+        else if (temperature < 28) // hot
         {
             setSectionColor(LED_TEMP, CRGB::Orange);
         }
-        else if (bmedata.temperature > 28) // scalding hot
+        else if (temperature > 28) // scalding hot
         {
             setSectionColor(LED_TEMP, CRGB::Red);
         }
@@ -151,38 +153,43 @@ void FastLedHandler::ledStatusBME()
         }
     }
 
-    if (bmedata.iaq > 0)
+    if (bmedata.pressure > 0)
     {
-        if (bmedata.iaq <= 50) // exellent
+        long pressure = bmedata.pressure/100;
+        if (pressure <= 400) // wet
         {
-            setSectionColor(LED_AIRQ, CRGB::SeaGreen);
+            setSectionColor(LED_PRES, CRGB::RoyalBlue);
         }
-        else if (bmedata.iaq <= 100) // good
+        else if (pressure <= 500) // good
         {
-            setSectionColor(LED_AIRQ, CRGB::Green);
+            setSectionColor(LED_PRES, CRGB::Turquoise);
         }
-        else if (bmedata.iaq <= 150) // lightly polluted. Ventilation suggested.
+        else if (pressure <= 600) // 
         {
-            setSectionColor(LED_AIRQ, CRGB::YellowGreen);
+            setSectionColor(LED_PRES, CRGB::Aquamarine);
         }
-        else if (bmedata.iaq <= 200) // moderately polluted. please ventilate.
+        else if (pressure <= 700) // 
         {
-            setSectionColor(LED_AIRQ, CRGB::Yellow);
+            setSectionColor(LED_PRES, CRGB::SpringGreen);
         }
-        else if (bmedata.iaq < 250) // heavily polluted. please ventilate.
+        else if (pressure <= 800) // 
         {
-            setSectionColor(LED_AIRQ, CRGB::Orange);
+            setSectionColor(LED_PRES, CRGB::Green);
         }
-        else if (bmedata.iaq < 300) // severly polluted. please ventilate urgently.
+        else if (pressure < 900) // 
         {
-            setSectionColor(LED_AIRQ, CRGB::Red);
+            setSectionColor(LED_PRES, CRGB::GreenYellow);
         }
-        else // extremly polluted. please ventilate urgently.
+        else if (pressure < 1000) // 
         {
-            setSectionColor(LED_AIRQ, CRGB::Black);
+            setSectionColor(LED_PRES, CRGB::YellowGreen);
+        }
+        else // 
+        {
+            setSectionColor(LED_PRES, CRGB::Black);
             delay(150);
 
-            setSectionColor(LED_AIRQ, CRGB::Magenta);
+            setSectionColor(LED_PRES, CRGB::Gold);
             delay(500);
         }
     }
@@ -191,8 +198,8 @@ void FastLedHandler::ledStatusBME()
             Serial.println(String(bmedata.temperature));
             Serial.print("[FASTLED] humidity: ");
             Serial.println(String(bmedata.humidity));
-            Serial.print("[FASTLED] iaq: ");
-            Serial.println(String(bmedata.iaq));
+            Serial.print("[FASTLED] pressure: ");
+            Serial.println(String(bmedata.pressure/100));
     #endif
 }
 
