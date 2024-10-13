@@ -65,6 +65,7 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 
         if (mqttClient.connected()==false){
           mqttClient.publish("sensor/bme680/temperature"           , 1, true, String(data_bme.temperature).c_str());
+          mqttClient.publish("sensor/bme680/temperature_offset"    , 1, true, String(data_bme.temperature+TEMPERATUR_OFFSET).c_str());
           mqttClient.publish("sensor/bme680/temperature_raw"       , 1, true, String(data_bme.rawTemperature).c_str());
           mqttClient.publish("sensor/bme680/humidity"              , 1, true, String(data_bme.humidity).c_str());
           mqttClient.publish("sensor/bme680/humidity_raw"          , 1, true, String(data_bme.rawHumidity).c_str());

@@ -9,6 +9,7 @@ const String name_bme680_gas                 = "[BME680] gas [Ohm]";
 const String name_bme680_iaq                 = "[BME680] IAQ";
 const String name_bme680_iaq_accuracy        = "[BME680] IAQ accuracy";
 const String name_bme680_temperatur_relative = "[BME680] temperature [°C]";
+const String name_bme680_temperatur_offset   = "[BME680] temperature with offset [°C]";
 const String name_bme680_humidity_relative   = "[BME680] relative humidity [%]";
 const String name_bme680_stab                = "[BME680] Stab Status";
 const String name_bme680_iaq_static          = "[BME680] IAQ Static";
@@ -143,17 +144,18 @@ void BME680Handler::printout() const {
     Serial.println(name_bme680_iaq_accuracy         + ":                "          + String(data.iaqAccuracy)        );
     Serial.println(name_bme680_iaq_static           + ":                  "        + String(data.staticIaq)          );
     Serial.println(name_bme680_gas                  + ":                   "       + String(data.gasResistance)      );
-    Serial.println(name_bme680_pressure             + ":              "            + String(data.pressure)           );
+    Serial.println(name_bme680_pressure             + ":              "            + String(data.pressure/100)       );
     Serial.println(name_bme680_co2equil             + ":             "             + String(data.co2Equivalent)      );
     Serial.println(name_bme680_stab                 + ":                 "         + String(data.stabStatus)         );
     Serial.println(name_bme680_runinStatus          + ":               "           + String(data.runInStatus)        );
     Serial.println(name_bme680_percentage           + ":              "            + String(data.gasPercentage)      );
 
-    Serial.println(name_bme680_temperatur_relative  + ":            "      + String(data.temperature)        );
-    Serial.println(name_bme680_temperatur_raw       + ":        "          + String(data.rawTemperature)     );
-    Serial.println(name_bme680_humidity_relative    + ":       "           + String(data.humidity)           );
-    Serial.println(name_bme680_humidity_raw         + ":   "               + String(data.rawHumidity)        );
-    Serial.println(name_bme680_breahtvoc            + ": "                 + String(data.breathVocEquivalent));
+    Serial.println(name_bme680_temperatur_relative  + ":            "      + String(data.temperature)                  );
+    Serial.println(name_bme680_temperatur_offset    + ":            "      + String(data.temperature+TEMPERATUR_OFFSET));
+    Serial.println(name_bme680_temperatur_raw       + ":        "          + String(data.rawTemperature)               );
+    Serial.println(name_bme680_humidity_relative    + ":       "           + String(data.humidity)                     );
+    Serial.println(name_bme680_humidity_raw         + ":   "               + String(data.rawHumidity)                  );
+    Serial.println(name_bme680_breahtvoc            + ": "                 + String(data.breathVocEquivalent)          );
     Serial.println();
 }
 
