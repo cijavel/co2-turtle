@@ -3,10 +3,10 @@
 
 // Define an enumeration for section names
 enum SectionName {
-    LED_WLANCONNECT,
     LED_TEMP,
     LED_HUM,
-    LED_AIRQ,
+    LED_WLANCONNECT,
+    LED_PRES,
     LED_CO2,
     NUM_SECTIONS
 };
