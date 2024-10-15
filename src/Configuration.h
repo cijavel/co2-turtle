@@ -14,7 +14,7 @@
 
 #define interval_MHZ19_in_Seconds 30
 #define interval_BME680_in_Seconds 30
-#define interval_WiFiCheck_in_Seconds 120
+#define interval_WiFiCheck_in_Seconds 300
 #define interval_RAMPrintout_in_Seconds 600
 #define interval_EPD_in_Seconds 900
 #define interval_LED_in_Seconds 30
@@ -26,7 +26,7 @@
 #define PIN_MHZ19_TX 16
 #define BAUDRATE 9600
 
-#define DeviceName "Sensorturtle_1_13.10.2024"
+#define DeviceName "Sensorturtle_3 15.10.2024"
 #define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 #define SEALEVELPRESSURE_HPA 1015
@@ -39,18 +39,9 @@
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 
-
-
-// Raspberry Pi Mosquitto MQTT Broker
 #define MQTT_HOST IPAddress(192, 168, 178, 38)
-// For a cloud MQTT broker, type the domain name
 //#define MQTT_HOST "example.com"
 #define MQTT_PORT 1883
 #define MQTT_USER_ENABLED 1
 
-
-
-
 #endif //CO2_TURTLE_CONFIGURATION_H
-
-
