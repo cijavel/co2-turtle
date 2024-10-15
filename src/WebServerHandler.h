@@ -21,6 +21,8 @@ private:
     static void handle_index(AsyncWebServerRequest *request);
     void handle_data(AsyncWebServerRequest *request);
     void handle_status(AsyncWebServerRequest *request);
+    void handle_ap(AsyncWebServerRequest *request);
+    void handle_credentials_submit(AsyncWebServerRequest *request);
     static void handle_NotFound(AsyncWebServerRequest *request);
     WebServerHandler();                    // Constructor? (the {} brackets) are needed here.
     WebServerHandler(WebServerHandler const&);  // Don't Implement
