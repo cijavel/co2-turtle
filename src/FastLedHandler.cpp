@@ -75,13 +75,21 @@ void FastLedHandler::ledStatusBME()
     long temperature = bmedata.temperature+TEMPERATUR_OFFSET;
     if (temperature)
     {
-        if (temperature < 400) // wet
+        if (temperature < 12) // colder
         {
-            setSectionColor(LED_TEMP, CRGB::LightBlue);
+            setSectionColor(LED_TEMP, CRGB::BlueViolet);
+        }
+        else if (temperature < 14) // colder
+        {
+            setSectionColor(LED_TEMP, CRGB::DarkBlue);
+        }
+        else if (temperature < 16) // colder
+        {
+            setSectionColor(LED_TEMP, CRGB::Blue);
         }
         else if (temperature < 18) // cold
         {
-            setSectionColor(LED_TEMP, CRGB::Blue);
+            setSectionColor(LED_TEMP, CRGB::LightBlue);
         }
         else if (temperature < 20) // cool
         {
@@ -207,9 +215,13 @@ void FastLedHandler::ledStatusCO2()
 {
     if (co2data.getRegular() > 0)
     {
-        if (co2data.getRegular() < 600) // outdoor air
+        if (co2data.getRegular() < 500) // outdoor air
         {
             setSectionColor(LED_CO2, CRGB::Blue);
+        }
+        else if (co2data.getRegular() < 600) // fresh indoor air
+        {
+            setSectionColor(LED_CO2, CRGB::Turquoise);
         }
         else if (co2data.getRegular() < 800) // fresh indoor air
         {
