@@ -67,7 +67,7 @@ void WiFiHandler::initWifi()
     }
     else
     {
-        Serial.println("[WIFI] Could not connect. Starting AP mode. Please connect to the wlan, which was created by the esp32");
+        Serial.println("[WIFI] Starting AP mode. Please connect to the esp32 wlan");
         setupAPMode();
     }
 }
