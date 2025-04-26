@@ -88,13 +88,30 @@ const String unifiedCSS = R"=====(
 
 WebServerHandler::WebServerHandler()
 {
-  server.on("/", HTTP_GET, handle_index);
-  server.on("/json", HTTP_GET, std::bind(&WebServerHandler::handle_data, this, std::placeholders::_1));
-  server.on("/status", HTTP_GET, std::bind(&WebServerHandler::handle_status, this, std::placeholders::_1));
-  server.on("/WLAN", HTTP_GET, std::bind(&WebServerHandler::handle_ap, this, std::placeholders::_1));
-  server.on("/submit", HTTP_POST, std::bind(&WebServerHandler::handle_credentials_submit, this, std::placeholders::_1));
 
-  server.onNotFound(handle_NotFound);
+  server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    handle_index(request);  // Pass the request to the member function
+  });
+
+  server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    handle_data(request);  // Pass the request to the member function
+  });
+
+  server.on("/status", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    handle_status(request);  // Pass the request to the member function
+  });
+
+  server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    handle_ap(request);  // Pass the request to the member function
+  });
+
+  server.on("/submit", HTTP_POST, [this](AsyncWebServerRequest *request) {
+    handle_credentials_submit(request);  // Pass the request to the member function
+  });
+
+  server.onNotFound([this](AsyncWebServerRequest *request) {
+    handle_NotFound(request);  // Pass the request to handle_NotFound
+  });
 }
 
 void WebServerHandler::handle_index(AsyncWebServerRequest *request)
