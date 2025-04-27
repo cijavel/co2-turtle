@@ -2,6 +2,8 @@
 #include "Configuration.h"
 #include "Credentials.h"
 #include <LittleFS.h>
+#include "settingsHandler.h"
+SettingsHandler settingsHandler;
 #include <Preferences.h>
 extern Preferences preferences;
 
@@ -10,29 +12,23 @@ WebServerHandler::WebServerHandler()
 
 void WebServerHandler::start() {
     server.serveStatic("/", LittleFS, "/");
-    server.on("/", HTTP_GET, handle_index);
-    server.on("/data", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_data(request); });
-    server.on("/status", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_status(request); });
-    server.on("/ap", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_ap(request); });
-    server.on("/credentials", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_credentials_submit(request); });
-    server.onNotFound(handle_NotFound);
+    server.on("/", HTTP_GET, handle_page_index);
+    server.on("/json", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_page_data(request); });
+    server.on("/status", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_page_status(request); });
+    server.on("/sensorsettings", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_page_sensorsettings(request); });
+    server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_page_wlan(request); });
+    server.on("/WLANsubmit", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_WLANcredentials_submit(request); });
+    server.onNotFound(handle_page_NotFound);
     server.begin();
-}
-
-void WebServerHandler::setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata, String sdate)
-{
-  this->bmedata = enviromentdata;
-  this->co2data = co2Sensordata;
-  acDate = sdate;
 }
 
 // --------------------
 // Handlers
 // --------------------
-void WebServerHandler::handle_index(AsyncWebServerRequest* request) {
-  File file = LittleFS.open("/index.html", "r");
+void WebServerHandler::handle_page_index(AsyncWebServerRequest* request) {
+  File file = LittleFS.open("/index.htm", "r");
   if (!file || file.isDirectory()) {
-      request->send(500, "text/plain", "Internal Server Error: Cannot open index.html");
+      request->send(500, "text/plain", "Internal Server Error: Cannot open index.htm");
       return;
   }
   String content = file.readString();
@@ -41,43 +37,72 @@ void WebServerHandler::handle_index(AsyncWebServerRequest* request) {
   request->send(200, "text/html; charset=utf-8", content);
 }
 
-void WebServerHandler::handle_data(AsyncWebServerRequest* request) {
-  String header_data = String("{\n") +
-  "\"bme680/temperature\":\"" + String(bmedata.temperature) + "\",\n" +
-  "\"bme680/temperature_offset\":\"" + String(bmedata.temperature + TEMPERATUR_OFFSET) + "\",\n" +
-  "\"bme680/temperature_raw\":\"" + String(bmedata.rawTemperature) + "\",\n" +
-  "\"bme680/humidity\":\"" + String(bmedata.humidity) + "\",\n" +
-  "\"bme680/humidity_raw\":\"" + String(bmedata.rawHumidity) + "\",\n" +
-  "\"bme680/pressure\":\"" + String(bmedata.pressure) + "\",\n" +
-  "\"bme680/gas\":\"" + String(bmedata.gasResistance) + "\",\n" +
-  "\"bme680/bme68xStatus\":\"" + String(bmedata.bme68xStatus) + "\",\n" +
-  "\"bme680/breathVocAccuracy\":\"" + String(bmedata.breathVocAccuracy) + "\",\n" +
-  "\"bme680/breathVocEquivalent\":\"" + String(bmedata.breathVocEquivalent) + "\",\n" +
-  "\"bme680/bsecStatus\":\"" + String(bmedata.bsecStatus) + "\",\n" +
-  "\"bme680/co2Accuracy\":\"" + String(bmedata.co2Accuracy) + "\",\n" +
-  "\"bme680/co2Equivalent\":\"" + String(bmedata.co2Equivalent) + "\",\n" +
-  "\"bme680/compGasAccuracy\":\"" + String(bmedata.compGasAccuracy) + "\",\n" +
-  "\"bme680/compGasValue\":\"" + String(bmedata.compGasValue) + "\",\n" +
-  "\"bme680/gasPercentage\":\"" + String(bmedata.gasPercentage) + "\",\n" +
-  "\"bme680/gasPercentageAccuracy\":\"" + String(bmedata.gasPercentageAccuracy) + "\",\n" +
-  "\"bme680/iaq\":\"" + String(bmedata.iaq) + "\",\n" +
-  "\"bme680/iaqAccuracy\":\"" + String(bmedata.iaqAccuracy) + "\",\n" +
-  "\"bme680/staticIaqAccuracy\":\"" + String(bmedata.staticIaqAccuracy) + "\",\n" +
-  "\"mhz19/Accuracy\":\"" + String(co2data.getAccuracy()) + "\",\n" +
-  "\"mhz19/Background\":\"" + String(co2data.getBackground()) + "\",\n" +
-  "\"mhz19/Limited\":\"" + String(co2data.getLimited()) + "\",\n" +
-  "\"mhz19/Raw\":\"" + String(co2data.getRaw()) + "\",\n" +
-  "\"mhz19/Regular\":\"" + String(co2data.getRegular()) + "\",\n" +
-  "\"mhz19/TempAdjustment\":\"" + String(co2data.getTempAdjustment()) + "\",\n" +
-  "\"mhz19/Temperature\":\"" + String(co2data.getTemperature()) + "\"\n"
-  "}";
+void WebServerHandler::handle_page_data(AsyncWebServerRequest* request) {
+  String header_data = "{\n";
+	header_data += "\"bme680/temperature\":\"{{temperature}}\",\n";
+	header_data += "\"bme680/temperature_offset\":\"{{temperature_offset}}\",\n";
+	header_data += "\"bme680/temperature_raw\":\"{{temperature_raw}}\",\n";
+	header_data += "\"bme680/humidity\":\"{{humidity}}\",\n";
+	header_data += "\"bme680/humidity_raw\":\"{{humidity_raw}}\",\n";
+	header_data += "\"bme680/pressure\":\"{{pressure}}\",\n";
+	header_data += "\"bme680/gas\":\"{{gas}}\",\n";
+	header_data += "\"bme680/bme68xStatus\":\"{{bme68xStatus}}\",\n";
+	header_data += "\"bme680/breathVocAccuracy\":\"{{breathVocAccuracy}}\",\n";
+	header_data += "\"bme680/breathVocEquivalent\":\"{{breathVocEquivalent}}\",\n";
+	header_data += "\"bme680/bsecStatus\":\"{{bsecStatus}}\",\n";
+	header_data += "\"bme680/co2Accuracy\":\"{{co2Accuracy}}\",\n";
+	header_data += "\"bme680/co2Equivalent\":\"{{co2Equivalent}}\",\n";
+	header_data += "\"bme680/compGasAccuracy\":\"{{compGasAccuracy}}\",\n";
+	header_data += "\"bme680/compGasValue\":\"{{compGasValue}}\",\n";
+	header_data += "\"bme680/gasPercentage\":\"{{gasPercentage}}\",\n";
+	header_data += "\"bme680/gasPercentageAccuracy\":\"{{gasPercentageAccuracy}}\",\n";
+	header_data += "\"bme680/iaq\":\"{{iaq}}\",\n";
+	header_data += "\"bme680/iaqAccuracy\":\"{{iaqAccuracy}}\",\n";
+	header_data += "\"bme680/staticIaqAccuracy\":\"{{staticIaqAccuracy}}\",\n";
+	header_data += "\"mhz19/Accuracy\":\"{{mhz19Accuracy}}\",\n";
+	header_data += "\"mhz19/Background\":\"{{mhz19Background}}\",\n";
+	header_data += "\"mhz19/Limited\":\"{{mhz19Limited}}\",\n";
+	header_data += "\"mhz19/Raw\":\"{{mhz19Raw}}\",\n";
+	header_data += "\"mhz19/Regular\":\"{{mhz19Regular}}\",\n";
+	header_data += "\"mhz19/TempAdjustment\":\"{{mhz19TempAdjustment}}\",\n";
+	header_data += "\"mhz19/Temperature\":\"{{mhz19Temperature}}\"\n"; 
+	header_data += "}";
+
+  header_data.replace("{{temperature}}", String(bmedata.temperature));
+	header_data.replace("{{temperature_offset}}", String(bmedata.temperature + TEMPERATUR_OFFSET));
+	header_data.replace("{{temperature_raw}}", String(bmedata.rawTemperature));
+	header_data.replace("{{humidity}}", String(bmedata.humidity));
+	header_data.replace("{{humidity_raw}}", String(bmedata.rawHumidity));
+	header_data.replace("{{pressure}}", String(bmedata.pressure));
+	header_data.replace("{{gas}}", String(bmedata.gasResistance));
+	header_data.replace("{{bme68xStatus}}", String(bmedata.bme68xStatus));
+	header_data.replace("{{breathVocAccuracy}}", String(bmedata.breathVocAccuracy));
+	header_data.replace("{{breathVocEquivalent}}", String(bmedata.breathVocEquivalent));
+	header_data.replace("{{bsecStatus}}", String(bmedata.bsecStatus));
+	header_data.replace("{{co2Accuracy}}", String(bmedata.co2Accuracy));
+	header_data.replace("{{co2Equivalent}}", String(bmedata.co2Equivalent));
+	header_data.replace("{{compGasAccuracy}}", String(bmedata.compGasAccuracy));
+	header_data.replace("{{compGasValue}}", String(bmedata.compGasValue));
+	header_data.replace("{{gasPercentage}}", String(bmedata.gasPercentage));
+	header_data.replace("{{gasPercentageAccuracy}}", String(bmedata.gasPercentageAccuracy));
+	header_data.replace("{{iaq}}", String(bmedata.iaq));
+	header_data.replace("{{iaqAccuracy}}", String(bmedata.iaqAccuracy));
+	header_data.replace("{{staticIaqAccuracy}}", String(bmedata.staticIaqAccuracy));
+	header_data.replace("{{mhz19Accuracy}}", String(co2data.getAccuracy()));
+	header_data.replace("{{mhz19Background}}", String(co2data.getBackground()));
+	header_data.replace("{{mhz19Limited}}", String(co2data.getLimited()));
+	header_data.replace("{{mhz19Raw}}", String(co2data.getRaw()));
+	header_data.replace("{{mhz19Regular}}", String(co2data.getRegular()));
+	header_data.replace("{{mhz19TempAdjustment}}", String(co2data.getTempAdjustment()));
+	header_data.replace("{{mhz19Temperature}}", String(co2data.getTemperature()));
+
   request->send(200, "application/json; charset=utf-8", header_data);
 }
 
-void WebServerHandler::handle_status(AsyncWebServerRequest* request) {
-  File file = LittleFS.open("/status.html", "r");
+void WebServerHandler::handle_page_status(AsyncWebServerRequest* request) {
+  File file = LittleFS.open("/status.htm", "r");
   if (!file || file.isDirectory()) {
-      request->send(500, "text/plain", "Internal Server Error: Cannot open status.html");
+      request->send(500, "text/plain", "Internal Server Error: Cannot open status.htm");
       return;
   }
   String header_data = file.readString();
@@ -113,7 +138,7 @@ void WebServerHandler::handle_status(AsyncWebServerRequest* request) {
   request->send(200, "text/html; charset=utf-8", header_data);
 }
 
-void WebServerHandler::handle_ap(AsyncWebServerRequest* request) {
+void WebServerHandler::handle_page_wlan(AsyncWebServerRequest* request) {
   String password;
   String ssid;
 
@@ -128,44 +153,168 @@ void WebServerHandler::handle_ap(AsyncWebServerRequest* request) {
     password = WIFI_PW;
   }
 
-  File file = LittleFS.open("/ap.html", "r");
+  File file = LittleFS.open("/wlan.htm", "r");
   if (!file) {
-    request->send(500, "text/plain", "Failed to open HTML file.");
+    request->send(500, "text/plain", "Internal Server Error: Cannot open wlan.htm");
     return;
   }
   String content = file.readString();
   file.close();
 
+  content.replace("{{deviceName}}", DeviceName);
   content.replace("{{ssid}}", String(ssid));
   content.replace("{{password}}", String(password));
 
   request->send(200, "text/html", content);
 }
 
-void WebServerHandler::handle_credentials_submit(AsyncWebServerRequest* request) {
-    // Extract SSID and Password from form submission
-    String ssid = request->getParam("ssid", true)->value();
-    String password = request->getParam("password", true)->value();
-  
-    // Save credentials to flash memory
-    preferences.begin("wifi", false); // Open preferences in read-write mode
-    preferences.putString("ssid", ssid);
-    preferences.putString("password", password);
-    preferences.end();
-  
-    // Restart ESP32 to apply new WiFi credentials
-    ESP.restart();
+void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest* request) {
+  File file = LittleFS.open("/setting.htm", "r");
+  if (!file || file.isDirectory()) {
+      request->send(500, "text/plain", "Internal Server Error: Cannot open setting.htm");
+      return;
+  }
+  String content = file.readString();
+  file.close();
+  content.replace("{{deviceName}}", DeviceName);
+  request->send(200, "text/html; charset=utf-8", content);
 }
 
-void WebServerHandler::handle_NotFound(AsyncWebServerRequest* request) {
+void WebServerHandler::handle_WLANcredentials_submit(AsyncWebServerRequest* request) {
+	preferences.begin("config", false); 
+	preferences.putString("wlanSSID", request->getParam("wlanSSID", true)->value());
+	preferences.putString("wlanPASSWORD", request->getParam("wlanPASSWORD", true)->value());
+	preferences.end();
+	ESP.restart();
+}
+
+void WebServerHandler::handle_page_NotFound(AsyncWebServerRequest* request) {
   request->send(404, "text/plain", "404: Not found");
 }
 
+void WebServerHandler::handle_sensorsettings_submit(AsyncWebServerRequest *request)
+{
+	preferences.begin("config", false);
 
+	if (request->hasParam("intervalMHZ19"))
+	{
+		preferences.putInt("intervalMHZ19", request->getParam("intervalMHZ19")->value().toInt());
+	}
+	else
+	{
+		preferences.putInt("intervalMHZ19", interval_MHZ19_in_Seconds);
+	}
+
+	if (request->hasParam("intervalBME680"))
+	{
+		preferences.putInt("intervalBME680", request->getParam("intervalBME680")->value().toInt());
+	}
+	else
+	{
+		preferences.putInt("intervalBME680", interval_BME680_in_Seconds);
+	}
+
+	if (request->hasParam("intervalWiFi"))
+	{
+		preferences.putInt("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
+	}
+	else
+	{
+		preferences.putInt("intervalWiFi", interval_WiFiCheck_in_Seconds);
+	}
+
+	if (request->hasParam("intervalPRINT"))
+	{
+		preferences.putInt("intervalPRINT", request->getParam("intervalPRINT")->value().toInt());
+	}
+	else
+	{
+		preferences.putInt("intervalPRINT", interval_RAMPrintout_in_Seconds);
+	}
+
+	if (request->hasParam("intervalEPD"))
+	{
+		preferences.putInt("intervalEPD", request->getParam("intervalEPD")->value().toInt());
+	}
+	else
+	{
+		preferences.putInt("intervalEPD", interval_EPD_in_Seconds);
+	}
+
+	if (request->hasParam("intervalLED"))
+	{
+		preferences.putInt("intervalLED", request->getParam("intervalLED")->value().toInt());
+	}
+	else
+	{
+		preferences.putInt("intervalLED", interval_LED_in_Seconds);
+	}
+
+	if (request->hasParam("intervalMQTT"))
+	{
+		preferences.putInt("intervalMQTT", request->getParam("intervalMQTT")->value().toInt());
+	}
+	else
+	{
+		preferences.putInt("intervalMQTT", interval_mqtt_in_Seconds);
+	}
+
+	preferences.end();
+	request->send(200, "text/plain", "Interval Settings Saved!");
+	request->redirect("/");
+}
+void WebServerHandler::handle_sensorswitch_submit(AsyncWebServerRequest *request)
+{
+	preferences.begin("config", false);
+
+		request->getParam("switchWIFI")->value();
+
+		bool switchWIFIValue = request->hasParam("switchWIFI") && request->getParam("switchWIFI")->value() == "on";
+		preferences.putBool("switchWIFI", switchWIFIValue);
+
+		bool switchPRINTValue = request->hasParam("switchPRINT") && request->getParam("switchPRINT")->value() == "on";
+		preferences.putBool("switchPRINT", switchPRINTValue);
+
+		bool switchEPDValue = request->hasParam("switchEPD") && request->getParam("switchEPD")->value() == "on";
+		preferences.putBool("switchEPD", switchEPDValue);
+
+		bool switchLEDValue = request->hasParam("switchLED") && request->getParam("switchLED")->value() == "on";
+		preferences.putBool("switchLED", switchLEDValue);
+
+		bool switchMQTTValue = request->hasParam("switchMQTT") && request->getParam("switchMQTT")->value() == "on";
+		preferences.putBool("switchMQTT", switchMQTTValue);
+
+		bool switchDEBUGValue = request->hasParam("switchDEBUG") && request->getParam("switchDEBUG")->value() == "on";
+		preferences.putBool("switchDEBUG", switchDEBUGValue);
+	preferences.end();
+	request->redirect("/");
+}
+void WebServerHandler::handle_load_defaults(AsyncWebServerRequest *request)
+{
+	settingsHandler.reset(); // Load default settings
+	request->redirect("/");
+	request->send(200, "text/plain", "Defaults loaded");
+	delay(500);
+	ESP.restart();
+}
+
+void WebServerHandler::handle_restart(AsyncWebServerRequest *request)
+{
+	request->send(200, "text/html", "Device is resetting...");
+	delay(500);
+	ESP.restart();
+}
 
 // --------------------
 // Helpers
 // --------------------
+void WebServerHandler::setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata, String sdate)
+{
+  this->bmedata = enviromentdata;
+  this->co2data = co2Sensordata;
+  acDate = sdate;
+}
+
 void WebServerHandler::replaceColorDescr(String& str, const String& key, const String& color, const String& descr) {
   str.replace("{{color_" + key + "}}", color);
   str.replace("{{descr_" + key + "}}", descr);
