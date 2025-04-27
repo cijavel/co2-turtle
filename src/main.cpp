@@ -12,7 +12,6 @@
 // 3.3V 	  -> 3.3V
 //#define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
 
-
 // _______________
 // LED
 // ---------------
@@ -40,6 +39,7 @@
 #include "BME680Handler.h"
 #include "MHZ19Handler.h"
 #include "Configuration.h"
+#include "Credentials.h"
 #include "WiFiHandler.h"
 #include "bsec.h"
 #include <ctime>
@@ -47,6 +47,9 @@
 #include "WebServerHandler.h"
 #include "FastLedHandler.h"
 #include "MqttClientHandler.h"
+#include "SettingsHandler.h"
+#include <Preferences.h>
+Preferences preferences;
 #include <LittleFS.h>
 
 // --------------------------------------------------------------------------
@@ -98,83 +101,104 @@ void setup() {
         return;
     }
 
+    SettingsHandler &settingsHandler = SettingsHandler::getInstance();
+    settingsHandler.setSeetingsOnFirstRun();
+    preferences.begin("config", true);
+    bool switchLED = preferences.getBool("switchLED", switch_LED);
+    bool switchmqtt = preferences.getBool("switchMQTT", switch_MQTT);
+    preferences.end();
+
+
+
+
     WiFiHandler::initWifi();
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.start();
-    
-    #ifdef switch_LED
+
+    if (switchLED) {
         FastLedHandler &ledhandler = FastLedHandler::getInstance();
         ledhandler.setup_led();
-    #endif
+    }
 
-    #ifdef switch_mqtt
+    if (switchLED) {
         MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
         MqttHandler.setup_Mqtt();
-    #endif
+    }
 }
 
 unsigned long last = 0;
+
 void loop() {
+
+    preferences.begin("config", true);
+    bool switchEPD = preferences.getBool("switchEPD", switch_EPD);
+    bool switchLED = preferences.getBool("switchLED", switch_LED);
+    bool switchMQTT = preferences.getBool("switchMQTT", switch_MQTT);
+    bool switchWiFi = preferences.getBool("switchWIFI", switch_WIFI);
+    bool switchDEBUG = preferences.getBool("switchDEBUG", DEBUG);
+    preferences.end();
+
     unsigned long currentSeconds = millis() / 1000;
-#ifdef DEBUG
-    if (currentSeconds != last) {
-        Serial.print("loop second: ");
-        Serial.println(currentSeconds);
-        last = currentSeconds;
+    if (switchDEBUG) {
+        if (currentSeconds != last) {
+            Serial.print("loop second: ");
+            Serial.println(currentSeconds);
+            last = currentSeconds;
+        }
+    } 
+
+    BME680Handler &bmehandler = BME680Handler::getInstance();
+    Bsec bme_data = bmehandler.getData();
+
+    if (switchDEBUG) {
+        if (bmehandler.updateSensorData(currentSeconds)) {
+            bmehandler.printout();
+        }
+    } else {
+        bmehandler.updateSensorData(currentSeconds);
     }
-#endif
 
-BME680Handler &bmehandler = BME680Handler::getInstance();
-Bsec bme_data = bmehandler.getData();
-
-#ifdef DEBUG
-    if (bmehandler.updateSensorData(currentSeconds)) {
-        bmehandler.printout();
+    MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
+    if (switchDEBUG) {
+        if (mhz19Handler.runUpdate(currentSeconds)) {
+            mhz19Handler.printoutLastReadout();
+        }
+    } else {
+        mhz19Handler.runUpdate(currentSeconds);
     }
-#else
-    bmehandler.updateSensorData(currentSeconds);
-#endif
 
-MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
-#ifdef DEBUG
-    if (mhz19Handler.runUpdate(currentSeconds)) {
-        mhz19Handler.printoutLastReadout();
-    }
-#else
-    mhz19Handler.runUpdate(currentSeconds);
-#endif
-DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
 
-#ifdef switch_WiFiCheck
-        WiFiHandler::checkWifi(currentSeconds);
-#endif
+    DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
+
+    if (switchWiFi) {
+        WiFiHandler::checkWifiStatus(currentSeconds);
+    } 
    
-#ifdef switch_Webserver
-        WebServerHandler &webServer = WebServerHandler::getInstance();
-        webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));   
-#endif    
 
-#ifdef switch_EPD
+    WebServerHandler &webServer = WebServerHandler::getInstance();
+    webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));   
+  
+
+    if (switchEPD) {
         EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
-#endif
+    } 
 
-#ifdef switch_LED
+    if (switchLED) {
         FastLedHandler &ledHandler = FastLedHandler::getInstance();
         ledHandler.setInputDataforLED(mhz19Readout, bme_data);
         ledHandler.ledstatus(currentSeconds);
-#else
+    } else {
         FastLedHandler &ledHandler = FastLedHandler::getInstance();
         ledHandler.setup_black(currentSeconds);
-#endif
+    }
 
-#ifdef switch_mqtt
+    if (switchMQTT) {
         MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
         MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
-#endif
-
-#ifdef DEBUG
-    PrintRamUsage(currentSeconds);
-#endif
+    } 
+    if (switchDEBUG) {
+        PrintRamUsage(currentSeconds);
+    } 
 }
