@@ -5,7 +5,7 @@
 #include "Credentials.h"
 #include "Configuration.h"
 
-Preferences preferences;
+extern Preferences preferences;
 String password;
 String ssid;
 
@@ -113,7 +113,7 @@ bool WiFiHandler::StatusCheck()
     return status == WL_CONNECTED;
 }
 
-bool WiFiHandler::checkWifi(unsigned long currentSeconds)
+bool WiFiHandler::checkWifiStatus(unsigned long currentSeconds)
 {
     if (currentSeconds % interval_WiFiCheck_in_Seconds == 0)
     {
