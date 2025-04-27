@@ -1,0 +1,83 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  h1 {
+    font-size: 120%;
+  }
+
+  .button {
+    padding: 10px 20px;
+    margin: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    color: white;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .button:hover {
+    background-color: #45a049;
+  }
+
+  table.content {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  td.description {
+    font-size: 14px;
+    color: #666;
+  }
+  th.title {
+    font-weight: bold;
+    text-align: left;
+    padding: 8px;
+  }
+  td.data {
+    text-align: left;
+    padding: 8px;
+    width: 40px;
+  }
+  td.space {
+    width: 20px;
+  }
+  .status {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+  }
+
+
+
+
+  .input {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  .status {
+    border-radius: 50%;
+    padding: 0px 10px;
+  }
+  .saved-credentials {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+  }
+  .show-password-button {
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
