@@ -20,7 +20,7 @@ void WiFiHandler::loadWiFiCredentials()
     {
         ssid = WIFI_SSID;
         password = WIFI_PW;
-        Serial.println("using default credentials. No stored WiFi credentials found");
+        Serial.println("OK - No stored WiFi credentials found. using default credentials.");
     }
     else
     {
