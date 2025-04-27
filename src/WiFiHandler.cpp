@@ -4,17 +4,16 @@
 #include <Preferences.h>
 #include "Credentials.h"
 #include "Configuration.h"
-#include "WebServerHandler.h"
-extern Preferences preferences;
+
+Preferences preferences;
 String password;
 String ssid;
 
 void WiFiHandler::loadWiFiCredentials()
 {
     preferences.begin("wifi", true);
-
-    ssid = preferences.getString("ssid", "");
-    password = preferences.getString("password", "");
+        ssid = preferences.getString("ssid", "");
+        password = preferences.getString("password", "");
     preferences.end();
 
     if (ssid == "" || password == "")
