@@ -33,5 +33,14 @@ private:
     void handle_ap(AsyncWebServerRequest* request);
     void handle_credentials_submit(AsyncWebServerRequest* request);
     static void handle_NotFound(AsyncWebServerRequest* request);
+
+    // helper function
+    void replaceColorDescr(String& str, const String& key, const String& color, const String& descr);
+    void replaceIaqAccuracy(String& str, int iaqAccuracy);
+    void replaceTemperatureInfo(String& str, float temp);
+    void replaceHumidityInfo(String& str, float hum);
+    void replaceIAQInfo(String& str, float iaq);
+    void replaceCO2Info(String& str, int co2);
+
 };
 #endif //CO2_TURTLE_WEBSERVERHANDLER_H

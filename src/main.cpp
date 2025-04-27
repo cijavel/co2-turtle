@@ -47,6 +47,7 @@
 #include "WebServerHandler.h"
 #include "FastLedHandler.h"
 #include "MqttClientHandler.h"
+#include <LittleFS.h>
 
 // --------------------------------------------------------------------------
 // time functions
@@ -72,7 +73,6 @@ String localTime(const String& format) {
     return time;
 }
 
-
 #ifdef DEBUG
 static void PrintRamUsage(unsigned long currentSeconds) {
     if (currentSeconds % interval_RAMPrintout_in_Seconds == 0) {
@@ -92,13 +92,18 @@ void setup() {
     delay(100);
     Serial.begin(BAUDRATE);
     Serial.println();
+
+    if (!LittleFS.begin()) {
+        Serial.println("Failed to mount LittleFS!");
+        return;
+    }
+
     WiFiHandler::initWifi();
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
     WebServerHandler &webServer = WebServerHandler::getInstance();
     webServer.start();
-
     
-
     #ifdef switch_LED
         FastLedHandler &ledhandler = FastLedHandler::getInstance();
         ledhandler.setup_led();
@@ -108,11 +113,7 @@ void setup() {
         MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
         MqttHandler.setup_Mqtt();
     #endif
-    
-
 }
-
-
 
 unsigned long last = 0;
 void loop() {
@@ -125,9 +126,6 @@ void loop() {
     }
 #endif
 
-
-
-
 BME680Handler &bmehandler = BME680Handler::getInstance();
 Bsec bme_data = bmehandler.getData();
 
@@ -139,8 +137,6 @@ Bsec bme_data = bmehandler.getData();
     bmehandler.updateSensorData(currentSeconds);
 #endif
 
-
-
 MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
 #ifdef DEBUG
     if (mhz19Handler.runUpdate(currentSeconds)) {
@@ -151,22 +147,18 @@ MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
 #endif
 DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
 
-
 #ifdef switch_WiFiCheck
         WiFiHandler::checkWifi(currentSeconds);
 #endif
    
-
 #ifdef switch_Webserver
         WebServerHandler &webServer = WebServerHandler::getInstance();
         webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));   
-#endif
-    
+#endif    
 
 #ifdef switch_EPD
         EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
 #endif
-
 
 #ifdef switch_LED
         FastLedHandler &ledHandler = FastLedHandler::getInstance();
@@ -176,15 +168,11 @@ DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
         FastLedHandler &ledHandler = FastLedHandler::getInstance();
         ledHandler.setup_black(currentSeconds);
 #endif
-    
 
 #ifdef switch_mqtt
         MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
         MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
 #endif
-    
-
-    
 
 #ifdef DEBUG
     PrintRamUsage(currentSeconds);
