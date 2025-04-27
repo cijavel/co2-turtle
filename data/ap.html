@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WLAN Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <h1>WLAN Settings</h1>
+    <br>
+    <button class="button" onclick="window.location.href='/'">Back to Index</button>
+    <br>
+    <div class="saved-credentials">
+      <h3>Saved Credentials:</h3>
+      <p><strong>SSID:</strong> {{ssid}}</p>
+      <p>
+        <strong>Password:</strong>
+        <span id="saved-password">********</span>
+        <button type="button" class="show-password-button" onmousedown="toggleSavedPassword(true)" onmouseup="toggleSavedPassword(false)" onmouseleave="toggleSavedPassword(false)">Show Password</button>
+      </p>
+    </div>
+    <form action="/submit" method="POST">
+      SSID: <input class="input" type="text" name="ssid" value="{{ssid}}"><br>
+      Password: <input class="input" type="password" name="password" id="password"><br>
+      <button type="button" class="show-password-button" onmousedown="togglePassword(true)" onmouseup="togglePassword(false)" onmouseleave="togglePassword(false)">Show Password</button>
+      <br><br>
+      <input class="button" type="submit" value="Submit">
+    </form>
+    <script>
+      function togglePassword(show) {
+        document.getElementById('password').type = show ? 'text' : 'password';
+      }
+
+      function toggleSavedPassword(show) {
+        document.getElementById('saved-password').innerText = show ? '{{password}}' : '********';
+      }
+    </script>
+  </body>
+</html>
