@@ -13,11 +13,13 @@ public:
         return instance;// Instantiated on first use.
     }
     void loadDefaultSettings();
+    int getSetting(String settingName);
     void reset();
     void setSeetingsOnFirstRun();
 
 private:
     Preferences preferences;
+    void loadsavedSettings();
 };
 
 #endif

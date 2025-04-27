@@ -177,6 +177,21 @@ void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest* request
   String content = file.readString();
   file.close();
   content.replace("{{deviceName}}", DeviceName);
+
+  content.replace("{{intervalMHZ19}}", String(settingsHandler.getSetting("intervalMHZ19")));
+  content.replace("{{intervalBME680}}", String(settingsHandler.getSetting("intervalBME680")));
+  content.replace("{{intervalWiFi}}", String(settingsHandler.getSetting("intervalWiFi")));
+  content.replace("{{intervalPRINT}}", String(settingsHandler.getSetting("intervalPRINT")));
+  content.replace("{{intervalEPD}}", String(settingsHandler.getSetting("intervalEPD")));
+  content.replace("{{intervalLED}}", String(settingsHandler.getSetting("intervalLED")));
+  content.replace("{{intervalMQTT}}", String(settingsHandler.getSetting("intervalMQTT")));
+  
+  content.replace("{{switchWIFI_checked}}", settingsHandler.getSetting("switchWIFI") ? "checked" : "");
+  content.replace("{{switchEPD_checked}}", settingsHandler.getSetting("switchEPD") ? "checked" : "");
+  content.replace("{{switchLED_checked}}", settingsHandler.getSetting("switchLED") ? "checked" : "");
+  content.replace("{{switchMQTT_checked}}", settingsHandler.getSetting("switchMQTT") ? "checked" : "");
+
+
   request->send(200, "text/html; charset=utf-8", content);
 }
 
