@@ -27,12 +27,17 @@ private:
     WebServerHandler& operator=(const WebServerHandler&) = delete;
 
     // Request handlers
-    static void handle_index(AsyncWebServerRequest* request);
-    void handle_data(AsyncWebServerRequest* request);
-    void handle_status(AsyncWebServerRequest* request);
-    void handle_ap(AsyncWebServerRequest* request);
-    void handle_credentials_submit(AsyncWebServerRequest* request);
-    static void handle_NotFound(AsyncWebServerRequest* request);
+    static void handle_page_index(AsyncWebServerRequest* request);
+    void handle_page_data(AsyncWebServerRequest* request);
+    void handle_page_status(AsyncWebServerRequest* request);
+    void handle_page_sensorsettings(AsyncWebServerRequest* request);
+    void handle_page_wlan(AsyncWebServerRequest* request);
+    static void handle_page_NotFound(AsyncWebServerRequest* request);
+    void handle_WLANcredentials_submit(AsyncWebServerRequest* request);
+    void handle_sensorsettings_submit(AsyncWebServerRequest* request);
+    void handle_sensorswitch_submit(AsyncWebServerRequest* request);
+    void handle_load_defaults(AsyncWebServerRequest* request);
+    void handle_restart(AsyncWebServerRequest* request);
 
     // helper function
     void replaceColorDescr(String& str, const String& key, const String& color, const String& descr);
