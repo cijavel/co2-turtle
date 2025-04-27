@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{deviceName}} - WLAN Settings</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="nav">
+              <button href="/" class="button">Back to Index</button>
+            </div>
+            <br>
+            <div class="content">
+              <div class="saved-credentials">
+                <h3>Saved Credentials:</h3>
+                <div><strong>SSID:</strong> {{ssid}}</div>
+                <div>
+                  <strong>Password:</strong>
+                  <span id="saved-password">********</span>
+                  <button type="button" class="show-password-button" onmousedown="toggleSavedPassword(true)" onmouseup="toggleSavedPassword(false)" onmouseleave="toggleSavedPassword(false)">Show Password</button>
+                </div>
+              </div>
+              <div class="new-credentials">
+                <form action="/submit" method="POST">
+                  SSID: <input class="input" type="text" name="wlanSSID" value="{{ssid}}"><br>
+                  Password: <input class="input" type="password" name="wlanPASSWORD" id="wlanPASSWORD"><br>
+                  <button type="button" class="show-password-button" onmousedown="togglePassword(true)" onmouseup="togglePassword(false)" onmouseleave="togglePassword(false)">Show Password</button>
+                  <br><br>
+                  <input class="button" type="submit" value="Submit">
+                </form>
+              </div>
+              <script>
+                function togglePassword(show) {
+                  document.getElementById('wlanPASSWORD').type = show ? 'text' : 'password';
+                }
+                function toggleSavedPassword(show) {
+                  document.getElementById('saved-password').innerText = show ? '{{password}}' : '********';
+                }
+              </script>
+            </div>
+        </div>
+        <div class="footer">&copy; 2025 SensorTurtle</div>
+    </body>
+</html>
