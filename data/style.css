@@ -23,14 +23,13 @@ body {
   }
 
   table.content {
-    width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
     font-family: Arial, Helvetica, sans-serif;
   }
   td.description {
     font-size: 14px;
-    color: #666;
+    width: 222px;
   }
   th.title {
     font-weight: bold;
