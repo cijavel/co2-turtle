@@ -4,7 +4,7 @@
 class WiFiHandler{
 public:
     static void initWifi();
-    static bool checkWifi(unsigned long currentSeconds);
+    static bool checkWifiStatus(unsigned long currentSeconds);
     static void setupAPMode();
 private:
     static bool StatusCheck();
