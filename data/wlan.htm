@@ -8,7 +8,7 @@
     <body>
         <div class="container">
             <div class="nav">
-              <button href="/" class="button">Back to Index</button>
+              <a href="/" class="button">Back to Index</a>
             </div>
             <br>
             <div class="content">
@@ -22,7 +22,7 @@
                 </div>
               </div>
               <div class="new-credentials">
-                <form action="/submit" method="POST">
+                <form action="/submitWLANcredentials" method="POST">
                   SSID: <input class="input" type="text" name="wlanSSID" value="{{ssid}}"><br>
                   Password: <input class="input" type="password" name="wlanPASSWORD" id="wlanPASSWORD"><br>
                   <button type="button" class="show-password-button" onmousedown="togglePassword(true)" onmouseup="togglePassword(false)" onmouseleave="togglePassword(false)">Show Password</button>

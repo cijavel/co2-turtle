@@ -9,41 +9,41 @@
     <body>
         <div class="container">
             <div class="nav">
-                <button href="/" class="button">Back to Index</button>
+                <a href="/" class="button">Back to Index</a>
             </div>
             <div class="content">
-                <h1>Sensor Switch</h1>
-                <form action="/submitswitch" method="POST">
+                <h1>Modul Switch</h1>
+                <form action="/submitmodulswitch" method="POST">
                     <table class="content">
                         <tr>
                             <th><label for="switchWIFI">WiFi Check</label></th>
                             <td>
-                                <input type="checkbox" id="switchWIFI" name="switchWIFI" value="on" {{switchWIFI_checked}}  title="Check WLAN status">
+                                <input type="checkbox" id="switchWIFI" name="switchWIFI" value="switchWIFI" {{switchWIFI_checked}}  title="Check WLAN status">
                             </td>
                         </tr>
                         <tr>
                             <th><label for="switchEPD">EPD Display</label></th>
                             <td>
-                                <input type="checkbox" id="switchEPD" name="switchEPD" value="on" {{switchEPD_checked}} title="Display sensor data on EPD">
+                                <input type="checkbox" id="switchEPD" name="switchEPD" value="switchEPD" {{switchEPD_checked}} title="Display sensor data on EPD">
                             </td>
                         </tr>
                         <tr>
                             <th><label for="switchLED">LED</label></th>
                             <td>
-                                <input type="checkbox" id="switchLED" name="switchLED" value="on" {{switchLED_checked}} title="Display sensor data on LED strips">
+                                <input type="checkbox" id="switchLED" name="switchLED" value="switchLED" {{switchLED_checked}} title="Display sensor data on LED strips">
                             </td>
                         </tr>
                         <tr>
                             <th><label for="switchMQTT">MQTT</label></th>
                             <td>
-                                <input type="checkbox" id="switchMQTT" name="switchMQTT" value="on" {{switchMQTT_checked}} title="Send sensor data via MQTT">
+                                <input type="checkbox" id="switchMQTT" name="switchMQTT" value="switchMQTT" {{switchMQTT_checked}} title="Send sensor data via MQTT">
                             </td>
                         </tr>
                     </table>
                     <input type="submit" value="Save Settings">
                 </form>
-                <h1>Sensor Settings</h1>
-                <form action="/submitsetting" method="POST">
+                <h1>Modul Time Interval</h1>
+                <form action="/submitmodulinterval" method="POST">
                         <table class="content">
                         <tr>
                             <th><label for="intervalMHZ19"19>MHZ19 Interval (s)</label></th>
@@ -68,16 +68,13 @@
                             <td><input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}"></td>
                         </tr>
                     </table>
-                    <!-- Submit Button -->
-                    <input type="submit" value="Save Settings">
+                    <input type="submit" value="Save Interval">
                 </form>
-                
-                <!-- Reset Button -->
+                <h1>Settings Option</h1>
                 <form action="/reset" method="POST">
                     <button type="submit">Reset ESP32</button>
                 </form>
-                <!-- Reset Button -->
-                <form action="/load_defaults" method="POST">
+                <form action="/loaddefaultsettings" method="POST">
                     <button onclick="loadDefaults()">Load Default Settings</button>
                 </form>
             </div>
