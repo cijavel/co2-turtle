@@ -33,10 +33,10 @@ private:
     void handle_page_sensorsettings(AsyncWebServerRequest* request);
     void handle_page_wlan(AsyncWebServerRequest* request);
     static void handle_page_NotFound(AsyncWebServerRequest* request);
-    void handle_WLANcredentials_submit(AsyncWebServerRequest* request);
-    void handle_sensorsettings_submit(AsyncWebServerRequest* request);
-    void handle_sensorswitch_submit(AsyncWebServerRequest* request);
-    void handle_load_defaults(AsyncWebServerRequest* request);
+    void handle_submit_WLANcredentials(AsyncWebServerRequest* request);
+    void handle_submit_modulinterval(AsyncWebServerRequest* request);
+    void handle_submit_modulswitch(AsyncWebServerRequest* request);
+    void handle_load_defaultsettings(AsyncWebServerRequest* request);
     void handle_restart(AsyncWebServerRequest* request);
 
     // helper function
