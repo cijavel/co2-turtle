@@ -17,7 +17,11 @@ void WebServerHandler::start() {
     server.on("/status", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_page_status(request); });
     server.on("/sensorsettings", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_page_sensorsettings(request); });
     server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest* request) { handle_page_wlan(request); });
-    server.on("/WLANsubmit", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_WLANcredentials_submit(request); });
+    server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_submit_WLANcredentials(request); });
+    server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_submit_modulinterval(request); });
+    server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_submit_modulswitch(request); });
+	server.on("/loaddefaultsettings", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_load_defaultsettings(request); });
+    server.on("/reset", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_restart(request); });
     server.onNotFound(handle_page_NotFound);
     server.begin();
 }
@@ -195,7 +199,7 @@ void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest* request
   request->send(200, "text/html; charset=utf-8", content);
 }
 
-void WebServerHandler::handle_WLANcredentials_submit(AsyncWebServerRequest* request) {
+void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest* request) {
 	preferences.begin("config", false); 
 	preferences.putString("wlanSSID", request->getParam("wlanSSID", true)->value());
 	preferences.putString("wlanPASSWORD", request->getParam("wlanPASSWORD", true)->value());
@@ -207,7 +211,7 @@ void WebServerHandler::handle_page_NotFound(AsyncWebServerRequest* request) {
   request->send(404, "text/plain", "404: Not found");
 }
 
-void WebServerHandler::handle_sensorsettings_submit(AsyncWebServerRequest *request)
+void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *request)
 {
 	preferences.begin("config", false);
 
@@ -278,7 +282,7 @@ void WebServerHandler::handle_sensorsettings_submit(AsyncWebServerRequest *reque
 	request->send(200, "text/plain", "Interval Settings Saved!");
 	request->redirect("/");
 }
-void WebServerHandler::handle_sensorswitch_submit(AsyncWebServerRequest *request)
+void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 {
 	preferences.begin("config", false);
 
@@ -304,7 +308,7 @@ void WebServerHandler::handle_sensorswitch_submit(AsyncWebServerRequest *request
 	preferences.end();
 	request->redirect("/");
 }
-void WebServerHandler::handle_load_defaults(AsyncWebServerRequest *request)
+void WebServerHandler::handle_load_defaultsettings(AsyncWebServerRequest *request)
 {
 	settingsHandler.reset(); // Load default settings
 	request->redirect("/");
