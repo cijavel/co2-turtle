@@ -1,17 +1,17 @@
 #include "EPDHandler.h"
 #include <GxEPD2_3C.h>
 #include "GxEPD2_display_selection_new_style.h"
-#include "../Font/BabelSans8pt7b.h"
-#include "../Font/BabelSans9pt7b.h"
-#include "../Font/BabelSans10pt7b.h"
-#include "../Font/Inter_Regular12pt7b.h"
-#include "../Font/Inter_Regular11pt7b.h"
-#include "../Font/Inter_Regular10pt7b.h"
-#include "../Font/Inter_Regular8pt7b.h"
-#include "../Font/Inter_Regular7pt7b.h"
+#include "../font/BabelSans8pt7b.h"
+#include "../font/BabelSans9pt7b.h"
+#include "../font/BabelSans10pt7b.h"
+#include "../font/Inter_Regular12pt7b.h"
+#include "../font/Inter_Regular11pt7b.h"
+#include "../font/Inter_Regular10pt7b.h"
+#include "../font/Inter_Regular8pt7b.h"
+#include "../font/Inter_Regular7pt7b.h"
 
-#include "../Font/Inter_Bold12pt7b.h"
-#include "../Font/Inter_Bold10pt7b.h"
+#include "../font/Inter_Bold12pt7b.h"
+#include "../font/Inter_Bold10pt7b.h"
 
 #include "Configuration.h"
 #include "symbol.h" // own symbol
