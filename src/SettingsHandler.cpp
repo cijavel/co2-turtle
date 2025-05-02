@@ -5,7 +5,7 @@
 
 static std::map<String, int> settingMap = {};
 
-void SettingsHandler::loadsavedSettings() {
+void SettingsHandler::loadAllPersistedSettings() {
     preferences.begin("config", true);
        settingMap["switchWIFI"] = preferences.getBool("switchWIFI", switch_WIFI);
        settingMap["switchEPD"] = preferences.getBool("switchEPD", switch_EPD);
@@ -22,13 +22,33 @@ void SettingsHandler::loadsavedSettings() {
     preferences.end();
 }
 
+void SettingsHandler::persistAllSettings() {
+    preferences.begin("config", true);
+        preferences.putBool("switchWIFI", settingMap["switchWIFI"]);
+        preferences.putBool("switchEPD", settingMap["switchEPD"]);
+        preferences.putBool("switchLED", settingMap["switchLED"]);
+        preferences.putBool("switchMQTT", settingMap["switchMQTT"]);
+
+        preferences.putInt("intervalMHZ19", settingMap["intervalMHZ19"]);
+        preferences.putInt("intervalBME680", settingMap["intervalBME680"]);
+        preferences.putInt("intervalWiFi", settingMap["intervalWiFi"]);
+        preferences.putInt("intervalPRINT", settingMap["intervalPRINT"]);
+        preferences.putInt("intervalEPD", settingMap["intervalEPD"]);
+        preferences.putInt("intervalLED", settingMap["intervalLED"]);
+        preferences.putInt("intervalMQTT", settingMap["intervalMQTT"]);
+    preferences.end();
+}
+
 int SettingsHandler::getSetting(String settingName){
  return settingMap[settingName];
 }
 
-void SettingsHandler::loadDefaultSettings() {
+void SettingsHandler::restoreDefaultSettings() {
     Serial.println("[preferences] set configuration");
     preferences.begin("config", false);
+        preferences.clear(); 
+        preferences.putBool("setSettingsFirstRun", true);
+
         preferences.putBool("switchWIFI", switch_WIFI);
         preferences.putBool("switchEPD", switch_EPD);
         preferences.putBool("switchLED", switch_LED);
@@ -61,22 +81,14 @@ void SettingsHandler::loadDefaultSettings() {
     preferences.end();
 }
 
-void SettingsHandler::reset() {
-    preferences.begin("config", false); 
-        preferences.clear();  
-    preferences.end();
-}
-void SettingsHandler::setSeetingsOnFirstRun() {
+void SettingsHandler::setSettingsOnFirstRun() {
     preferences.begin("config", true); 
-        bool hasRunBefore = preferences.getBool("setSeetingsFirstRun", false); 
+        bool hasRunBefore = preferences.getBool("setSettingsFirstRun", false); 
     preferences.end();
     if (!hasRunBefore) {
-        loadDefaultSettings();
-        preferences.begin("config", false); 
-            preferences.putBool("setSeetingsFirstRun", true);
-        preferences.end();
+        restoreDefaultSettings();
         Serial.println("[Settings] Setting firstRun flag in NVS to true.");
     } 
-    loadsavedSettings();
+    loadAllPersistedSettings();
     
 }
