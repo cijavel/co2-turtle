@@ -102,7 +102,7 @@ void setup() {
     }
 
     SettingsHandler &settingsHandler = SettingsHandler::getInstance();
-    settingsHandler.setSeetingsOnFirstRun();
+    settingsHandler.setSettingsOnFirstRun();
 
     WiFiHandler::initWifi();
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);

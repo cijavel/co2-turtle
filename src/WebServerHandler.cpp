@@ -20,7 +20,7 @@ void WebServerHandler::start() {
     server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_submit_WLANcredentials(request); });
     server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_submit_modulinterval(request); });
     server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_submit_modulswitch(request); });
-	server.on("/loaddefaultsettings", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_load_defaultsettings(request); });
+	server.on("/restoredefaultsettings", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_restoreDefaultSettings(request); });
     server.on("/reset", HTTP_POST, [this](AsyncWebServerRequest* request) { handle_restart(request); });
     server.onNotFound(handle_page_NotFound);
     server.begin();
@@ -308,9 +308,9 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	preferences.end();
 	request->redirect("/");
 }
-void WebServerHandler::handle_load_defaultsettings(AsyncWebServerRequest *request)
+void WebServerHandler::handle_restoreDefaultSettings(AsyncWebServerRequest *request)
 {
-	settingsHandler.reset(); // Load default settings
+	settingsHandler.restoreDefaultSettings(); // Load default settings
 	request->redirect("/");
 	request->send(200, "text/plain", "Defaults loaded");
 	delay(500);

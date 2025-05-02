@@ -36,7 +36,7 @@ private:
     void handle_submit_WLANcredentials(AsyncWebServerRequest* request);
     void handle_submit_modulinterval(AsyncWebServerRequest* request);
     void handle_submit_modulswitch(AsyncWebServerRequest* request);
-    void handle_load_defaultsettings(AsyncWebServerRequest* request);
+    void handle_restoreDefaultSettings(AsyncWebServerRequest* request);
     void handle_restart(AsyncWebServerRequest* request);
 
     // helper function
