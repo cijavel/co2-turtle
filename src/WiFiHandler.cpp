@@ -11,113 +11,113 @@ String ssid;
 
 void WiFiHandler::loadWiFiCredentials()
 {
-    preferences.begin("wifi", true);
-        ssid = preferences.getString("ssid", "");
-        password = preferences.getString("password", "");
-    preferences.end();
+	preferences.begin("wifi", true);
+	ssid = preferences.getString("ssid", "");
+	password = preferences.getString("password", "");
+	preferences.end();
 
-    if (ssid == "" || password == "")
-    {
-        ssid = WIFI_SSID;
-        password = WIFI_PW;
-        Serial.println("OK - No stored WiFi credentials found. using default credentials.");
-    }
-    else
-    {
-        Serial.println("Stored WiFi credentials loaded.");
-    }
+	if (ssid == "" || password == "")
+	{
+		ssid = WIFI_SSID;
+		password = WIFI_PW;
+		Serial.println("OK - No stored WiFi credentials found. using default credentials.");
+	}
+	else
+	{
+		Serial.println("Stored WiFi credentials loaded.");
+	}
 
-    Serial.print("SSID: ");
-    Serial.println(ssid);
+	Serial.print("SSID: ");
+	Serial.println(ssid);
 }
 
 void WiFiHandler::setupAPMode()
 {
-    const char *apSSID = "sensorturle 192.168.4.1";
-    const char *apPassword = "sensorturtle";
+	const char *apSSID = "sensorturle 192.168.4.1";
+	const char *apPassword = "sensorturtle";
 
-    WiFi.softAP(apSSID, apPassword);
-    Serial.println("[AP MODE] Access Point Started");
-    Serial.print("[AP MODE] IP address: ");
-    Serial.println(WiFi.softAPIP());
+	WiFi.softAP(apSSID, apPassword);
+	Serial.println("[AP MODE] Access Point Started");
+	Serial.print("[AP MODE] IP address: ");
+	Serial.println(WiFi.softAPIP());
 }
 
 void WiFiHandler::initWifi()
 {
-    int wifiWaitCount = 0;
-    WiFiClass::setHostname(DeviceName);
+	int wifiWaitCount = 0;
+	WiFiClass::setHostname(DeviceName);
 #ifdef DEBUG
-    Serial.print("\n[WIFI] Connecting to ");
-    Serial.println(WIFI_SSID);
+	Serial.print("\n[WIFI] Connecting to ");
+	Serial.println(WIFI_SSID);
 #endif
-    loadWiFiCredentials();
-    WiFi.begin(ssid.c_str(), password.c_str());
+	loadWiFiCredentials();
+	WiFi.begin(ssid.c_str(), password.c_str());
 
-    while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
-    {
-        delay(250);
-        wifiWaitCount++;
-    }
-    if (WiFiClass::status() == WL_CONNECTED)
-    {
-        Serial.println("[WIFI] connected.");
-        Serial.print("[WIFI] IP address: ");
-        Serial.println(WiFi.localIP());
-    }
-    else
-    {
-        Serial.println("[WIFI] Starting AP mode. Please connect to the esp32 wlan");
-        setupAPMode();
-    }
+	while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
+	{
+		delay(250);
+		wifiWaitCount++;
+	}
+	if (WiFiClass::status() == WL_CONNECTED)
+	{
+		Serial.println("[WIFI] connected.");
+		Serial.print("[WIFI] IP address: ");
+		Serial.println(WiFi.localIP());
+	}
+	else
+	{
+		Serial.println("[WIFI] Starting AP mode. Please connect to the esp32 wlan");
+		setupAPMode();
+	}
 }
 
 void WiFiHandler::ReStart()
 {
 #ifdef DEBUGk
-    Serial.println();
-    Serial.print("[WIFI] Connecting to ");
-    Serial.println(WIFI_SSID);
+	Serial.println();
+	Serial.print("[WIFI] Connecting to ");
+	Serial.println(WIFI_SSID);
 #endif
-    loadWiFiCredentials();
-    WiFi.begin(ssid.c_str(), password.c_str());
-    int wifiWaitCount = 0;
-    while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
-    {
-        delay(250);
-        wifiWaitCount++;
-    }
+	loadWiFiCredentials();
+	WiFi.begin(ssid.c_str(), password.c_str());
+	int wifiWaitCount = 0;
+	while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
+	{
+		delay(250);
+		wifiWaitCount++;
+	}
 #ifdef DEBUG
-    if (WiFiClass::status() == WL_CONNECTED)
-    {
-        Serial.println();
-        Serial.println("[WIFI] WiFi connected");
-        Serial.println(WiFi.localIP());
-    }
+	if (WiFiClass::status() == WL_CONNECTED)
+	{
+		Serial.println();
+		Serial.println("[WIFI] WiFi connected");
+		Serial.println(WiFi.localIP());
+	}
 #endif
 }
 
 bool WiFiHandler::StatusCheck()
 {
-    wl_status_t status = WiFiClass::status();
-    if (status != WL_CONNECTED)
-    {
-        ReStart();
-    }
+	wl_status_t status = WiFiClass::status();
+	if (status != WL_CONNECTED)
+	{
+		ReStart();
+	}
 #ifdef DEBUG
-    else
-    {
-        Serial.println("[WIFI] Still connected");
-        Serial.println();
-    }
+	else
+	{
+		Serial.println("[WIFI] Still connected");
+		Serial.println();
+	}
 #endif
-    return status == WL_CONNECTED;
+	return status == WL_CONNECTED;
 }
 
 bool WiFiHandler::checkWifiStatus(unsigned long currentSeconds)
 {
-    if (currentSeconds % interval_WiFiCheck_in_Seconds == 0)
-    {
-        return WiFiHandler::StatusCheck();
-    }
-    return false;
+	if (currentSeconds % interval_WiFiCheck_in_Seconds == 0)
+	{
+		return WiFiHandler::StatusCheck();
+	}
+	return false;
 }

@@ -1,15 +1,17 @@
 #ifndef CO2_TURTLE_WIFIHANDLER_H
 #define CO2_TURTLE_WIFIHANDLER_H
 
-class WiFiHandler{
+class WiFiHandler
+{
 public:
-    static void initWifi();
-    static bool checkWifiStatus(unsigned long currentSeconds);
-    static void setupAPMode();
+	static void initWifi();
+	static bool checkWifiStatus(unsigned long currentSeconds);
+	static void setupAPMode();
+
 private:
-    static bool StatusCheck();
-    static void ReStart();
-    static void loadWiFiCredentials();
+	static bool StatusCheck();
+	static void ReStart();
+	static void loadWiFiCredentials();
 };
 
-#endif //CO2_TURTLE_WIFIHANDLER_H
+#endif // CO2_TURTLE_WIFIHANDLER_H

@@ -10,7 +10,7 @@
 // DIN /SDI   -> MOSI(23) 	weiß,
 // GND 		  -> GND,
 // 3.3V 	  -> 3.3V
-//#define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
+// #define GxEPD2_DRIVER_CLASS GxEPD2_213_Z98c // GDEY0213Z98 122x250, SSD1680
 
 // _______________
 // LED
@@ -35,7 +35,7 @@
 // SD0 -> -
 // CS  -> -
 
-//OOP
+// OOP
 #include "BME680Handler.h"
 #include "MHZ19Handler.h"
 #include "Configuration.h"
@@ -55,136 +55,161 @@ Preferences preferences;
 // --------------------------------------------------------------------------
 // time functions
 // --------------------------------------------------------------------------
-const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 0;
-const int   daylightOffset_sec = 3600;
+const char *ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = 0;
+const int daylightOffset_sec = 3600;
 
-String localTime(const String& format) {
-    struct tm timeinfo{};
+String localTime(const String &format)
+{
+	struct tm timeinfo{};
 
-    String time = "";
-    char toutp[60];
-    setenv("TZ", TIMEZONE , 1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
-    tzset();
+	String time = "";
+	char toutp[60];
+	setenv("TZ", TIMEZONE, 1); //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+	tzset();
 
-    if (!getLocalTime(&timeinfo)) {
-        time = "TIME: Failed to obtain";
-    } else {
-        strftime(toutp, sizeof(toutp), format.c_str(), &timeinfo);
-        time = String(toutp);
-    }
-    return time;
+	if (!getLocalTime(&timeinfo))
+	{
+		time = "TIME: Failed to obtain";
+	}
+	else
+	{
+		strftime(toutp, sizeof(toutp), format.c_str(), &timeinfo);
+		time = String(toutp);
+	}
+	return time;
 }
 
 #ifdef DEBUG
-static void PrintRamUsage(unsigned long currentSeconds) {
-    if (currentSeconds % interval_RAMPrintout_in_Seconds == 0) {
-        Serial.print("Memory Usage: ");
-        uint32_t freeHeap = ESP.getFreeHeap();
-        uint32_t maximumHeap = ESP.getHeapSize();
-        uint32_t usedHeap = maximumHeap - freeHeap;
-        Serial.print(usedHeap);
-        Serial.print("b | ");
-        Serial.print(maximumHeap);
-        Serial.println("b");
-    }
+static void PrintRamUsage(unsigned long currentSeconds)
+{
+	if (currentSeconds % interval_RAMPrintout_in_Seconds == 0)
+	{
+		Serial.print("Memory Usage: ");
+		uint32_t freeHeap = ESP.getFreeHeap();
+		uint32_t maximumHeap = ESP.getHeapSize();
+		uint32_t usedHeap = maximumHeap - freeHeap;
+		Serial.print(usedHeap);
+		Serial.print("b | ");
+		Serial.print(maximumHeap);
+		Serial.println("b");
+	}
 }
 #endif
 
-void setup() {
-    delay(100);
-    Serial.begin(BAUDRATE);
-    Serial.println();
+void setup()
+{
+	delay(100);
+	Serial.begin(BAUDRATE);
+	Serial.println();
 
-    if (!LittleFS.begin()) {
-        Serial.println("Failed to mount LittleFS!");
-        return;
-    }
+	if (!LittleFS.begin())
+	{
+		Serial.println("Failed to mount LittleFS!");
+		return;
+	}
 
-    SettingsHandler &settingsHandler = SettingsHandler::getInstance();
-    settingsHandler.setSettingsOnFirstRun();
+	SettingsHandler &settingsHandler = SettingsHandler::getInstance();
+	settingsHandler.setSettingsOnFirstRun();
 
-    WiFiHandler::initWifi();
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+	WiFiHandler::initWifi();
+	configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
-    WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.start();
+	WebServerHandler &webServer = WebServerHandler::getInstance();
+	webServer.start();
 
-    if (settingsHandler.getSetting("switchLED")) {
-        FastLedHandler &ledhandler = FastLedHandler::getInstance();
-        ledhandler.setup_led();
-    }
+	if (settingsHandler.getConfigModul("switchLED"))
+	{
+		FastLedHandler &ledhandler = FastLedHandler::getInstance();
+		ledhandler.setup_led();
+	}
 
-    if (settingsHandler.getSetting("switchMQTT")) {
-        MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-        MqttHandler.setup_Mqtt();
-    }
+	if (settingsHandler.getConfigModul("switchMQTT"))
+	{
+		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+		MqttHandler.setup_Mqtt();
+	}
 }
 
 unsigned long last = 0;
 
-void loop() {
+void loop()
+{
 
-    unsigned long currentSeconds = millis() / 1000;
-    if (DEBUG) {
-        if (currentSeconds != last) {
-            Serial.print("loop second: ");
-            Serial.println(currentSeconds);
-            last = currentSeconds;
-        }
-    } 
-    SettingsHandler &settingsHandler = SettingsHandler::getInstance();
+	unsigned long currentSeconds = millis() / 1000;
+	if (DEBUG)
+	{
+		if (currentSeconds != last)
+		{
+			Serial.print("loop second: ");
+			Serial.println(currentSeconds);
+			last = currentSeconds;
+		}
+	}
+	SettingsHandler &settingsHandler = SettingsHandler::getInstance();
 
-    BME680Handler &bmehandler = BME680Handler::getInstance();
-    Bsec bme_data = bmehandler.getData();
+	BME680Handler &bmehandler = BME680Handler::getInstance();
+	Bsec bme_data = bmehandler.getData();
 
-    if (DEBUG) {
-        if (bmehandler.updateSensorData(currentSeconds)) {
-            bmehandler.printout();
-        }
-    } else {
-        bmehandler.updateSensorData(currentSeconds);
-    }
+	if (DEBUG)
+	{
+		if (bmehandler.updateSensorData(currentSeconds))
+		{
+			bmehandler.printout();
+		}
+	}
+	else
+	{
+		bmehandler.updateSensorData(currentSeconds);
+	}
 
-    MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
-    if (DEBUG) {
-        if (mhz19Handler.runUpdate(currentSeconds)) {
-            mhz19Handler.printoutLastReadout();
-        }
-    } else {
-        mhz19Handler.runUpdate(currentSeconds);
-    }
+	MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
+	if (DEBUG)
+	{
+		if (mhz19Handler.runUpdate(currentSeconds))
+		{
+			mhz19Handler.printoutLastReadout();
+		}
+	}
+	else
+	{
+		mhz19Handler.runUpdate(currentSeconds);
+	}
 
+	DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
 
-    DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
+	if (settingsHandler.getConfigModul("switchWiFi"))
+	{
+		WiFiHandler::checkWifiStatus(currentSeconds);
+	}
 
-    if (settingsHandler.getSetting("switchWiFi")) {
-        WiFiHandler::checkWifiStatus(currentSeconds);
-    } 
-   
+	WebServerHandler &webServer = WebServerHandler::getInstance();
+	webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));
 
-    WebServerHandler &webServer = WebServerHandler::getInstance();
-    webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));   
-  
+	if (settingsHandler.getConfigModul("switchEPD"))
+	{
+		EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
+	}
 
-    if (settingsHandler.getSetting("switchEPD")) {
-        EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
-    } 
+	if (settingsHandler.getConfigModul("switchLED"))
+	{
+		FastLedHandler &ledHandler = FastLedHandler::getInstance();
+		ledHandler.setInputDataforLED(mhz19Readout, bme_data);
+		ledHandler.ledstatus(currentSeconds);
+	}
+	else
+	{
+		FastLedHandler &ledHandler = FastLedHandler::getInstance();
+		ledHandler.setup_black(currentSeconds);
+	}
 
-    if (settingsHandler.getSetting("switchLED")) {
-        FastLedHandler &ledHandler = FastLedHandler::getInstance();
-        ledHandler.setInputDataforLED(mhz19Readout, bme_data);
-        ledHandler.ledstatus(currentSeconds);
-    } else {
-        FastLedHandler &ledHandler = FastLedHandler::getInstance();
-        ledHandler.setup_black(currentSeconds);
-    }
-
-    if (settingsHandler.getSetting("switchMQTT")) {
-        MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
-        MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
-    } 
-    if (DEBUG) {
-        PrintRamUsage(currentSeconds);
-    } 
+	if (settingsHandler.getConfigModul("switchMQTT"))
+	{
+		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+		MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
+	}
+	if (DEBUG)
+	{
+		PrintRamUsage(currentSeconds);
+	}
 }

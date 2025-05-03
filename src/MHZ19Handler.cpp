@@ -13,42 +13,45 @@ const String name_MHZ19_date              = "[MHZ19] Date";
 const String name_MHZ19_time              = "[MHZ19] Time";
 const String name_MHZ19_zone              = "[MHZ19] Timezone";
 
-MHZ19Handler::MHZ19Handler() {
-    Serial_MHZ19 = new SoftwareSerial(PIN_MHZ19_RX, PIN_MHZ19_TX);
-    Serial_MHZ19->begin(BAUDRATE);                                // Uno Example: Begin Stream with MHZ19 baudrate
-    myMHZ19 = MHZ19();
-    myMHZ19.begin(*Serial_MHZ19);                                 // *Important, Pass your Stream reference
-    //myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
+MHZ19Handler::MHZ19Handler()
+{
+	Serial_MHZ19 = new SoftwareSerial(PIN_MHZ19_RX, PIN_MHZ19_TX);
+	Serial_MHZ19->begin(BAUDRATE); // Uno Example: Begin Stream with MHZ19 baudrate
+	myMHZ19 = MHZ19();
+	myMHZ19.begin(*Serial_MHZ19); // *Important, Pass your Stream reference
+	// myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
 
-    myMHZ19.autoCalibration(true);
+	myMHZ19.autoCalibration(true);
 #ifdef DEBUG
-    Serial.print("[MHZ19] ABC Status: ");
-    myMHZ19.getABC() ? Serial.println("ON") :  Serial.println("OFF");  // now print it's status
+	Serial.print("[MHZ19] ABC Status: ");
+	myMHZ19.getABC() ? Serial.println("ON") : Serial.println("OFF"); // now print it's status
 #endif
-    char myVersion[4];
-    myMHZ19.getVersion(myVersion);
+	char myVersion[4];
+	myMHZ19.getVersion(myVersion);
 #ifdef DEBUG
-    Serial.print("[MHZ19] Range: ");
-    Serial.println(myMHZ19.getRange());
+	Serial.print("[MHZ19] Range: ");
+	Serial.println(myMHZ19.getRange());
 #endif
 
-    //CALIBRATION
-    // reset the MH-Z19B sensor by connecting "GND" pin and the "HD" pin for 7-10 seconds!!! This worked and I calibrated the sensor by running him at the open window and it is now starting up with 400~410 PPM.
-    //Serial.println("MHZ19: Calibrating..");
-    //myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
-    myMHZ19.verify();
-    _lastReadout = DataCO2();
+	// CALIBRATION
+	//  reset the MH-Z19B sensor by connecting "GND" pin and the "HD" pin for 7-10 seconds!!! This worked and I calibrated the sensor by running him at the open window and it is now starting up with 400~410 PPM.
+	// Serial.println("MHZ19: Calibrating..");
+	// myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
+	myMHZ19.verify();
+	_lastReadout = DataCO2();
 #ifdef DEBUG
-    Serial.println();
-    Serial.println("[MHZ19] OK");
+	Serial.println();
+	Serial.println("[MHZ19] OK");
 #endif
 }
 
-void MHZ19Handler::printoutCurrentValues() {
-    if(myMHZ19.errorCode == RESULT_OK) {
-        Serial.println("[MHZ19] CurrentValues:");
-//        Serial.println(name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     );
-//        Serial.println(name_MHZ19_datetime        + ":      "      + data_MHZ19_datetime      );
+void MHZ19Handler::printoutCurrentValues()
+{
+	if (myMHZ19.errorCode == RESULT_OK)
+	{
+		Serial.println("[MHZ19] CurrentValues:");
+		//        Serial.println(name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     );
+		//        Serial.println(name_MHZ19_datetime        + ":      "      + data_MHZ19_datetime      );
         Serial.println(name_MHZ19_co2             + ":          "   + myMHZ19.getCO2()            );
         Serial.println(name_MHZ19_co2_raw         + ":       "      + myMHZ19.getCO2Raw()         );
         Serial.println(name_MHZ19_co2_limited     + ":            " + myMHZ19.getCO2(false)       );
@@ -56,18 +59,19 @@ void MHZ19Handler::printoutCurrentValues() {
         Serial.println(name_MHZ19_co2_tempAdjust  + ": "            + myMHZ19.getTempAdjustment() );
         Serial.println(name_MHZ19_co2_temperatur  + ":    "         + myMHZ19.getTemperature()    );
         Serial.println(name_MHZ19_co2_Accuracy    + ":           "  + myMHZ19.getAccuracy()       );
-        Serial.println();
-    }
-    else {
-        Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
-        Serial.print("[MHZ19] Response Code: ");
-        Serial.println(myMHZ19.errorCode);          // Get the Error Code value
-    }
+		Serial.println();
+	}
+	else
+	{
+		Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
+		Serial.print("[MHZ19] Response Code: ");
+		Serial.println(myMHZ19.errorCode); // Get the Error Code value
+	}
 }
 
-
-void MHZ19Handler::printoutLastReadout() {
-        Serial.println("[MHZ19] LastReadout:");
+void MHZ19Handler::printoutLastReadout()
+{
+	Serial.println("[MHZ19] LastReadout:");
         Serial.println(name_MHZ19_co2             + ":          "   + String(_lastReadout.getRegular()       ));
         Serial.println(name_MHZ19_co2_raw         + ":      "       + String(_lastReadout.getRaw()           ));
         Serial.println(name_MHZ19_co2_limited     + ":            " + String(_lastReadout.getLimited()       ));
@@ -75,37 +79,42 @@ void MHZ19Handler::printoutLastReadout() {
         Serial.println(name_MHZ19_co2_tempAdjust  + ": "            + String(_lastReadout.getTempAdjustment()));
         Serial.println(name_MHZ19_co2_temperatur  + ":    "         + String(_lastReadout.getTemperature()   ));
         Serial.println(name_MHZ19_co2_Accuracy    + ":           "  + String(_lastReadout.getAccuracy()      ));
-        Serial.println();
+	Serial.println();
 }
 
-DataCO2 MHZ19Handler::getLastReadout() {
-    return _lastReadout;
+DataCO2 MHZ19Handler::getLastReadout()
+{
+	return _lastReadout;
 }
 
-bool MHZ19Handler::updateLastReadout() {
-    if(myMHZ19.errorCode == RESULT_OK) {
-        _lastReadout = DataCO2(
-                myMHZ19.getCO2(),
-                myMHZ19.getCO2Raw(),
-                myMHZ19.getCO2(false),
-                myMHZ19.getBackgroundCO2(),
-                myMHZ19.getTempAdjustment(),
-                myMHZ19.getTemperature(),
-                myMHZ19.getAccuracy()
-                );
-        return true;
-    }
-    else {
-        Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
-        Serial.print("[MHZ19] Response Code: ");
-        Serial.println(myMHZ19.errorCode);          // Get the Error Code value
-        return false;
-    }
+bool MHZ19Handler::updateLastReadout()
+{
+	if (myMHZ19.errorCode == RESULT_OK)
+	{
+		_lastReadout = DataCO2(
+			myMHZ19.getCO2(),
+			myMHZ19.getCO2Raw(),
+			myMHZ19.getCO2(false),
+			myMHZ19.getBackgroundCO2(),
+			myMHZ19.getTempAdjustment(),
+			myMHZ19.getTemperature(),
+			myMHZ19.getAccuracy());
+		return true;
+	}
+	else
+	{
+		Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
+		Serial.print("[MHZ19] Response Code: ");
+		Serial.println(myMHZ19.errorCode); // Get the Error Code value
+		return false;
+	}
 }
 
-bool MHZ19Handler::runUpdate(const unsigned long currentSeconds) {
-    if (currentSeconds % interval_MHZ19_in_Seconds == 0){
-        return updateLastReadout();
-    }
-    return false;
+bool MHZ19Handler::runUpdate(const unsigned long currentSeconds)
+{
+	if (currentSeconds % interval_MHZ19_in_Seconds == 0)
+	{
+		return updateLastReadout();
+	}
+	return false;
 }
