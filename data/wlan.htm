@@ -8,38 +8,62 @@
     <body>
         <div class="container">
             <div class="nav">
-              <a href="/" class="button">Back to Index</a>
+                <a href="/" class="button">Back to Index</a>
             </div>
-            <br>
             <div class="content">
-              <div class="saved-credentials">
-                <h3>Saved Credentials:</h3>
-                <div><strong>SSID:</strong> {{ssid}}</div>
-                <div>
-                  <strong>Password:</strong>
-                  <span id="saved-password">********</span>
-                  <button type="button" class="show-password-button" onmousedown="toggleSavedPassword(true)" onmouseup="toggleSavedPassword(false)" onmouseleave="toggleSavedPassword(false)">Show Password</button>
+                <div class="saved-credentials">
+                    <h3>Saved Credentials:</h3>
+                    <div>
+                        <label class="wlanlabel">SSID:</label>
+                        <span>{{ssid}}</span>
+                    </div>
+                    <div>
+                        <label class="wlanlabel">Password:</label>
+                        <span id="saved-password">********</span>
+                        <button type="button" class="show-password-button" 
+                                onmousedown="toggleSavedPassword(true)" 
+                                onmouseup="toggleSavedPassword(false)" 
+                                onmouseleave="toggleSavedPassword(false)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-eye" viewBox="-1 -1 16 16">
+                                  <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8a13.133 13.133 0 0 1-1.66 2.043C11.879 11.332 10.12 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z"/>
+                                  <path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM8 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>
+                              </svg>
+                        </button>
+                    </div>
                 </div>
-              </div>
-              <div class="new-credentials">
-                <form action="/submitWLANcredentials" method="POST">
-                  SSID: <input class="input" type="text" name="wlanSSID" value="{{ssid}}"><br>
-                  Password: <input class="input" type="password" name="wlanPASSWORD" id="wlanPASSWORD"><br>
-                  <button type="button" class="show-password-button" onmousedown="togglePassword(true)" onmouseup="togglePassword(false)" onmouseleave="togglePassword(false)">Show Password</button>
-                  <br><br>
-                  <input class="button" type="submit" value="Submit">
-                </form>
-              </div>
-              <script>
-                function togglePassword(show) {
-                  document.getElementById('wlanPASSWORD').type = show ? 'text' : 'password';
-                }
-                function toggleSavedPassword(show) {
-                  document.getElementById('saved-password').innerText = show ? '{{password}}' : '********';
-                }
-              </script>
+                <div class="new-credentials">
+                    <h3>Enter New Credentials:</h3>
+                    <form action="/submitWLANcredentials" method="POST" id="wlanForm">
+                        <div>
+                            <label class="wlanlabel">SSID:</label>
+                            <input class="input" type="text" id="wlanSSID" name="wlanSSID" value="{{ssid}}">
+                        </div>
+                        <div>
+                            <label class="wlanlabel" >Password:</label>
+                            <input class="input" type="password" id="wlanPASSWORD" name="wlanPASSWORD">
+                            <button type="button" class="show-password-button" 
+                                    onmousedown="togglePassword(true)" 
+                                    onmouseup="togglePassword(false)" 
+                                    onmouseleave="togglePassword(false)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-eye" viewBox="-1 -1 16 16">
+                                      <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8a13.133 13.133 0 0 1-1.66 2.043C11.879 11.332 10.12 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z"/>
+                                      <path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM8 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>
+                                  </svg>
+                            </button>
+                        </div>
+                        <button type="submit" class="btn">Submit</button>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="footer">&copy; 2025 SensorTurtle</div>
+        <script>
+            function togglePassword(show) {
+                document.getElementById('wlanPASSWORD').type = show ? 'text' : 'password';
+            }
+            function toggleSavedPassword(show) {
+                document.getElementById('saved-password').innerText = show ? '{{password}}' : '********';
+            }
+        </script>
     </body>
 </html>

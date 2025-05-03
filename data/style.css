@@ -4,79 +4,105 @@ body {
   padding: 0;
   background-color: #f0f0f0;
 }
-div {
-  padding: 5px;
-}
-h1 {
-  font-size: 120%;
-}
+
 .container {
-  max-width: 960px;
-  margin: 0 auto;
+  max-width: 800px;
+  margin: 20px auto;
   padding: 20px;
-  background-color: #ffffff;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.status {
-  border-radius: 20%;
-  width: 20px;
-  height: 20px;
-}
+
 .nav {
   margin-bottom: 20px;
 }
-table{
-  margin-top: 20px;
-  display: inline-block;
-}
-td, th, tr, td{
-  text-align: left;
-  padding: 8px;
-  vertical-align: top;
-}
-th{
-  width: 20%;
-}
-td.data{
-  width: 30%;
-}
-td:has(input), 
-table.cred tbody tr td {
-width: 65%;
-}
-th.title {
-  font-weight: bold;
-  width: 150px;
+
+.nav .button {
+  text-decoration: none;
+  color: #fff;
+  background: #28a745;
+  padding: 10px 34px;
+  border-radius: 5px;
 }
 
-input {
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.content h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
 }
-button, 
-input[type=submit] {
-  padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  font-size: 16px;
-  text-align: center;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  margin: 5px 0px;
+
+#moduleSwitchForm div, #moduleIntervalForm div {
+  display: block; 
+  margin-bottom: 15px;
+}
+
+#moduleSwitchForm div label {
   display: inline-block;
-  border: 1px solid #ccc;
+  overflow: hidden;
+  width: 120px; 
 }
-input[type=submit]:hover,
-button:hover {
-  background-color: #45a049;
+
+#moduleIntervalForm div label {
+  display: inline-block;
+  width: 400px; 
+}
+
+#moduleSwitchForm div label input[type="checkbox"] {
+  vertical-align: middle; 
+  float: right; 
+  transform: scale(1.2);
+}
+
+#moduleIntervalForm div label input[type="number"] {
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px; 
+  box-sizing: border-box; 
+  vertical-align: middle; 
+  float: right; 
+}
+
+.btn {
+  background: #28a745;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 165px;
+  font-size: 105%;
+}
+
+.btn:hover, .nav .button:hover {
+  background: #218838;
 }
 
 .footer {
-  margin-top: 40px;
   text-align: center;
-  font-size: 12px;
+  margin-top: 20px;
+  font-size: 14px;
   color: #666;
+}
+
+.wlanlabel {
+  display: inline-block;
+  width: 120px; 
+}
+#wlanSSID, #wlanPASSWORD{
+  width: 200px; 
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; 
+  width: 350px
+}
+
+.saved-credentials div label, 
+.saved-credentials div span,
+#wlanForm div label,
+#wlanForm div input {
+  margin-bottom: 8px;
 }
