@@ -12,8 +12,9 @@ public:
         static SettingsHandler instance; // Guaranteed to be destroyed.
         return instance;// Instantiated on first use.
     }
-    void restoreDefaultSettings();
+    void restoreDefaultConfiguration();
     int getSetting(String settingName);
+    void setSetting(String settingName, int value);
     void setSettingsOnFirstRun();
 
 private:
