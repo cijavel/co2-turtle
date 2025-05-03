@@ -47,11 +47,11 @@ void WebServerHandler::handle_page_index(AsyncWebServerRequest *request)
 		request->send(500, "text/plain", "Internal Server Error: Cannot open index.htm");
 		return;
 	}
-	String content = file.readString();
+	String content_index = file.readString();
 	file.close();
 
-	content.replace("{{deviceName}}", String(DeviceName));
-	request->send(200, "text/html; charset=utf-8", content);
+	content_index.replace("{{deviceName}}", DeviceName);
+	request->send(200, "text/html; charset=utf-8", content_index);
 }
 
 void WebServerHandler::handle_page_data(AsyncWebServerRequest *request)
@@ -202,18 +202,18 @@ void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest *request
 	file.close();
 	content.replace("{{deviceName}}", DeviceName);
 
-	content.replace("{{intervalMHZ19}}", String(settingsHandler.getSetting("intervalMHZ19")));
-	content.replace("{{intervalBME680}}", String(settingsHandler.getSetting("intervalBME680")));
-	content.replace("{{intervalWiFi}}", String(settingsHandler.getSetting("intervalWiFi")));
-	content.replace("{{intervalPRINT}}", String(settingsHandler.getSetting("intervalPRINT")));
-	content.replace("{{intervalEPD}}", String(settingsHandler.getSetting("intervalEPD")));
-	content.replace("{{intervalLED}}", String(settingsHandler.getSetting("intervalLED")));
-	content.replace("{{intervalMQTT}}", String(settingsHandler.getSetting("intervalMQTT")));
+	content.replace("{{intervalMHZ19}}", String(settingsHandler.getConfigModul("intervalMHZ19")));
+	content.replace("{{intervalBME680}}", String(settingsHandler.getConfigModul("intervalBME680")));
+	content.replace("{{intervalWiFi}}", String(settingsHandler.getConfigModul("intervalWiFi")));
+	content.replace("{{intervalPRINT}}", String(settingsHandler.getConfigModul("intervalPRINT")));
+	content.replace("{{intervalEPD}}", String(settingsHandler.getConfigModul("intervalEPD")));
+	content.replace("{{intervalLED}}", String(settingsHandler.getConfigModul("intervalLED")));
+	content.replace("{{intervalMQTT}}", String(settingsHandler.getConfigModul("intervalMQTT")));
 
-	content.replace("{{switchWIFI_checked}}", settingsHandler.getSetting("switchWIFI") ? "checked" : "");
-	content.replace("{{switchEPD_checked}}", settingsHandler.getSetting("switchEPD") ? "checked" : "");
-	content.replace("{{switchLED_checked}}", settingsHandler.getSetting("switchLED") ? "checked" : "");
-	content.replace("{{switchMQTT_checked}}", settingsHandler.getSetting("switchMQTT") ? "checked" : "");
+	content.replace("{{switchWIFI_checked}}", settingsHandler.getConfigModul("switchWIFI") ? "checked" : "");
+	content.replace("{{switchEPD_checked}}", settingsHandler.getConfigModul("switchEPD") ? "checked" : "");
+	content.replace("{{switchLED_checked}}", settingsHandler.getConfigModul("switchLED") ? "checked" : "");
+	content.replace("{{switchMQTT_checked}}", settingsHandler.getConfigModul("switchMQTT") ? "checked" : "");
 
 	request->send(200, "text/html; charset=utf-8", content);
 }
@@ -238,65 +238,65 @@ void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *reques
 
 	if (request->hasParam("intervalMHZ19"))
 	{
-		settingsHandler.setSetting("intervalMHZ19", request->getParam("intervalMHZ19")->value().toInt());
+		settingsHandler.setConfigModul("intervalMHZ19", request->getParam("intervalMHZ19")->value().toInt());
 	}
 	else
 	{
-		settingsHandler.setSetting("intervalMHZ19", interval_MHZ19_in_Seconds);
+		settingsHandler.setConfigModul("intervalMHZ19", interval_MHZ19_in_Seconds);
 	}
 
 	if (request->hasParam("intervalBME680"))
 	{
-		settingsHandler.setSetting("intervalBME680", request->getParam("intervalBME680")->value().toInt());
+		settingsHandler.setConfigModul("intervalBME680", request->getParam("intervalBME680")->value().toInt());
 	}
 	else
 	{
-		settingsHandler.setSetting("intervalBME680", interval_BME680_in_Seconds);
+		settingsHandler.setConfigModul("intervalBME680", interval_BME680_in_Seconds);
 	}
 
 	if (request->hasParam("intervalWiFi"))
 	{
-		settingsHandler.setSetting("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
+		settingsHandler.setConfigModul("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
 	}
 	else
 	{
-		settingsHandler.setSetting("intervalWiFi", interval_WiFiCheck_in_Seconds);
+		settingsHandler.setConfigModul("intervalWiFi", interval_WiFiCheck_in_Seconds);
 	}
 
 	if (request->hasParam("intervalPRINT"))
 	{
-		settingsHandler.setSetting("intervalPRINT", request->getParam("intervalPRINT")->value().toInt());
+		settingsHandler.setConfigModul("intervalPRINT", request->getParam("intervalPRINT")->value().toInt());
 	}
 	else
 	{
-		settingsHandler.setSetting("intervalPRINT", interval_RAMPrintout_in_Seconds);
+		settingsHandler.setConfigModul("intervalPRINT", interval_RAMPrintout_in_Seconds);
 	}
 
 	if (request->hasParam("intervalEPD"))
 	{
-		settingsHandler.setSetting("intervalEPD", request->getParam("intervalEPD")->value().toInt());
+		settingsHandler.setConfigModul("intervalEPD", request->getParam("intervalEPD")->value().toInt());
 	}
 	else
 	{
-		settingsHandler.setSetting("intervalEPD", interval_EPD_in_Seconds);
+		settingsHandler.setConfigModul("intervalEPD", interval_EPD_in_Seconds);
 	}
 
 	if (request->hasParam("intervalLED"))
 	{
-		settingsHandler.setSetting("intervalLED", request->getParam("intervalLED")->value().toInt());
+		settingsHandler.setConfigModul("intervalLED", request->getParam("intervalLED")->value().toInt());
 	}
 	else
 	{
-		settingsHandler.setSetting("intervalLED", interval_LED_in_Seconds);
+		settingsHandler.setConfigModul("intervalLED", interval_LED_in_Seconds);
 	}
 
 	if (request->hasParam("intervalMQTT"))
 	{
-		settingsHandler.setSetting("intervalMQTT", request->getParam("intervalMQTT")->value().toInt());
+		settingsHandler.setConfigModul("intervalMQTT", request->getParam("intervalMQTT")->value().toInt());
 	}
 	else
 	{
-		settingsHandler.setSetting("intervalMQTT", interval_mqtt_in_Seconds);
+		settingsHandler.setConfigModul("intervalMQTT", interval_mqtt_in_Seconds);
 	}
 
 	preferences.end();
@@ -308,19 +308,19 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 {
 	if (request->hasParam("switchWIFI"))
 	{
-		settingsHandler.setSetting("switchWIFI", atoi(request->getParam("switchWIFI")->value().c_str()));
+		settingsHandler.setConfigModul("switchWIFI", atoi(request->getParam("switchWIFI")->value().c_str()));
 	}
 	if (request->hasParam("switchEPD"))
 	{
-		settingsHandler.setSetting("switchEPD", atoi(request->getParam("switchEPD")->value().c_str()));
+		settingsHandler.setConfigModul("switchEPD", atoi(request->getParam("switchEPD")->value().c_str()));
 	}
 	if (request->hasParam("switchLED"))
 	{
-		settingsHandler.setSetting("switchLED", atoi(request->getParam("switchLED")->value().c_str()));
+		settingsHandler.setConfigModul("switchLED", atoi(request->getParam("switchLED")->value().c_str()));
 	}
 	if (request->hasParam("switchMQTT"))
 	{
-		settingsHandler.setSetting("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
+		settingsHandler.setConfigModul("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
 	}
 	request->redirect("/");
 }

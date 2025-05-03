@@ -5,47 +5,49 @@
 #include "DataCO2.h"
 #include "bsec.h"
 
-class WebServerHandler {
+class WebServerHandler
+{
 public:
-    static WebServerHandler &getInstance() {
-        static WebServerHandler instance; 
-        return instance;
-    }
-    void start();
-    void setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata, String sdate);
+	static WebServerHandler &getInstance()
+	{
+		static WebServerHandler instance;
+		return instance;
+	}
+	void start();
+	void setInputDataforBody(DataCO2 co2Sensordata, Bsec enviromentdata, String sdate);
+
 private:
-    DataCO2 co2data;
-    Bsec bmedata;
-    AsyncWebServer server;
-    String acDate;
+	DataCO2 co2data;
+	Bsec bmedata;
+	AsyncWebServer server;
+	String acDate;
 
-    WebServerHandler(); // Constructor
-    ~WebServerHandler() = default;
+	WebServerHandler(); // Constructor
+	~WebServerHandler() = default;
 
-    // Delete copy constructor and copy assignment to enforce singleton
-    WebServerHandler(const WebServerHandler&) = delete;
-    WebServerHandler& operator=(const WebServerHandler&) = delete;
+	// Delete copy constructor and copy assignment to enforce singleton
+	WebServerHandler(const WebServerHandler &) = delete;
+	WebServerHandler &operator=(const WebServerHandler &) = delete;
 
-    // Request handlers
-    static void handle_page_index(AsyncWebServerRequest* request);
-    void handle_page_data(AsyncWebServerRequest* request);
-    void handle_page_status(AsyncWebServerRequest* request);
-    void handle_page_sensorsettings(AsyncWebServerRequest* request);
-    void handle_page_wlan(AsyncWebServerRequest* request);
-    static void handle_page_NotFound(AsyncWebServerRequest* request);
-    void handle_submit_WLANcredentials(AsyncWebServerRequest* request);
-    void handle_submit_modulinterval(AsyncWebServerRequest* request);
-    void handle_submit_modulswitch(AsyncWebServerRequest* request);
-    void handle_restoreDefaultSettings(AsyncWebServerRequest* request);
-    void handle_restart(AsyncWebServerRequest* request);
+	// Request handlers
+	static void handle_page_index(AsyncWebServerRequest *request);
+	void handle_page_data(AsyncWebServerRequest *request);
+	void handle_page_status(AsyncWebServerRequest *request);
+	void handle_page_sensorsettings(AsyncWebServerRequest *request);
+	void handle_page_wlan(AsyncWebServerRequest *request);
+	static void handle_page_NotFound(AsyncWebServerRequest *request);
+	void handle_submit_WLANcredentials(AsyncWebServerRequest *request);
+	void handle_submit_modulinterval(AsyncWebServerRequest *request);
+	void handle_submit_modulswitch(AsyncWebServerRequest *request);
+	void handle_restoreDefaultSettings(AsyncWebServerRequest *request);
+	void handle_restart(AsyncWebServerRequest *request);
 
-    // helper function
-    void replaceColorDescr(String& str, const String& key, const String& color, const String& descr);
-    void replaceIaqAccuracy(String& str, int iaqAccuracy);
-    void replaceTemperatureInfo(String& str, float temp);
-    void replaceHumidityInfo(String& str, float hum);
-    void replaceIAQInfo(String& str, float iaq);
-    void replaceCO2Info(String& str, int co2);
-
+	// helper function
+	void replaceColorDescr(String &str, const String &key, const String &color, const String &descr);
+	void replaceIaqAccuracy(String &str, int iaqAccuracy);
+	void replaceTemperatureInfo(String &str, float temp);
+	void replaceHumidityInfo(String &str, float hum);
+	void replaceIAQInfo(String &str, float iaq);
+	void replaceCO2Info(String &str, int co2);
 };
-#endif //CO2_TURTLE_WEBSERVERHANDLER_H
+#endif // CO2_TURTLE_WEBSERVERHANDLER_H
