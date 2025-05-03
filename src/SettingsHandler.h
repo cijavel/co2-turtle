@@ -5,22 +5,23 @@
 #include <FS.h>
 #include <LittleFS.h>
 
-class SettingsHandler {
+class SettingsHandler
+{
 public:
-
-    static SettingsHandler &getInstance() {
-        static SettingsHandler instance; // Guaranteed to be destroyed.
-        return instance;// Instantiated on first use.
-    }
-    void restoreDefaultConfiguration();
-    int getSetting(String settingName);
-    void setSetting(String settingName, int value);
-    void setSettingsOnFirstRun();
+	static SettingsHandler &getInstance()
+	{
+		static SettingsHandler instance; // Guaranteed to be destroyed.
+		return instance;				 // Instantiated on first use.
+	}
+	void restoreDefaultConfiguration();
+	int getConfigModul(String settingName);
+	void setConfigModul(String settingName, int value);
+	void setSettingsOnFirstRun();
 
 private:
-    Preferences preferences;
-    void loadAllPersistedSettings();
-    void persistAllSettings();
+	Preferences preferences;
+	void loadAllPersistedSettings();
+	void persistAllSettings();
 };
 
 #endif
