@@ -23,7 +23,7 @@ void SettingsHandler::loadAllPersistedSettings() {
 }
 
 void SettingsHandler::persistAllSettings() {
-    preferences.begin("config", true);
+    preferences.begin("config", false);
         preferences.putBool("switchWIFI", settingMap["switchWIFI"]);
         preferences.putBool("switchEPD", settingMap["switchEPD"]);
         preferences.putBool("switchLED", settingMap["switchLED"]);
@@ -43,7 +43,12 @@ int SettingsHandler::getSetting(String settingName){
  return settingMap[settingName];
 }
 
-void SettingsHandler::restoreDefaultSettings() {
+void SettingsHandler::setSetting(String settingName, int value) {
+    settingMap[settingName] = value;
+}
+
+
+void SettingsHandler::restoreDefaultConfiguration() {
     Serial.println("[preferences] set configuration");
     preferences.begin("config", false);
         preferences.clear(); 
@@ -86,7 +91,7 @@ void SettingsHandler::setSettingsOnFirstRun() {
         bool hasRunBefore = preferences.getBool("setSettingsFirstRun", false); 
     preferences.end();
     if (!hasRunBefore) {
-        restoreDefaultSettings();
+        restoreDefaultConfiguration();
         Serial.println("[Settings] Setting firstRun flag in NVS to true.");
     } 
     loadAllPersistedSettings();
