@@ -3,6 +3,7 @@
 #include "credentials.h"
 #include <map>
 
+
 static std::map<String, int> configMapforModul = {};
 static std::map<String, String> configMapforDevice = {};
 static std::map<String, int> configMapforLED = {};
@@ -24,7 +25,7 @@ void SettingsHandler::loadAllPersistedSettings()
 	configMapforModul["intervalLED"] = preferences.getInt("intervalLED", interval_LED_in_Seconds);
 	configMapforModul["intervalMQTT"] = preferences.getInt("intervalMQTT", interval_mqtt_in_Seconds);
 
-	configMapforDevice["device"] = preferences.getString("device", DeviceName);
+	configMapforDevice["deviceName"] = preferences.getString("deviceName", DeviceName);
 	configMapforDevice["timezone"] = preferences.getString("timezone", TIMEZONE);
 	configMapforDevice["wlanSSID"] = preferences.getString("wlanSSID", WIFI_SSID);
 	configMapforDevice["wlanPASSWORD"] = preferences.getString("wlanPASSWORD", WIFI_PW);
@@ -35,11 +36,89 @@ void SettingsHandler::loadAllPersistedSettings()
 	configMapforDevice["mqttUSERen"] = preferences.getBool("mqttUSERen", MQTT_USER_ENABLED);
 
 	configMapforLED["LEDbrightness"] = preferences.getInt("LEDbrightness", BRIGHTNESS_LEDS);
-	configMapforLED["LEDamount"] = preferences.getInt("LEDamount", NUM_LEDS);
 
 	configMapforSensor["pressure"] = preferences.getInt("pressure", SEALEVELPRESSURE_HPA);
-	configMapforSensor["temperaturOffset"] = preferences.getInt("temperaturOffset", TEMPERATUR_OFFSET);
+	configMapforSensor["tempOffset"] = preferences.getInt("tempOffset", TEMPERATUR_OFFSET);
 	preferences.end();
+}
+
+void SettingsHandler::validateConfigMaps()
+{
+    // Überprüfen der Modul-Konfiguration
+    for (const auto& key : {"switchWIFI", "switchEPD", "switchLED", "switchMQTT",
+                            "intervalMHZ19", "intervalBME680", "intervalWiFi",
+                            "intervalPRINT", "intervalEPD", "intervalLED", "intervalMQTT"})
+    {
+        if (configMapforModul.find(key) == configMapforModul.end())
+        {
+            Serial.printf("[Config] Missing key in configMapforModul: %s\n", key);
+        }
+    }
+
+    // Überprüfen der Geräte-Konfiguration
+    for (const auto& key : {"deviceName", "timezone", "wlanSSID", "wlanPASSWORD",
+                            "mqttUSER", "mqttPASSWORD", "mqttHOST", "mqttPORT", "mqttUSERen"})
+    {
+        if (configMapforDevice.find(key) == configMapforDevice.end())
+        {
+            Serial.printf("[Config] Missing key in configMapforDevice: %s\n", key);
+        }
+    }
+
+    // Überprüfen der LED-Konfiguration
+    for (const auto& key : {"LEDbrightness"})
+    {
+        if (configMapforLED.find(key) == configMapforLED.end())
+        {
+            Serial.printf("[Config] Missing key in configMapforLED: %s\n", key);
+        }
+    }
+
+    // Überprüfen der Sensor-Konfiguration
+    for (const auto& key : {"pressure", "tempOffset"})
+    {
+        if (configMapforSensor.find(key) == configMapforSensor.end())
+        {
+            Serial.printf("[Config] Missing key in configMapforSensor: %s\n", key);
+        }
+    }
+
+    Serial.println("[Config] Validation of configMaps completed.");
+}
+
+void SettingsHandler::printConfigMaps()
+{
+    Serial.println("[Config] Printing all configuration values:");
+
+    // Modul-Konfiguration
+    Serial.println("[Config] Modul Configuration:");
+    for (const auto& entry : configMapforModul)
+    {
+        Serial.printf("  %s: %d\n", entry.first.c_str(), entry.second);
+    }
+
+    // Geräte-Konfiguration
+    Serial.println("[Config] Device Configuration:");
+    for (const auto& entry : configMapforDevice)
+    {
+        Serial.printf("  %s: %s\n", entry.first.c_str(), entry.second.c_str());
+    }
+
+    // LED-Konfiguration
+    Serial.println("[Config] LED Configuration:");
+    for (const auto& entry : configMapforLED)
+    {
+        Serial.printf("  %s: %d\n", entry.first.c_str(), entry.second);
+    }
+
+    // Sensor-Konfiguration
+    Serial.println("[Config] Sensor Configuration:");
+    for (const auto& entry : configMapforSensor)
+    {
+        Serial.printf("  %s: %d\n", entry.first.c_str(), entry.second);
+    }
+
+    Serial.println("[Config] End of configuration values.");
 }
 
 void SettingsHandler::persistAllSettings()
@@ -60,22 +139,12 @@ void SettingsHandler::persistAllSettings()
 	preferences.end();
 }
 
-int SettingsHandler::getConfigModul(String settingName)
-{
-	return configMapforModul[settingName];
-}
-
-void SettingsHandler::setConfigModul(String settingName, int value)
-{
-	configMapforModul[settingName] = value;
-}
-
 void SettingsHandler::restoreDefaultConfiguration()
 {
 	Serial.println("[preferences] set configuration");
 	preferences.begin("config", false);
 	preferences.clear();
-	preferences.putBool("setSettingsFirstRun", true);
+	preferences.putBool("setFirstRun", true);
 
 	preferences.putBool("switchWIFI", switch_WIFI);
 	preferences.putBool("switchEPD", switch_EPD);
@@ -90,7 +159,7 @@ void SettingsHandler::restoreDefaultConfiguration()
 	preferences.putInt("intervalLED", interval_LED_in_Seconds);
 	preferences.putInt("intervalMQTT", interval_mqtt_in_Seconds);
 
-	preferences.putString("device", DeviceName);
+	preferences.putString("deviceName", DeviceName);
 	preferences.putString("timezone", TIMEZONE);
 	preferences.putString("wlanSSID", WIFI_SSID);
 	preferences.putString("wlanPASSWORD", WIFI_PW);
@@ -101,22 +170,69 @@ void SettingsHandler::restoreDefaultConfiguration()
 	preferences.putBool("mqttUSERen", MQTT_USER_ENABLED);
 
 	preferences.putInt("pressure", SEALEVELPRESSURE_HPA);
-	preferences.putInt("temperaturOffset", TEMPERATUR_OFFSET);
+	preferences.putInt("tempOffset", TEMPERATUR_OFFSET);
 
 	preferences.putInt("LEDbrightness", BRIGHTNESS_LEDS);
-	preferences.putInt("LEDamount", NUM_LEDS);
 	preferences.end();
 }
 
 void SettingsHandler::setSettingsOnFirstRun()
 {
 	preferences.begin("config", true);
-	bool hasRunBefore = preferences.getBool("setSettingsFirstRun", false);
+	bool hasRunBefore = preferences.getBool("setFirstRun", false);
 	preferences.end();
 	if (!hasRunBefore)
 	{
 		restoreDefaultConfiguration();
-		Serial.println("[Settings] Setting firstRun flag in NVS to true.");
+		Serial.println("[Config] Setting firstRun flag in NVS to true.");
+	}
+	else
+	{
+		Serial.println("[Config] FirstRun flag in NVS is already set to true.");
 	}
 	loadAllPersistedSettings();
+	validateConfigMaps();
+	//printConfigMaps();
 }
+
+int SettingsHandler::getConfigModul(String settingName)
+{
+	return configMapforModul[settingName];
+}
+
+void SettingsHandler::setConfigModul(String settingName, int value)
+{
+	configMapforModul[settingName] = value;
+}
+
+String SettingsHandler::getConfigDevice(String settingName)
+{
+	return configMapforDevice[settingName];
+}
+
+void SettingsHandler::setConfigDevice(String settingName, String value)
+{
+	configMapforDevice[settingName] = value;
+}
+
+int SettingsHandler::getConfigLED(String settingName)
+{
+	return configMapforLED[settingName];
+}
+
+void SettingsHandler::setConfigLED(String settingName, int value)
+{
+	configMapforLED[settingName] = value;
+}
+
+int SettingsHandler::getConfigSensor(String settingName)
+{
+	return configMapforSensor[settingName];
+}
+
+void SettingsHandler::setConfigSensor(String settingName, int value)
+{
+	configMapforSensor[settingName] = value;
+}
+
+
