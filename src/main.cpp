@@ -48,8 +48,7 @@
 #include "FastLedHandler.h"
 #include "MqttClientHandler.h"
 #include "SettingsHandler.h"
-#include <Preferences.h>
-Preferences preferences;
+SettingsHandler settingsHandler;
 #include <LittleFS.h>
 
 // --------------------------------------------------------------------------
@@ -58,6 +57,18 @@ Preferences preferences;
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 0;
 const int daylightOffset_sec = 3600;
+
+void listFiles()
+{
+    Serial.println("[LittleFS] Listing files:");
+    File root = LittleFS.open("/");
+    File file = root.openNextFile();
+    while (file)
+    {
+        Serial.printf("  FILE: %s  SIZE: %d\n", file.name(), file.size());
+        file = root.openNextFile();
+    }
+}
 
 String localTime(const String &format)
 {
@@ -108,7 +119,7 @@ void setup()
 		Serial.println("Failed to mount LittleFS!");
 		return;
 	}
-
+	//listFiles();
 	SettingsHandler &settingsHandler = SettingsHandler::getInstance();
 	settingsHandler.setSettingsOnFirstRun();
 
