@@ -3,9 +3,7 @@
 #include "Credentials.h"
 #include <LittleFS.h>
 #include "settingsHandler.h"
-SettingsHandler settingsHandler;
-#include <Preferences.h>
-extern Preferences preferences;
+extern SettingsHandler settingsHandler;
 
 WebServerHandler::WebServerHandler()
 	: server(80) {}
@@ -50,7 +48,12 @@ void WebServerHandler::handle_page_index(AsyncWebServerRequest *request)
 	String content_index = file.readString();
 	file.close();
 
-	content_index.replace("{{deviceName}}", DeviceName);
+	String deviceNameVar = settingsHandler.getConfigDevice("deviceName");
+	content_index.replace("{{deviceName}}", deviceNameVar);
+
+	Serial.printf(content_index.c_str());
+
+
 	request->send(200, "text/html; charset=utf-8", content_index);
 }
 
@@ -163,10 +166,8 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 	String password;
 	String ssid;
 
-	preferences.begin("wifi", true);
-	ssid = preferences.getString("ssid", "");
-	password = preferences.getString("password", "");
-	preferences.end();
+	ssid = settingsHandler.getConfigDevice("wlanSSID");
+	password = settingsHandler.getConfigDevice("wlanPASSWORD");
 
 	if (ssid == "" || password == "")
 	{
@@ -220,10 +221,18 @@ void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest *request
 
 void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *request)
 {
-	preferences.begin("config", false);
-	preferences.putString("wlanSSID", request->getParam("wlanSSID", true)->value());
-	preferences.putString("wlanPASSWORD", request->getParam("wlanPASSWORD", true)->value());
-	preferences.end();
+	if (request->hasParam("wlanSSID", true) && request->hasParam("wlanPASSWORD", true))
+	{
+		settingsHandler.setConfigDevice("wlanSSID", request->getParam("wlanSSID", true)->value());
+		settingsHandler.setConfigDevice("wlanPASSWORD", request->getParam("wlanPASSWORD", true)->value());
+	}
+	else
+	{
+		request->send(400, "text/plain", "Bad Request: Missing parameters");
+		return;
+	}
+	request->send(200, "text/plain", "WLAN Settings Saved!");
+	request->redirect("/");
 	ESP.restart();
 }
 
@@ -234,7 +243,6 @@ void WebServerHandler::handle_page_NotFound(AsyncWebServerRequest *request)
 
 void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *request)
 {
-	preferences.begin("config", false);
 
 	if (request->hasParam("intervalMHZ19"))
 	{
@@ -299,7 +307,6 @@ void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *reques
 		settingsHandler.setConfigModul("intervalMQTT", interval_mqtt_in_Seconds);
 	}
 
-	preferences.end();
 	request->send(200, "text/plain", "Interval Settings Saved!");
 	request->redirect("/");
 }
