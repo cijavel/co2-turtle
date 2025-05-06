@@ -1,34 +1,18 @@
 #include <WiFi.h>
 #include "WiFiHandler.h"
 // please rename credentials_example.h to credentials.h and set your WIFI Credentials there
-#include <Preferences.h>
 #include "Credentials.h"
 #include "Configuration.h"
-
-extern Preferences preferences;
+#include "settingsHandler.h"
+extern SettingsHandler settingsHandler;
 String password;
 String ssid;
 
 void WiFiHandler::loadWiFiCredentials()
 {
-	preferences.begin("wifi", true);
-	ssid = preferences.getString("ssid", "");
-	password = preferences.getString("password", "");
-	preferences.end();
-
-	if (ssid == "" || password == "")
-	{
-		ssid = WIFI_SSID;
-		password = WIFI_PW;
-		Serial.println("OK - No stored WiFi credentials found. using default credentials.");
-	}
-	else
-	{
-		Serial.println("Stored WiFi credentials loaded.");
-	}
-
-	Serial.print("SSID: ");
-	Serial.println(ssid);
+	ssid = settingsHandler.getConfigDevice("wlanSSID");
+	password = settingsHandler.getConfigDevice("wlanPASSWORD");
+	Serial.println("[WIFI] get credentails");
 }
 
 void WiFiHandler::setupAPMode()
@@ -37,7 +21,7 @@ void WiFiHandler::setupAPMode()
 	const char *apPassword = "sensorturtle";
 
 	WiFi.softAP(apSSID, apPassword);
-	Serial.println("[AP MODE] Access Point Started");
+	Serial.println("[AP MODE] no known wifi credentials found, starting AP mode");
 	Serial.print("[AP MODE] IP address: ");
 	Serial.println(WiFi.softAPIP());
 }
