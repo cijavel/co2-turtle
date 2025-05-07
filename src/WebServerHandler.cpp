@@ -10,26 +10,18 @@ WebServerHandler::WebServerHandler()
 
 void WebServerHandler::start()
 {
-	server.serveStatic("/", LittleFS, "/");
-	server.on("/", HTTP_GET, handle_page_index);
-	server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request)
-			  { handle_page_data(request); });
-	server.on("/status", HTTP_GET, [this](AsyncWebServerRequest *request)
-			  { handle_page_status(request); });
-	server.on("/sensorsettings", HTTP_GET, [this](AsyncWebServerRequest *request)
-			  { handle_page_sensorsettings(request); });
-	server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest *request)
-			  { handle_page_wlan(request); });
-	server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest *request)
-			  { handle_submit_WLANcredentials(request); });
-	server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest *request)
-			  { handle_submit_modulinterval(request); });
-	server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest *request)
-			  { handle_submit_modulswitch(request); });
-	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request)
-			  { handle_restoreDefaultSettings(request); });
-	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request)
-			  { handle_restart(request); });
+    server.serveStatic("/static", LittleFS, "/static");
+    server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {request->redirect("/index"); });
+    server.on("/index", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_index(request);});
+	server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_data(request); });
+	server.on("/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_status(request); });
+	server.on("/sensorsettings", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_sensorsettings(request); });
+	server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_wlan(request); });
+	server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_WLANcredentials(request); });
+	server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulinterval(request); });
+	server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulswitch(request); });
+	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restoreDefaultSettings(request); });
+	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restart(request); });
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
 }
@@ -39,7 +31,7 @@ void WebServerHandler::start()
 // --------------------
 void WebServerHandler::handle_page_index(AsyncWebServerRequest *request)
 {
-	File file = LittleFS.open("/index.htm", "r");
+	File file = LittleFS.open("/static/index.htm", "r");
 	if (!file || file.isDirectory())
 	{
 		request->send(500, "text/plain", "Internal Server Error: Cannot open index.htm");
@@ -50,10 +42,6 @@ void WebServerHandler::handle_page_index(AsyncWebServerRequest *request)
 
 	String deviceNameVar = settingsHandler.getConfigDevice("deviceName");
 	content_index.replace("{{deviceName}}", deviceNameVar);
-
-	Serial.printf(content_index.c_str());
-
-
 	request->send(200, "text/html; charset=utf-8", content_index);
 }
 
@@ -122,7 +110,7 @@ void WebServerHandler::handle_page_data(AsyncWebServerRequest *request)
 
 void WebServerHandler::handle_page_status(AsyncWebServerRequest *request)
 {
-	File file = LittleFS.open("/status.htm", "r");
+	File file = LittleFS.open("/static/status.htm", "r");
 	if (!file || file.isDirectory())
 	{
 		request->send(500, "text/plain", "Internal Server Error: Cannot open status.htm");
@@ -175,7 +163,7 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 		password = WIFI_PW;
 	}
 
-	File file = LittleFS.open("/wlan.htm", "r");
+	File file = LittleFS.open("/static/wlan.htm", "r");
 	if (!file)
 	{
 		request->send(500, "text/plain", "Internal Server Error: Cannot open wlan.htm");
@@ -193,7 +181,7 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 
 void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest *request)
 {
-	File file = LittleFS.open("/setting.htm", "r");
+	File file = LittleFS.open("/static/setting.htm", "r");
 	if (!file || file.isDirectory())
 	{
 		request->send(500, "text/plain", "Internal Server Error: Cannot open setting.htm");
@@ -232,7 +220,7 @@ void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *requ
 		return;
 	}
 	request->send(200, "text/plain", "WLAN Settings Saved!");
-	request->redirect("/");
+	request->redirect("/index");
 	ESP.restart();
 }
 
@@ -308,7 +296,7 @@ void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *reques
 	}
 
 	request->send(200, "text/plain", "Interval Settings Saved!");
-	request->redirect("/");
+	request->redirect("/index");
 }
 
 void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
@@ -329,13 +317,13 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	{
 		settingsHandler.setConfigModul("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
 	}
-	request->redirect("/");
+	request->redirect("/index");
 }
 
 void WebServerHandler::handle_restoreDefaultSettings(AsyncWebServerRequest *request)
 {
 	settingsHandler.restoreDefaultConfiguration(); // Load default settings
-	request->redirect("/");
+	request->redirect("/index");
 	request->send(200, "text/plain", "Defaults loaded");
 	delay(500);
 	ESP.restart();
