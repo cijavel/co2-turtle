@@ -15,8 +15,11 @@ body {
 }
 
 .nav {
-  margin: 20px;
   display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 10px;
 }
 
 .nav .button {
