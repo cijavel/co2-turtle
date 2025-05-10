@@ -1,6 +1,6 @@
 #include "MHZ19Handler.h" //myMHZ19.calibrate();    // Take a reading which be used as the zero point f
-#include "SettingsHandler.h"
-extern SettingsHandler settingsHandler;
+#include "ConfigHandler.h"
+extern ConfigHandler configHandler;
 
 const String name_MHZ19_co2               = "[MHZ19] CO2 [ppm]";
 const String name_MHZ19_co2_raw           = "[MHZ19] CO2 raw [ppm]";
@@ -117,7 +117,7 @@ bool MHZ19Handler::updateLastReadout()
 
 bool MHZ19Handler::runUpdate(const unsigned long currentSeconds)
 {
-	if (currentSeconds % settingsHandler.getConfigInterval("intervalMHZ19") == 0)
+	if (currentSeconds % configHandler.getConfigInterval("intervalMHZ19") == 0)
 	{
 		return updateLastReadout();
 	}

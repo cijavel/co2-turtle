@@ -1,4 +1,4 @@
-#include "settingsHandler.h"
+#include "ConfigHandler.h"
 #include "Configuration.h"
 #include "credentials.h"
 #include <map>
@@ -10,7 +10,7 @@ static std::map<String, String> configMapforDevice = {};
 static std::map<String, int> configMapforLED = {};
 static std::map<String, int> configMapforSensor = {};
 
-void SettingsHandler::loadAllPersistedSettings()
+void ConfigHandler::loadAllPersistedSettings()
 {
 	preferences.begin("config", true);
 		configMapforSwitch["switchWIFI"] = preferences.getBool("switchWIFI", switch_WIFI);
@@ -43,7 +43,7 @@ void SettingsHandler::loadAllPersistedSettings()
 	preferences.end();
 }
 
-void SettingsHandler::validateConfigMaps()
+void ConfigHandler::validateConfigMaps()
 {
     for (const auto& key : {"switchWIFI", "switchEPD", "switchLED", "switchMQTT"})
     {
@@ -84,7 +84,7 @@ void SettingsHandler::validateConfigMaps()
     Serial.println("[Config] Validation of configMaps completed.");
 }
 
-void SettingsHandler::persistAllSettings()
+void ConfigHandler::persistAllSettings()
 {
 	preferences.begin("config", false);
 	preferences.putBool("switchWIFI", configMapforSwitch["switchWIFI"]);
@@ -102,7 +102,7 @@ void SettingsHandler::persistAllSettings()
 	preferences.end();
 }
 
-void SettingsHandler::restoreDefaultConfiguration()
+void ConfigHandler::restoreDefaultConfiguration()
 {
 	Serial.println("[preferences] set configuration");
 	preferences.begin("config", false);
@@ -139,7 +139,7 @@ void SettingsHandler::restoreDefaultConfiguration()
 	preferences.end();
 }
 
-void SettingsHandler::setSettingsOnFirstRun()
+void ConfigHandler::setSettingsOnFirstRun()
 {
 	preferences.begin("config", true);
 	bool hasRunBefore = preferences.getBool("setFirstRun", false);
@@ -160,47 +160,47 @@ void SettingsHandler::setSettingsOnFirstRun()
 
 
 /* -------------------------- Getter and Setter for Config Maps --------------------- */
-void SettingsHandler::setConfigSwitch(String settingName, int value)
+void ConfigHandler::setConfigSwitch(String settingName, int value)
 {
 	configMapforSwitch[settingName] = value;
 }
-int SettingsHandler::getConfigSwitch(String settingName)
+int ConfigHandler::getConfigSwitch(String settingName)
 {
 	return configMapforSwitch[settingName];
 }
 
-void SettingsHandler::setConfigInterval(String settingName, int value)
+void ConfigHandler::setConfigInterval(String settingName, int value)
 {
 	configMapforInterval[settingName] = value;
 }
-int SettingsHandler::getConfigInterval(String settingName)
+int ConfigHandler::getConfigInterval(String settingName)
 {
 	return configMapforInterval[settingName];
 }
 
-String SettingsHandler::getConfigDevice(String settingName)
+String ConfigHandler::getConfigDevice(String settingName)
 {
 	return configMapforDevice[settingName];
 }
-void SettingsHandler::setConfigDevice(String settingName, String value)
+void ConfigHandler::setConfigDevice(String settingName, String value)
 {
 	configMapforDevice[settingName] = value;
 }
 
-int SettingsHandler::getConfigLED(String settingName)
+int ConfigHandler::getConfigLED(String settingName)
 {
 	return configMapforLED[settingName];
 }
-void SettingsHandler::setConfigLED(String settingName, int value)
+void ConfigHandler::setConfigLED(String settingName, int value)
 {
 	configMapforLED[settingName] = value;
 }
 
-int SettingsHandler::getConfigSensor(String settingName)
+int ConfigHandler::getConfigSensor(String settingName)
 {
 	return configMapforSensor[settingName];
 }
-void SettingsHandler::setConfigSensor(String settingName, int value)
+void ConfigHandler::setConfigSensor(String settingName, int value)
 {
 	configMapforSensor[settingName] = value;
 }

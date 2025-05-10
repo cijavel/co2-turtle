@@ -5,12 +5,12 @@
 #include <FS.h>
 #include <LittleFS.h>
 
-class SettingsHandler
+class ConfigHandler
 {
 public:
-	static SettingsHandler &getInstance()
+	static ConfigHandler &getInstance()
 	{
-		static SettingsHandler instance; // Guaranteed to be destroyed.
+		static ConfigHandler instance; // Guaranteed to be destroyed.
 		return instance;				 // Instantiated on first use.
 	}
 	void restoreDefaultConfiguration();
