@@ -99,7 +99,7 @@ bool WiFiHandler::StatusCheck()
 
 bool WiFiHandler::checkWifiStatus(unsigned long currentSeconds)
 {
-	if (currentSeconds % interval_WiFiCheck_in_Seconds == 0)
+	if (currentSeconds % settingsHandler.getConfigInterval("intervalWiFi") == 0)
 	{
 		return WiFiHandler::StatusCheck();
 	}
