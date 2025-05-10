@@ -7,7 +7,7 @@
 #include <WiFi.h>
 #include <SPI.h>
 #include <FastLED.h>
-#include "sectionLed.h"
+#include "LEDsection.h"
 
 class FastLedHandler
 {
