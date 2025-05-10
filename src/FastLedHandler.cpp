@@ -1,6 +1,6 @@
 #include "Configuration.h"
 #include "FastLedHandler.h"
-#include "sectionLed.h"
+#include "LEDsection.h"
 #include "settingsHandler.h"
 extern SettingsHandler settingsHandler;
 
