@@ -4,7 +4,8 @@
 #include <map>
 
 
-static std::map<String, int> configMapforModul = {};
+static std::map<String, int> configMapforSwitch = {};
+static std::map<String, int> configMapforInterval = {};
 static std::map<String, String> configMapforDevice = {};
 static std::map<String, int> configMapforLED = {};
 static std::map<String, int> configMapforSensor = {};
@@ -12,48 +13,53 @@ static std::map<String, int> configMapforSensor = {};
 void SettingsHandler::loadAllPersistedSettings()
 {
 	preferences.begin("config", true);
-	configMapforModul["switchWIFI"] = preferences.getBool("switchWIFI", switch_WIFI);
-	configMapforModul["switchEPD"] = preferences.getBool("switchEPD", switch_EPD);
-	configMapforModul["switchLED"] = preferences.getBool("switchLED", switch_LED);
-	configMapforModul["switchMQTT"] = preferences.getBool("switchMQTT", switch_MQTT);
+		configMapforSwitch["switchWIFI"] = preferences.getBool("switchWIFI", switch_WIFI);
+		configMapforSwitch["switchEPD"] = preferences.getBool("switchEPD", switch_EPD);
+		configMapforSwitch["switchLED"] = preferences.getBool("switchLED", switch_LED);
+		configMapforSwitch["switchMQTT"] = preferences.getBool("switchMQTT", switch_MQTT);
 
-	configMapforModul["intervalMHZ19"] = preferences.getInt("intervalMHZ19", interval_MHZ19_in_Seconds);
-	configMapforModul["intervalBME680"] = preferences.getInt("intervalBME680", interval_BME680_in_Seconds);
-	configMapforModul["intervalWiFi"] = preferences.getInt("intervalWiFi", interval_WiFiCheck_in_Seconds);
-	configMapforModul["intervalPRINT"] = preferences.getInt("intervalPRINT", interval_RAMPrintout_in_Seconds);
-	configMapforModul["intervalEPD"] = preferences.getInt("intervalEPD", interval_EPD_in_Seconds);
-	configMapforModul["intervalLED"] = preferences.getInt("intervalLED", interval_LED_in_Seconds);
-	configMapforModul["intervalMQTT"] = preferences.getInt("intervalMQTT", interval_mqtt_in_Seconds);
+		configMapforInterval["intervalMHZ19"] = preferences.getInt("intervalMHZ19", interval_MHZ19_in_Seconds);
+		configMapforInterval["intervalBME680"] = preferences.getInt("intervalBME680", interval_BME680_in_Seconds);
+		configMapforInterval["intervalWiFi"] = preferences.getInt("intervalWiFi", interval_WiFiCheck_in_Seconds);
+		configMapforInterval["intervalPRINT"] = preferences.getInt("intervalPRINT", interval_RAMPrintout_in_Seconds);
+		configMapforInterval["intervalEPD"] = preferences.getInt("intervalEPD", interval_EPD_in_Seconds);
+		configMapforInterval["intervalLED"] = preferences.getInt("intervalLED", interval_LED_in_Seconds);
+		configMapforInterval["intervalMQTT"] = preferences.getInt("intervalMQTT", interval_mqtt_in_Seconds);
 
-	configMapforDevice["deviceName"] = preferences.getString("deviceName", DeviceName);
-	configMapforDevice["timezone"] = preferences.getString("timezone", TIMEZONE);
-	configMapforDevice["wlanSSID"] = preferences.getString("wlanSSID", WIFI_SSID);
-	configMapforDevice["wlanPASSWORD"] = preferences.getString("wlanPASSWORD", WIFI_PW);
-	configMapforDevice["mqttUSER"] = preferences.getString("mqttUSER", MQTT_USER);
-	configMapforDevice["mqttPASSWORD"] = preferences.getString("mqttPASSWORD", MQTT_PASS);
-	configMapforDevice["mqttHOST"] = preferences.getString("mqttHOST", MQTT_HOST);
-	configMapforDevice["mqttPORT"] = preferences.getInt("mqttPORT", MQTT_PORT);
-	configMapforDevice["mqttUSERen"] = preferences.getBool("mqttUSERen", MQTT_USER_ENABLED);
+		configMapforDevice["deviceName"] = preferences.getString("deviceName", DeviceName);
+		configMapforDevice["timezone"] = preferences.getString("timezone", TIMEZONE);
+		configMapforDevice["wlanSSID"] = preferences.getString("wlanSSID", WIFI_SSID);
+		configMapforDevice["wlanPASSWORD"] = preferences.getString("wlanPASSWORD", WIFI_PW);
+		configMapforDevice["mqttUSER"] = preferences.getString("mqttUSER", MQTT_USER);
+		configMapforDevice["mqttPASSWORD"] = preferences.getString("mqttPASSWORD", MQTT_PASS);
+		configMapforDevice["mqttHOST"] = preferences.getString("mqttHOST", MQTT_HOST);
+		configMapforDevice["mqttPORT"] = preferences.getInt("mqttPORT", MQTT_PORT);
+		configMapforDevice["mqttUSERen"] = preferences.getBool("mqttUSERen", MQTT_USER_ENABLED);
 
-	configMapforLED["LEDbrightness"] = preferences.getInt("LEDbrightness", BRIGHTNESS_LEDS);
+		configMapforLED["LEDbrightness"] = preferences.getInt("LEDbrightness", BRIGHTNESS_LEDS);
 
-	configMapforSensor["pressure"] = preferences.getInt("pressure", SEALEVELPRESSURE_HPA);
-	configMapforSensor["tempOffset"] = preferences.getInt("tempOffset", TEMPERATUR_OFFSET);
+		configMapforSensor["pressure"] = preferences.getInt("pressure", SEALEVELPRESSURE_HPA);
+		configMapforSensor["tempOffset"] = preferences.getInt("tempOffset", TEMPERATUR_OFFSET);
 	preferences.end();
 }
 
 void SettingsHandler::validateConfigMaps()
 {
-    // Überprüfen der Modul-Konfiguration
-    for (const auto& key : {"switchWIFI", "switchEPD", "switchLED", "switchMQTT",
-                            "intervalMHZ19", "intervalBME680", "intervalWiFi",
-                            "intervalPRINT", "intervalEPD", "intervalLED", "intervalMQTT"})
+    for (const auto& key : {"switchWIFI", "switchEPD", "switchLED", "switchMQTT"})
     {
-        if (configMapforModul.find(key) == configMapforModul.end())
+        if (configMapforSwitch.find(key) == configMapforSwitch.end())
         {
-            Serial.printf("[Config] Missing key in configMapforModul: %s\n", key);
+            Serial.printf("[Config] Missing key in configMapforSwitch: %s\n", key);
         }
     }
+	for (const auto& key : {"intervalBME680", "intervalWiFi",
+		"intervalPRINT", "intervalEPD", "intervalLED", "intervalMQTT"})
+	{
+	if (configMapforInterval.find(key) == configMapforInterval.end())
+	{
+	Serial.printf("[Config] Missing key in configMapforInterval: %s\n", key);
+	}
+	}
 
     // Überprüfen der Geräte-Konfiguration
     for (const auto& key : {"deviceName", "timezone", "wlanSSID", "wlanPASSWORD",
@@ -86,56 +92,21 @@ void SettingsHandler::validateConfigMaps()
     Serial.println("[Config] Validation of configMaps completed.");
 }
 
-void SettingsHandler::printConfigMaps()
-{
-    Serial.println("[Config] Printing all configuration values:");
-
-    // Modul-Konfiguration
-    Serial.println("[Config] Modul Configuration:");
-    for (const auto& entry : configMapforModul)
-    {
-        Serial.printf("  %s: %d\n", entry.first.c_str(), entry.second);
-    }
-
-    // Geräte-Konfiguration
-    Serial.println("[Config] Device Configuration:");
-    for (const auto& entry : configMapforDevice)
-    {
-        Serial.printf("  %s: %s\n", entry.first.c_str(), entry.second.c_str());
-    }
-
-    // LED-Konfiguration
-    Serial.println("[Config] LED Configuration:");
-    for (const auto& entry : configMapforLED)
-    {
-        Serial.printf("  %s: %d\n", entry.first.c_str(), entry.second);
-    }
-
-    // Sensor-Konfiguration
-    Serial.println("[Config] Sensor Configuration:");
-    for (const auto& entry : configMapforSensor)
-    {
-        Serial.printf("  %s: %d\n", entry.first.c_str(), entry.second);
-    }
-
-    Serial.println("[Config] End of configuration values.");
-}
-
 void SettingsHandler::persistAllSettings()
 {
 	preferences.begin("config", false);
-	preferences.putBool("switchWIFI", configMapforModul["switchWIFI"]);
-	preferences.putBool("switchEPD", configMapforModul["switchEPD"]);
-	preferences.putBool("switchLED", configMapforModul["switchLED"]);
-	preferences.putBool("switchMQTT", configMapforModul["switchMQTT"]);
+	preferences.putBool("switchWIFI", configMapforSwitch["switchWIFI"]);
+	preferences.putBool("switchEPD", configMapforSwitch["switchEPD"]);
+	preferences.putBool("switchLED", configMapforSwitch["switchLED"]);
+	preferences.putBool("switchMQTT", configMapforSwitch["switchMQTT"]);
 
-	preferences.putInt("intervalMHZ19", configMapforModul["intervalMHZ19"]);
-	preferences.putInt("intervalBME680", configMapforModul["intervalBME680"]);
-	preferences.putInt("intervalWiFi", configMapforModul["intervalWiFi"]);
-	preferences.putInt("intervalPRINT", configMapforModul["intervalPRINT"]);
-	preferences.putInt("intervalEPD", configMapforModul["intervalEPD"]);
-	preferences.putInt("intervalLED", configMapforModul["intervalLED"]);
-	preferences.putInt("intervalMQTT", configMapforModul["intervalMQTT"]);
+	preferences.putInt("intervalMHZ19", configMapforSwitch["intervalMHZ19"]);
+	preferences.putInt("intervalBME680", configMapforSwitch["intervalBME680"]);
+	preferences.putInt("intervalWiFi", configMapforSwitch["intervalWiFi"]);
+	preferences.putInt("intervalPRINT", configMapforSwitch["intervalPRINT"]);
+	preferences.putInt("intervalEPD", configMapforSwitch["intervalEPD"]);
+	preferences.putInt("intervalLED", configMapforSwitch["intervalLED"]);
+	preferences.putInt("intervalMQTT", configMapforSwitch["intervalMQTT"]);
 	preferences.end();
 }
 
@@ -195,21 +166,30 @@ void SettingsHandler::setSettingsOnFirstRun()
 	//printConfigMaps();
 }
 
-int SettingsHandler::getConfigModul(String settingName)
+
+/* -------------------------- Getter and Setter for Config Maps --------------------- */
+void SettingsHandler::setConfigSwitch(String settingName, int value)
 {
-	return configMapforModul[settingName];
+	configMapforSwitch[settingName] = value;
+}
+int SettingsHandler::getConfigSwitch(String settingName)
+{
+	return configMapforSwitch[settingName];
 }
 
-void SettingsHandler::setConfigModul(String settingName, int value)
+void SettingsHandler::setConfigInterval(String settingName, int value)
 {
-	configMapforModul[settingName] = value;
+	configMapforInterval[settingName] = value;
+}
+int SettingsHandler::getConfigInterval(String settingName)
+{
+	return configMapforInterval[settingName];
 }
 
 String SettingsHandler::getConfigDevice(String settingName)
 {
 	return configMapforDevice[settingName];
 }
-
 void SettingsHandler::setConfigDevice(String settingName, String value)
 {
 	configMapforDevice[settingName] = value;
@@ -219,7 +199,6 @@ int SettingsHandler::getConfigLED(String settingName)
 {
 	return configMapforLED[settingName];
 }
-
 void SettingsHandler::setConfigLED(String settingName, int value)
 {
 	configMapforLED[settingName] = value;
@@ -229,7 +208,6 @@ int SettingsHandler::getConfigSensor(String settingName)
 {
 	return configMapforSensor[settingName];
 }
-
 void SettingsHandler::setConfigSensor(String settingName, int value)
 {
 	configMapforSensor[settingName] = value;
