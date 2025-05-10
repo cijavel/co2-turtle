@@ -2,8 +2,8 @@
 #include "Configuration.h"
 #include "Credentials.h"
 #include <LittleFS.h>
-#include "settingsHandler.h"
-extern SettingsHandler settingsHandler;
+#include "ConfigHandler.h"
+extern ConfigHandler configHandler;
 
 WebServerHandler::WebServerHandler()
 	: server(80) {}
@@ -40,7 +40,7 @@ void WebServerHandler::handle_page_index(AsyncWebServerRequest *request)
 	String content_index = file.readString();
 	file.close();
 
-	String deviceNameVar = settingsHandler.getConfigDevice("deviceName");
+	String deviceNameVar = configHandler.getConfigDevice("deviceName");
 	content_index.replace("{{deviceName}}", deviceNameVar);
 	request->send(200, "text/html; charset=utf-8", content_index);
 }
@@ -154,8 +154,8 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 	String password;
 	String ssid;
 
-	ssid = settingsHandler.getConfigDevice("wlanSSID");
-	password = settingsHandler.getConfigDevice("wlanPASSWORD");
+	ssid = configHandler.getConfigDevice("wlanSSID");
+	password = configHandler.getConfigDevice("wlanPASSWORD");
 
 	if (ssid == "" || password == "")
 	{
@@ -191,18 +191,18 @@ void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest *request
 	file.close();
 	content.replace("{{deviceName}}", DeviceName);
 
-	content.replace("{{intervalMHZ19}}", String(settingsHandler.getConfigInterval("intervalMHZ19")));
-	content.replace("{{intervalBME680}}", String(settingsHandler.getConfigInterval("intervalBME680")));
-	content.replace("{{intervalWiFi}}", String(settingsHandler.getConfigInterval("intervalWiFi")));
-	content.replace("{{intervalPRINT}}", String(settingsHandler.getConfigInterval("intervalPRINT")));
-	content.replace("{{intervalEPD}}", String(settingsHandler.getConfigInterval("intervalEPD")));
-	content.replace("{{intervalLED}}", String(settingsHandler.getConfigInterval("intervalLED")));
-	content.replace("{{intervalMQTT}}", String(settingsHandler.getConfigInterval("intervalMQTT")));
+	content.replace("{{intervalMHZ19}}", String(configHandler.getConfigInterval("intervalMHZ19")));
+	content.replace("{{intervalBME680}}", String(configHandler.getConfigInterval("intervalBME680")));
+	content.replace("{{intervalWiFi}}", String(configHandler.getConfigInterval("intervalWiFi")));
+	content.replace("{{intervalPRINT}}", String(configHandler.getConfigInterval("intervalPRINT")));
+	content.replace("{{intervalEPD}}", String(configHandler.getConfigInterval("intervalEPD")));
+	content.replace("{{intervalLED}}", String(configHandler.getConfigInterval("intervalLED")));
+	content.replace("{{intervalMQTT}}", String(configHandler.getConfigInterval("intervalMQTT")));
 
-	content.replace("{{switchWIFI_checked}}", settingsHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
-	content.replace("{{switchEPD_checked}}", settingsHandler.getConfigSwitch("switchEPD") ? "checked" : "");
-	content.replace("{{switchLED_checked}}", settingsHandler.getConfigSwitch("switchLED") ? "checked" : "");
-	content.replace("{{switchMQTT_checked}}", settingsHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
+	content.replace("{{switchWIFI_checked}}", configHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
+	content.replace("{{switchEPD_checked}}", configHandler.getConfigSwitch("switchEPD") ? "checked" : "");
+	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
+	content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
 
 	request->send(200, "text/html; charset=utf-8", content);
 }
@@ -211,8 +211,8 @@ void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *requ
 {
 	if (request->hasParam("wlanSSID", true) && request->hasParam("wlanPASSWORD", true))
 	{
-		settingsHandler.setConfigDevice("wlanSSID", request->getParam("wlanSSID", true)->value());
-		settingsHandler.setConfigDevice("wlanPASSWORD", request->getParam("wlanPASSWORD", true)->value());
+		configHandler.setConfigDevice("wlanSSID", request->getParam("wlanSSID", true)->value());
+		configHandler.setConfigDevice("wlanPASSWORD", request->getParam("wlanPASSWORD", true)->value());
 	}
 	else
 	{
@@ -234,73 +234,73 @@ void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *reques
 
 	if (request->hasParam("intervalMHZ19"))
 	{
-		settingsHandler.setConfigInterval("intervalMHZ19", request->getParam("intervalMHZ19")->value().toInt());
+		configHandler.setConfigInterval("intervalMHZ19", request->getParam("intervalMHZ19")->value().toInt());
 	}
 	else
 	{
 		Serial.println("MHZ19 Interval not set. Using default value.");
-		settingsHandler.setConfigInterval("intervalMHZ19", interval_MHZ19_in_Seconds);
+		configHandler.setConfigInterval("intervalMHZ19", interval_MHZ19_in_Seconds);
 	}
 
 	if (request->hasParam("intervalBME680"))
 	{
-		settingsHandler.setConfigInterval("intervalBME680", request->getParam("intervalBME680")->value().toInt());
+		configHandler.setConfigInterval("intervalBME680", request->getParam("intervalBME680")->value().toInt());
 	}
 	else
 	{
 		Serial.println("BME680 Interval not set. Using default value.");
-		settingsHandler.setConfigInterval("intervalBME680", interval_BME680_in_Seconds);
+		configHandler.setConfigInterval("intervalBME680", interval_BME680_in_Seconds);
 	}
 
 	if (request->hasParam("intervalWiFi"))
 	{
-		settingsHandler.setConfigInterval("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
+		configHandler.setConfigInterval("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
 	}
 	else
 	{	
 		Serial.println("WiFi Interval not set. Using default value.");
-		settingsHandler.setConfigInterval("intervalWiFi", interval_WiFiCheck_in_Seconds);
+		configHandler.setConfigInterval("intervalWiFi", interval_WiFiCheck_in_Seconds);
 	}
 
 	if (request->hasParam("intervalPRINT"))
 	{
-		settingsHandler.setConfigInterval("intervalPRINT", request->getParam("intervalPRINT")->value().toInt());
+		configHandler.setConfigInterval("intervalPRINT", request->getParam("intervalPRINT")->value().toInt());
 	}
 	else
 	{
 		Serial.println("RAM Printout Interval not set. Using default value.");
-		settingsHandler.setConfigInterval("intervalPRINT", interval_RAMPrintout_in_Seconds);
+		configHandler.setConfigInterval("intervalPRINT", interval_RAMPrintout_in_Seconds);
 	}
 
 	if (request->hasParam("intervalEPD"))
 	{
-		settingsHandler.setConfigInterval("intervalEPD", request->getParam("intervalEPD")->value().toInt());
+		configHandler.setConfigInterval("intervalEPD", request->getParam("intervalEPD")->value().toInt());
 	}
 	else
 	{
 		Serial.println("EPD Interval not set. Using default value.");
-		settingsHandler.setConfigInterval("intervalEPD", interval_EPD_in_Seconds);
+		configHandler.setConfigInterval("intervalEPD", interval_EPD_in_Seconds);
 	}
 
 	if (request->hasParam("intervalLED"))
 	{
-		settingsHandler.setConfigInterval("intervalLED", request->getParam("intervalLED")->value().toInt());
+		configHandler.setConfigInterval("intervalLED", request->getParam("intervalLED")->value().toInt());
 	}
 	else
 	{
 		Serial.println("LED Interval not set. Using default value.");
-		settingsHandler.setConfigInterval("intervalLED", interval_LED_in_Seconds);
+		configHandler.setConfigInterval("intervalLED", interval_LED_in_Seconds);
 	}
 
 	if (request->hasParam("intervalMQTT"))
 	{
 
-		settingsHandler.setConfigInterval("intervalMQTT", request->getParam("intervalMQTT")->value().toInt());
+		configHandler.setConfigInterval("intervalMQTT", request->getParam("intervalMQTT")->value().toInt());
 	}
 	else
 	{
 		Serial.println("MQTT Interval not set. Using default value.");
-		settingsHandler.setConfigInterval("intervalMQTT", interval_mqtt_in_Seconds);
+		configHandler.setConfigInterval("intervalMQTT", interval_mqtt_in_Seconds);
 	}
 	request->send(200, "text/plain", "Interval Settings Saved!");
 	request->redirect("/sensorsettings");
@@ -310,19 +310,19 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 {
 	if (request->hasParam("switchWIFI"))
 	{
-		settingsHandler.setConfigSwitch("switchWIFI", atoi(request->getParam("switchWIFI")->value().c_str()));
+		configHandler.setConfigSwitch("switchWIFI", atoi(request->getParam("switchWIFI")->value().c_str()));
 	}
 	if (request->hasParam("switchEPD"))
 	{
-		settingsHandler.setConfigSwitch("switchEPD", atoi(request->getParam("switchEPD")->value().c_str()));
+		configHandler.setConfigSwitch("switchEPD", atoi(request->getParam("switchEPD")->value().c_str()));
 	}
 	if (request->hasParam("switchLED"))
 	{
-		settingsHandler.setConfigSwitch("switchLED", atoi(request->getParam("switchLED")->value().c_str()));
+		configHandler.setConfigSwitch("switchLED", atoi(request->getParam("switchLED")->value().c_str()));
 	}
 	if (request->hasParam("switchMQTT"))
 	{
-		settingsHandler.setConfigSwitch("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
+		configHandler.setConfigSwitch("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
 	} 
 	request->send(200, "text/plain", "Modul Settings Saved!");
 	request->redirect("/sensorsettings");
@@ -330,7 +330,7 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 
 void WebServerHandler::handle_restoreDefaultConfiguration(AsyncWebServerRequest *request)
 {
-	settingsHandler.restoreDefaultConfiguration(); 
+	configHandler.restoreDefaultConfiguration(); 
 	request->redirect("/index");
 	delay(1000);
 	request->send(200, "text/plain", "Defaults loaded");

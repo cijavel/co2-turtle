@@ -1,8 +1,8 @@
 #include "Configuration.h"
 #include "LEDHandler.h"
 #include "LEDsection.h"
-#include "settingsHandler.h"
-extern SettingsHandler settingsHandler;
+#include "ConfigHandler.h"
+extern ConfigHandler configHandler;
 
 CRGB leds[NUM_LEDS];
 
@@ -42,7 +42,7 @@ void LEDHandler::setInputDataforLED(DataCO2 co2Sensordata, Bsec enviromentdata)
 
 bool LEDHandler::ledstatus(const unsigned long currentSeconds)
 {
-	if (currentSeconds % settingsHandler.getConfigInterval("intervalLED")  == 0)
+	if (currentSeconds % configHandler.getConfigInterval("intervalLED")  == 0)
 	{
 		ledStatusWiFi();
 		ledStatusBME();
@@ -246,7 +246,7 @@ void LEDHandler::ledStatusCO2()
 
 bool LEDHandler::setup_black(const unsigned long currentSeconds)
 {
-	if (currentSeconds % settingsHandler.getConfigInterval("intervalLED")  == 0)
+	if (currentSeconds % configHandler.getConfigInterval("intervalLED")  == 0)
 	{
 		FastLED.addLeds<LED_TYPE, DATA_LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
 		FastLED.clear(true);

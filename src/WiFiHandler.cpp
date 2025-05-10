@@ -3,15 +3,15 @@
 // please rename credentials_example.h to credentials.h and set your WIFI Credentials there
 #include "Credentials.h"
 #include "Configuration.h"
-#include "settingsHandler.h"
-extern SettingsHandler settingsHandler;
+#include "ConfigHandler.h"
+extern ConfigHandler configHandler;
 String password;
 String ssid;
 
 void WiFiHandler::loadWiFiCredentials()
 {
-	ssid = settingsHandler.getConfigDevice("wlanSSID");
-	password = settingsHandler.getConfigDevice("wlanPASSWORD");
+	ssid = configHandler.getConfigDevice("wlanSSID");
+	password = configHandler.getConfigDevice("wlanPASSWORD");
 	Serial.println("[WIFI] get credentails");
 }
 
@@ -92,7 +92,7 @@ bool WiFiHandler::StatusCheck()
 
 bool WiFiHandler::checkWifiStatus(unsigned long currentSeconds)
 {
-	if (currentSeconds % settingsHandler.getConfigInterval("intervalWiFi") == 0)
+	if (currentSeconds % configHandler.getConfigInterval("intervalWiFi") == 0)
 	{
 		return WiFiHandler::StatusCheck();
 	}
