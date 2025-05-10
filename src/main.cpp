@@ -82,7 +82,7 @@ String localTime(const String &format)
 #ifdef DEBUG
 static void PrintRamUsage(unsigned long currentSeconds)
 {
-	if (currentSeconds % interval_RAMPrintout_in_Seconds == 0)
+	if (currentSeconds % settingsHandler.getConfigInterval("intervalPRINT") == 0)
 	{
 		Serial.print("Memory Usage: ");
 		uint32_t freeHeap = ESP.getFreeHeap();
@@ -116,13 +116,13 @@ void setup()
 	WebServerHandler &webServer = WebServerHandler::getInstance();
 	webServer.start();
 
-	if (settingsHandler.getConfigModul("switchLED"))
+	if (settingsHandler.getConfigSwitch("switchLED"))
 	{
 		FastLedHandler &ledhandler = FastLedHandler::getInstance();
 		ledhandler.setup_led();
 	}
 
-	if (settingsHandler.getConfigModul("switchMQTT"))
+	if (settingsHandler.getConfigSwitch("switchMQTT"))
 	{
 		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
 		MqttHandler.setup_Mqtt();
@@ -176,7 +176,7 @@ void loop()
 
 	DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
 
-	if (settingsHandler.getConfigModul("switchWiFi"))
+	if (settingsHandler.getConfigSwitch("switchWIFI"))
 	{
 		WiFiHandler::checkWifiStatus(currentSeconds);
 	}
@@ -184,12 +184,12 @@ void loop()
 	WebServerHandler &webServer = WebServerHandler::getInstance();
 	webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));
 
-	if (settingsHandler.getConfigModul("switchEPD"))
+	if (settingsHandler.getConfigSwitch("switchEPD"))
 	{
 		EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
 	}
 
-	if (settingsHandler.getConfigModul("switchLED"))
+	if (settingsHandler.getConfigSwitch("switchLED"))
 	{
 		FastLedHandler &ledHandler = FastLedHandler::getInstance();
 		ledHandler.setInputDataforLED(mhz19Readout, bme_data);
@@ -201,7 +201,7 @@ void loop()
 		ledHandler.setup_black(currentSeconds);
 	}
 
-	if (settingsHandler.getConfigModul("switchMQTT"))
+	if (settingsHandler.getConfigSwitch("switchMQTT"))
 	{
 		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
 		MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
