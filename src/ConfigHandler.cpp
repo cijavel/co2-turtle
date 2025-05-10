@@ -135,7 +135,18 @@ void ConfigHandler::restoreDefaultConfiguration()
 	preferences.putInt("pressure", SEALEVELPRESSURE_HPA);
 	preferences.putInt("tempOffset", TEMPERATUR_OFFSET);
 
-	preferences.putInt("LEDbrightness", BRIGHTNESS_LEDS);
+
+	if (BRIGHTNESS_LEDS > 1 || BRIGHTNESS_LEDS < 256) {
+		preferences.putInt("LEDbrightness", BRIGHTNESS_LEDS);
+	}
+	else {
+		if (BRIGHTNESS_LEDS < 2 ) {
+			preferences.putInt("LEDbrightness", 2);
+		}
+		if ( BRIGHTNESS_LEDS > 255) {
+			preferences.putInt("LEDbrightness", 255);
+		}
+	}
 	preferences.end();
 }
 
@@ -193,7 +204,11 @@ int ConfigHandler::getConfigLED(String settingName)
 }
 void ConfigHandler::setConfigLED(String settingName, int value)
 {
-	configMapforLED[settingName] = value;
+	if (value < 2 || value > 255) {
+        Serial.println("[Config] LEDbrightness value out of range. Clamping to valid range.");
+        value = (value < 2) ? 2 : 255; 
+    }
+    configMapforLED[settingName] = value;
 }
 
 int ConfigHandler::getConfigSensor(String settingName)
