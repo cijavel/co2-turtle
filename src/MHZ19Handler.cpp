@@ -24,28 +24,31 @@ MHZ19Handler::MHZ19Handler()
 	// myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
 
 	myMHZ19.autoCalibration(true);
-#ifdef DEBUG
+
 	Serial.print("[MHZ19] ABC Status: ");
 	myMHZ19.getABC() ? Serial.println("ON") : Serial.println("OFF"); // now print it's status
-#endif
+
 	char myVersion[4];
 	myMHZ19.getVersion(myVersion);
-#ifdef DEBUG
+
 	Serial.print("[MHZ19] Range: ");
 	Serial.println(myMHZ19.getRange());
-#endif
 
-	// CALIBRATION
-	//  reset the MH-Z19B sensor by connecting "GND" pin and the "HD" pin for 7-10 seconds!!! This worked and I calibrated the sensor by running him at the open window and it is now starting up with 400~410 PPM.
-	// Serial.println("MHZ19: Calibrating..");
-	// myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
 	myMHZ19.verify();
 	_lastReadout = DataCO2();
-#ifdef DEBUG
-	Serial.println();
-	Serial.println("[MHZ19] OK");
-#endif
 }
+
+void MHZ19Handler::calibrate()
+{
+	// CALIBRATION
+	// reset the MH-Z19B sensor by connecting "GND" pin and the "HD" pin for 7-10 seconds!!! 
+	// This worked and I calibrated the sensor by running him at the open window and it is now starting up with 400~410 PPM.
+	Serial.println("[MHZ19] Calibrating...");
+	myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
+}
+
+
+
 
 void MHZ19Handler::printoutCurrentValues()
 {
