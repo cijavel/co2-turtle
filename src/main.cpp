@@ -45,7 +45,7 @@
 #include <ctime>
 #include "EPDHandler.h"
 #include "WebServerHandler.h"
-#include "FastLedHandler.h"
+#include "LEDHandler.h"
 #include "MqttClientHandler.h"
 #include "SettingsHandler.h"
 SettingsHandler settingsHandler;
@@ -118,7 +118,7 @@ void setup()
 
 	if (settingsHandler.getConfigSwitch("switchLED"))
 	{
-		FastLedHandler &ledhandler = FastLedHandler::getInstance();
+		LEDHandler &ledhandler = LEDHandler::getInstance();
 		ledhandler.setup_led();
 	}
 
@@ -191,13 +191,13 @@ void loop()
 
 	if (settingsHandler.getConfigSwitch("switchLED"))
 	{
-		FastLedHandler &ledHandler = FastLedHandler::getInstance();
+		LEDHandler &ledHandler = LEDHandler::getInstance();
 		ledHandler.setInputDataforLED(mhz19Readout, bme_data);
 		ledHandler.ledstatus(currentSeconds);
 	}
 	else
 	{
-		FastLedHandler &ledHandler = FastLedHandler::getInstance();
+		LEDHandler &ledHandler = LEDHandler::getInstance();
 		ledHandler.setup_black(currentSeconds);
 	}
 
