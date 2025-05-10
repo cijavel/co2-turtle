@@ -1,4 +1,6 @@
 #include "EPDHandler.h"
+#include "SettingsHandler.h"
+extern SettingsHandler settingsHandler;
 #include <GxEPD2_3C.h>
 #include "GxEPD2_display_selection_new_style.h"
 #include "../font/BabelSans8pt7b.h"
@@ -233,7 +235,7 @@ void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const
 
 void EPDHandler::updateEPDvertical(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, const unsigned long currentSeconds)
 {
-	if (currentSeconds % interval_EPD_in_Seconds == 0)
+	if (currentSeconds % settingsHandler.getConfigInterval("intervalEPD") == 0)
 	{
 		printVertically(co2, bme_data, epd_date, epd_time);
 	}
@@ -241,7 +243,7 @@ void EPDHandler::updateEPDvertical(const DataCO2 co2, const Bsec bme_data, const
 
 void EPDHandler::updateEPDhorizontal(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, const unsigned long currentSeconds)
 {
-	if (currentSeconds % interval_EPD_in_Seconds == 0)
+	if (currentSeconds % settingsHandler.getConfigInterval("intervalEPD") == 0)
 	{
 		printHorizontally(co2, bme_data, epd_date, epd_time);
 	}
