@@ -20,7 +20,7 @@ void WebServerHandler::start()
 	server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_WLANcredentials(request); });
 	server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulinterval(request); });
 	server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulswitch(request); });
-	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restoreDefaultSettings(request); });
+	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restoreDefaultConfiguration(request); });
 	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restart(request); });
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
@@ -328,10 +328,11 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	request->redirect("/sensorsettings");
 }
 
-void WebServerHandler::handle_restoreDefaultSettings(AsyncWebServerRequest *request)
+void WebServerHandler::handle_restoreDefaultConfiguration(AsyncWebServerRequest *request)
 {
-	settingsHandler.restoreDefaultConfiguration(); // Load default settings
+	settingsHandler.restoreDefaultConfiguration(); 
 	request->redirect("/index");
+	delay(1000);
 	request->send(200, "text/plain", "Defaults loaded");
 	delay(500);
 	ESP.restart();
@@ -340,6 +341,8 @@ void WebServerHandler::handle_restoreDefaultSettings(AsyncWebServerRequest *requ
 void WebServerHandler::handle_restart(AsyncWebServerRequest *request)
 {
 	request->send(200, "text/html", "Device is restarting...");
+	delay(1000);
+	request->redirect("/index");
 	delay(500);
 	ESP.restart();
 }
