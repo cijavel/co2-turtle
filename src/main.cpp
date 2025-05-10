@@ -47,8 +47,8 @@
 #include "WebServerHandler.h"
 #include "LEDHandler.h"
 #include "MqttClientHandler.h"
-#include "SettingsHandler.h"
-SettingsHandler settingsHandler;
+#include "ConfigHandler.h"
+ConfigHandler configHandler;
 #include <LittleFS.h>
 
 // --------------------------------------------------------------------------
@@ -82,7 +82,7 @@ String localTime(const String &format)
 #ifdef DEBUG
 static void PrintRamUsage(unsigned long currentSeconds)
 {
-	if (currentSeconds % settingsHandler.getConfigInterval("intervalPRINT") == 0)
+	if (currentSeconds % configHandler.getConfigInterval("intervalPRINT") == 0)
 	{
 		Serial.print("Memory Usage: ");
 		uint32_t freeHeap = ESP.getFreeHeap();
@@ -107,8 +107,8 @@ void setup()
 		Serial.println("Failed to mount LittleFS!");
 		return;
 	}
-	SettingsHandler &settingsHandler = SettingsHandler::getInstance();
-	settingsHandler.setSettingsOnFirstRun();
+	ConfigHandler &configHandler = ConfigHandler::getInstance();
+	configHandler.setSettingsOnFirstRun();
 
 	WiFiHandler::initWifi();
 	configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
@@ -116,13 +116,13 @@ void setup()
 	WebServerHandler &webServer = WebServerHandler::getInstance();
 	webServer.start();
 
-	if (settingsHandler.getConfigSwitch("switchLED"))
+	if (configHandler.getConfigSwitch("switchLED"))
 	{
 		LEDHandler &ledhandler = LEDHandler::getInstance();
 		ledhandler.setup_led();
 	}
 
-	if (settingsHandler.getConfigSwitch("switchMQTT"))
+	if (configHandler.getConfigSwitch("switchMQTT"))
 	{
 		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
 		MqttHandler.setup_Mqtt();
@@ -144,7 +144,7 @@ void loop()
 			last = currentSeconds;
 		}
 	}
-	SettingsHandler &settingsHandler = SettingsHandler::getInstance();
+	ConfigHandler &configHandler = ConfigHandler::getInstance();
 
 	BME680Handler &bmehandler = BME680Handler::getInstance();
 	Bsec bme_data = bmehandler.getData();
@@ -176,7 +176,7 @@ void loop()
 
 	DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
 
-	if (settingsHandler.getConfigSwitch("switchWIFI"))
+	if (configHandler.getConfigSwitch("switchWIFI"))
 	{
 		WiFiHandler::checkWifiStatus(currentSeconds);
 	}
@@ -184,12 +184,12 @@ void loop()
 	WebServerHandler &webServer = WebServerHandler::getInstance();
 	webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));
 
-	if (settingsHandler.getConfigSwitch("switchEPD"))
+	if (configHandler.getConfigSwitch("switchEPD"))
 	{
 		EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
 	}
 
-	if (settingsHandler.getConfigSwitch("switchLED"))
+	if (configHandler.getConfigSwitch("switchLED"))
 	{
 		LEDHandler &ledHandler = LEDHandler::getInstance();
 		ledHandler.setInputDataforLED(mhz19Readout, bme_data);
@@ -201,7 +201,7 @@ void loop()
 		ledHandler.setup_black(currentSeconds);
 	}
 
-	if (settingsHandler.getConfigSwitch("switchMQTT"))
+	if (configHandler.getConfigSwitch("switchMQTT"))
 	{
 		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
 		MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);

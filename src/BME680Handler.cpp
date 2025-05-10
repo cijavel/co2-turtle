@@ -1,7 +1,7 @@
 #include "BME680Handler.h"
 #include "Configuration.h"
-#include "settingsHandler.h"
-extern SettingsHandler settingsHandler;
+#include "ConfigHandler.h"
+extern ConfigHandler configHandler;
 
 const String name_bme680_timestamp           = "[BME680] Timestamp [ms]";
 const String name_bme680_temperatur_raw      = "[BME680] raw temperature [°C]";
@@ -52,7 +52,7 @@ uint16_t stateUpdateCounter = 0;
 bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
 {
 
-	if (currentSeconds % settingsHandler.getConfigInterval("intervalBME680") == 0)
+	if (currentSeconds % configHandler.getConfigInterval("intervalBME680") == 0)
 	{
 		updateSensorDataInternal();
 		return true;
