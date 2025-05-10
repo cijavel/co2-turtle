@@ -31,7 +31,7 @@ void LEDHandler::setup_led()
 	FastLED.clear(true);
 	FastLED.setCorrection(TypicalLEDStrip);
 	FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);
-	FastLED.setBrightness(BRIGHTNESS_LEDS);
+	FastLED.setBrightness(configHandler.getConfigLED("LEDbrightness"));
 }
 
 void LEDHandler::setInputDataforLED(DataCO2 co2Sensordata, Bsec enviromentdata)
