@@ -21,7 +21,7 @@
 #define SEALEVELPRESSURE_HPA 1015
 #define TEMPERATUR_OFFSET -3.5
 
-#define DeviceName "Sensorturtle_3 27.04.2025"
+#define DeviceName "Turtle 10.05.2025"
 #define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 #define PIN_BME680_SDA 21
@@ -31,7 +31,7 @@
 #define BAUDRATE 9600
 
 #define BRIGHTNESS_LEDS 2 // dont set 1. it will all leds set to red
-#define NUM_LEDS 34
+#define NUM_LEDS 38
 #define DATA_LED_PIN 4
 
 #define MAX_POWER_MILLIAMPS 500
