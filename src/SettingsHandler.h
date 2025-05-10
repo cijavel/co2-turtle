@@ -14,8 +14,10 @@ public:
 		return instance;				 // Instantiated on first use.
 	}
 	void restoreDefaultConfiguration();
-	int getConfigModul(String settingName);
-	void setConfigModul(String settingName, int value);
+	int getConfigSwitch(String settingName);
+	void setConfigSwitch(String settingName, int value);
+	int getConfigInterval(String settingName);
+	void setConfigInterval(String settingName, int value);
 	String getConfigDevice(String settingName);
 	void setConfigDevice(String settingName, String value);
 	int getConfigLED(String settingName);
@@ -24,7 +26,7 @@ public:
 	void setConfigSensor(String settingName, int value);
 	void setSettingsOnFirstRun();
 	void validateConfigMaps();
-	void printConfigMaps();
+
 
 private:
 	Preferences preferences;
