@@ -24,6 +24,44 @@ const uint8_t bsec_config_iaq[] = {
 uint8_t bsecState[BSEC_MAX_STATE_BLOB_SIZE] = {0};
 uint16_t stateUpdateCounter = 0;
 
+BME680Handler::BME680Handler()
+{
+	// IMPORTANT
+	Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
+	delay(1000);
+	pinMode(LED_BUILTIN, OUTPUT);
+
+	// IMPORTANT
+	data.begin(BME68X_I2C_ADDR_HIGH, Wire);
+	data.setConfig(bsec_config_iaq);
+	checkSensorStatus();
+	loadState();
+
+#ifdef DEBUG
+	Serial.println("\n[BME] BSEC library version " + String(data.version.major) + "." + String(data.version.minor) + "." + String(data.version.major_bugfix) + "." + String(data.version.minor_bugfix));
+#endif
+	bsec_virtual_sensor_t sensorList[13] = {
+		BSEC_OUTPUT_IAQ,
+		BSEC_OUTPUT_STATIC_IAQ,
+		BSEC_OUTPUT_CO2_EQUIVALENT,
+		BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
+		BSEC_OUTPUT_RAW_TEMPERATURE,
+		BSEC_OUTPUT_RAW_PRESSURE,
+		BSEC_OUTPUT_RAW_HUMIDITY,
+		BSEC_OUTPUT_RAW_GAS,
+		BSEC_OUTPUT_STABILIZATION_STATUS,
+		BSEC_OUTPUT_RUN_IN_STATUS,
+		BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
+		BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
+		BSEC_OUTPUT_GAS_PERCENTAGE};
+
+	data.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_CONT);
+
+	pinMode(LED_BUILTIN, OUTPUT);
+	digitalWrite(LED_BUILTIN, LOW);
+} 
+
+
 bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
 {
 
@@ -89,43 +127,6 @@ void BME680Handler::checkSensorStatus() const
 	}
 }
 
-// setup
-BME680Handler::BME680Handler()
-{
-	// IMPORTANT
-	Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
-	delay(1000);
-	pinMode(LED_BUILTIN, OUTPUT);
-
-	// IMPORTANT
-	data.begin(BME68X_I2C_ADDR_HIGH, Wire);
-	data.setConfig(bsec_config_iaq);
-	checkSensorStatus();
-	loadState();
-
-#ifdef DEBUG
-	Serial.println("\n[BME] BSEC library version " + String(data.version.major) + "." + String(data.version.minor) + "." + String(data.version.major_bugfix) + "." + String(data.version.minor_bugfix));
-#endif
-	bsec_virtual_sensor_t sensorList[13] = {
-		BSEC_OUTPUT_IAQ,
-		BSEC_OUTPUT_STATIC_IAQ,
-		BSEC_OUTPUT_CO2_EQUIVALENT,
-		BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
-		BSEC_OUTPUT_RAW_TEMPERATURE,
-		BSEC_OUTPUT_RAW_PRESSURE,
-		BSEC_OUTPUT_RAW_HUMIDITY,
-		BSEC_OUTPUT_RAW_GAS,
-		BSEC_OUTPUT_STABILIZATION_STATUS,
-		BSEC_OUTPUT_RUN_IN_STATUS,
-		BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
-		BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
-		BSEC_OUTPUT_GAS_PERCENTAGE};
-
-	data.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_CONT);
-
-	pinMode(LED_BUILTIN, OUTPUT);
-	digitalWrite(LED_BUILTIN, LOW);
-}
 
 void BME680Handler::printout() const
 {
