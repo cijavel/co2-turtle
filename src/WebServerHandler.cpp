@@ -68,6 +68,11 @@ void WebServerHandler::handle_page_data(AsyncWebServerRequest *request)
 	header_data += "\"bme680/iaq\":\"{{iaq}}\",\n";
 	header_data += "\"bme680/iaqAccuracy\":\"{{iaqAccuracy}}\",\n";
 	header_data += "\"bme680/staticIaqAccuracy\":\"{{staticIaqAccuracy}}\",\n";
+	header_data += "\"bme680/runInStatus\":\"{{runInStatus}}\",\n";
+	header_data += "\"bme680/stabStatus\":\"{{stabStatus}}\",\n";
+	header_data += "\"bme680/nextCall\":\"{{nextCall}}\",\n";
+	header_data += "\"bme680/outputTimestamp\":\"{{outputTimestamp}}\",\n";
+
 	header_data += "\"mhz19/Accuracy\":\"{{mhz19Accuracy}}\",\n";
 	header_data += "\"mhz19/Background\":\"{{mhz19Background}}\",\n";
 	header_data += "\"mhz19/Limited\":\"{{mhz19Limited}}\",\n";
@@ -77,6 +82,10 @@ void WebServerHandler::handle_page_data(AsyncWebServerRequest *request)
 	header_data += "\"mhz19/Temperature\":\"{{mhz19Temperature}}\"\n";
 	header_data += "}";
 
+	header_data.replace("{{runInStatus}}", String(bmedata.runInStatus));
+	header_data.replace("{{stabStatus}}", String(bmedata.stabStatus));
+	header_data.replace("{{nextCall}}", String(bmedata.nextCall));
+	header_data.replace("{{outputTimestamp}}", String(bmedata.outputTimestamp));
 	header_data.replace("{{temperature}}", String(bmedata.temperature));
 	header_data.replace("{{temperature_offset}}", String(bmedata.temperature + TEMPERATUR_OFFSET));
 	header_data.replace("{{temperature_raw}}", String(bmedata.rawTemperature));
