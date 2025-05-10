@@ -52,26 +52,20 @@ void SettingsHandler::validateConfigMaps()
             Serial.printf("[Config] Missing key in configMapforSwitch: %s\n", key);
         }
     }
-	for (const auto& key : {"intervalBME680", "intervalWiFi",
-		"intervalPRINT", "intervalEPD", "intervalLED", "intervalMQTT"})
+	for (const auto& key : {"intervalBME680", "intervalWiFi", "intervalPRINT", "intervalEPD", "intervalLED", "intervalMQTT"})
 	{
-	if (configMapforInterval.find(key) == configMapforInterval.end())
-	{
-	Serial.printf("[Config] Missing key in configMapforInterval: %s\n", key);
+		if (configMapforInterval.find(key) == configMapforInterval.end())
+		{
+		Serial.printf("[Config] Missing key in configMapforInterval: %s\n", key);
+		}
 	}
-	}
-
-    // Überprüfen der Geräte-Konfiguration
-    for (const auto& key : {"deviceName", "timezone", "wlanSSID", "wlanPASSWORD",
-                            "mqttUSER", "mqttPASSWORD", "mqttHOST", "mqttPORT", "mqttUSERen"})
+    for (const auto& key : {"deviceName", "timezone", "wlanSSID", "wlanPASSWORD", "mqttUSER", "mqttPASSWORD", "mqttHOST", "mqttPORT", "mqttUSERen"})
     {
         if (configMapforDevice.find(key) == configMapforDevice.end())
         {
             Serial.printf("[Config] Missing key in configMapforDevice: %s\n", key);
         }
     }
-
-    // Überprüfen der LED-Konfiguration
     for (const auto& key : {"LEDbrightness"})
     {
         if (configMapforLED.find(key) == configMapforLED.end())
@@ -79,8 +73,6 @@ void SettingsHandler::validateConfigMaps()
             Serial.printf("[Config] Missing key in configMapforLED: %s\n", key);
         }
     }
-
-    // Überprüfen der Sensor-Konfiguration
     for (const auto& key : {"pressure", "tempOffset"})
     {
         if (configMapforSensor.find(key) == configMapforSensor.end())
