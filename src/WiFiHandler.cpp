@@ -44,8 +44,7 @@ void WiFiHandler::initWifi()
 	}
 	if (WiFiClass::status() == WL_CONNECTED)
 	{
-		Serial.println("[WIFI] connected.");
-		Serial.print("[WIFI] IP address: ");
+		Serial.print("[WIFI] connected. IP address: ");
 		Serial.println(WiFi.localIP());
 	}
 	else
@@ -57,9 +56,9 @@ void WiFiHandler::initWifi()
 
 void WiFiHandler::ReStart()
 {
-#ifdef DEBUGk
+#ifdef DEBUG
 	Serial.println();
-	Serial.print("[WIFI] Connecting to ");
+	Serial.print("[WIFI] Connecting to: ");
 	Serial.println(WIFI_SSID);
 #endif
 	loadWiFiCredentials();
@@ -74,7 +73,7 @@ void WiFiHandler::ReStart()
 	if (WiFiClass::status() == WL_CONNECTED)
 	{
 		Serial.println();
-		Serial.println("[WIFI] WiFi connected");
+		Serial.print("[WIFI] still connected. IP: ");
 		Serial.println(WiFi.localIP());
 	}
 #endif
@@ -86,14 +85,8 @@ bool WiFiHandler::StatusCheck()
 	if (status != WL_CONNECTED)
 	{
 		ReStart();
+		Serial.println("[WIFI] restarting WiFi connection");
 	}
-#ifdef DEBUG
-	else
-	{
-		Serial.println("[WIFI] Still connected");
-		Serial.println();
-	}
-#endif
 	return status == WL_CONNECTED;
 }
 
