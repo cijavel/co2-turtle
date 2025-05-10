@@ -112,6 +112,33 @@
                         console.error("Error:", error);
                     });
                 });
+
+                const intervalForm = document.querySelector('form[action="/submitmodulinterval"]');
+                const intervalInputs = intervalForm.querySelectorAll('input[type="number"]');
+
+                intervalForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+
+                    const intervalParams = Array.from(intervalInputs).map(input => {
+                        return `${encodeURIComponent(input.name)}=${encodeURIComponent(input.value)}`;
+                    }).join("&");
+
+                    fetch(`/submitmodulinterval?${intervalParams}`, {
+                        method: "POST",
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Module interval settings saved successfully!");
+                        } else {
+                            console.error("Failed to save module interval settings.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                });
+
+
             });
         </script>
     </body>
