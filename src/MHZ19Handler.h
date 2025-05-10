@@ -20,6 +20,7 @@ public:
 	bool runUpdate(unsigned long currentSeconds);
 
 private:
+	void calibrate();
 	bool updateLastReadout();
 	DataCO2 _lastReadout;
 	MHZ19 myMHZ19;
@@ -27,5 +28,6 @@ private:
 	MHZ19Handler();						  // Constructor? (the {} brackets) are needed here.
 	MHZ19Handler(MHZ19Handler const &);	  // Don't Implement
 	void operator=(MHZ19Handler const &); // Don't implement
+
 };
 #endif // CO2_TURTLE_MHZ19HANDLER_H
