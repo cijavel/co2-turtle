@@ -22,7 +22,7 @@ private:
     void loadState(void);
     void updateState(void);
     [[noreturn]] static void executeLedError();
-    Bsec data;
+    Bsec bmeSensor;
     BME680Handler();
     BME680Handler(BME680Handler const &);
     void operator=(BME680Handler const &); 
