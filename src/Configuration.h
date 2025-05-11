@@ -30,7 +30,7 @@
 #define PIN_MHZ19_TX 16
 #define BAUDRATE 9600
 
-#define BRIGHTNESS_LEDS 2 // dont set 1. it will all leds set to red
+#define BRIGHTNESS_LEDS 2 // range 2-255
 #define NUM_LEDS 38
 #define DATA_LED_PIN 4
 
