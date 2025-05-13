@@ -34,6 +34,12 @@ void LEDHandler::setup_led()
 	FastLED.setBrightness(configHandler.getConfigLED("LEDbrightness"));
 }
 
+void LEDHandler::updateLEDBrightness(int brightness)
+{
+    FastLED.setBrightness(brightness);
+    FastLED.show(); 
+}
+
 void LEDHandler::setInputDataforLED(DataCO2 co2Sensordata, Bsec enviromentdata)
 {
 	this->bmedata = enviromentdata;
