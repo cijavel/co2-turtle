@@ -130,9 +130,9 @@ void WebServerHandler::handle_page_status(AsyncWebServerRequest *request)
 	String header_data = file.readString();
 	file.close();
 	header_data.replace("{{deviceName}}", DeviceName);
-	header_data.replace("{{data_gas}}", String(bmedata.gasPercentage));
+	header_data.replace("{{data_gas}}", String(bmedata.gasResistance));
 	header_data.replace("{{data_breahtvoc}}", String(bmedata.breathVocEquivalent));
-	header_data.replace("{{data_pressure}}", String(bmedata.pressure));
+	header_data.replace("{{data_pressure}}", String(bmedata.pressure/100));
 	header_data.replace("{{data_timestep}}", String(bmedata.outputTimestamp));
 	header_data.replace("{{data_zone}}", TIMEZONE);
 	header_data.replace("{{data_time}}", acDate);

@@ -8,11 +8,10 @@ CRGB leds[NUM_LEDS];
 
 // Map section names to their corresponding sections
 SectionStruc sections[NUM_SECTIONS] = {
-	{0, 6},	  // LED_TEMP
-	{8, 14},  // LED_HUM
+	//{0, 6},	  // LED_TEMP
+	{0, 16},  // LED_HUM
 	{16, 17}, // LED_WLANCONNECT
-	{19, 25}, // LED_AIRQ
-	{27, 33}  // LED_CO2
+	{21, 37}  // LED_CO2
 };
 
 void LEDHandler::setSectionColor(SectionName sectionName, CRGB color)
@@ -76,8 +75,8 @@ void LEDHandler::ledStatusWiFi()
 
 void LEDHandler::ledStatusBME()
 {
-	long temperature = bmedata.temperature + TEMPERATUR_OFFSET;
-	if (temperature)
+	//long temperature = bmedata.temperature + TEMPERATUR_OFFSET;
+	/*if (temperature)
 	{
 		if (temperature < 12) // colder
 		{
@@ -123,87 +122,66 @@ void LEDHandler::ledStatusBME()
 		{
 			setSectionColor(LED_TEMP, CRGB::Magenta);
 		}
-	}
+	}*/
 
-	if (bmedata.humidity)
-	{
-		if (bmedata.humidity < 20) // Far too dry
-		{
-			setSectionColor(LED_HUM, CRGB::Red);
-		}
-		else if (bmedata.humidity < 30) // Too dry
-		{
-			setSectionColor(LED_HUM, CRGB::Yellow);
-		}
-		else if (bmedata.humidity < 40) // dry
-		{
-			setSectionColor(LED_HUM, CRGB::GreenYellow);
-		}
-		else if (bmedata.humidity < 50) // normal
-		{
-			setSectionColor(LED_HUM, CRGB::Green);
-		}
-		else if (bmedata.humidity < 60) // Slightly moist
-		{
-			setSectionColor(LED_HUM, CRGB::YellowGreen);
-		}
-		else if (bmedata.humidity < 65) // moist
-		{
-			setSectionColor(LED_HUM, CRGB::Orange);
-		}
-		else if (bmedata.humidity < 70) // very moist
-		{
-			setSectionColor(LED_HUM, CRGB::Red);
-		}
-		else // wet
-		{
-			setSectionColor(LED_HUM, CRGB::Black);
-			delay(150);
-
-			setSectionColor(LED_HUM, CRGB::Magenta);
-			delay(500);
-		}
-	}
-
-	if (bmedata.pressure > 0)
-	{
-		long pressure = bmedata.pressure / 100;
-		if (pressure <= 400) // wet
-		{
-			setSectionColor(LED_PRES, CRGB::RoyalBlue);
-		}
-		else if (pressure <= 500) // good
-		{
-			setSectionColor(LED_PRES, CRGB::Turquoise);
-		}
-		else if (pressure <= 600) //
-		{
-			setSectionColor(LED_PRES, CRGB::Aquamarine);
-		}
-		else if (pressure <= 700) //
-		{
-			setSectionColor(LED_PRES, CRGB::SpringGreen);
-		}
-		else if (pressure <= 800) //
-		{
-			setSectionColor(LED_PRES, CRGB::Green);
-		}
-		else if (pressure < 900) //
-		{
-			setSectionColor(LED_PRES, CRGB::GreenYellow);
-		}
-		else if (pressure < 1000) //
-		{
-			setSectionColor(LED_PRES, CRGB::YellowGreen);
-		}
-		else //
-		{
-			setSectionColor(LED_PRES, CRGB::Black);
-			delay(150);
-
-			setSectionColor(LED_PRES, CRGB::Gold);
-			delay(500);
-		}
+    if (bmedata.humidity)
+    {
+        if (bmedata.humidity < 10) // Extremely dry
+        {
+            setSectionColor(LED_HUM, CRGB::DarkRed);
+        }
+        else if (bmedata.humidity < 20) // Very dry
+        {
+            setSectionColor(LED_HUM, CRGB::Red);
+        }
+        else if (bmedata.humidity < 25) // Dry
+        {
+            setSectionColor(LED_HUM, CRGB::OrangeRed);
+        }
+        else if (bmedata.humidity < 30) // Slightly dry
+        {
+            setSectionColor(LED_HUM, CRGB::Orange);
+        }
+        else if (bmedata.humidity < 35) // Normal dry
+        {
+            setSectionColor(LED_HUM, CRGB::Yellow);
+        }
+        else if (bmedata.humidity < 40) // Comfortable
+        {
+            setSectionColor(LED_HUM, CRGB::GreenYellow);
+        }
+        else if (bmedata.humidity < 45) // Optimal
+        {
+            setSectionColor(LED_HUM, CRGB::Green);
+        }
+        else if (bmedata.humidity < 50) // Slightly humid
+        {
+            setSectionColor(LED_HUM, CRGB::SeaGreen);
+        }
+        else if (bmedata.humidity < 55) // Humid
+        {
+            setSectionColor(LED_HUM, CRGB::LightBlue);
+        }
+        else if (bmedata.humidity < 60) // Very humid
+        {
+            setSectionColor(LED_HUM, CRGB::Blue);
+        }
+        else if (bmedata.humidity < 65) // Extremely humid
+        {
+            setSectionColor(LED_HUM, CRGB::DarkBlue);
+        }
+        else if (bmedata.humidity < 70) // Wet
+        {
+            setSectionColor(LED_HUM, CRGB::Purple);
+        }
+        else if (bmedata.humidity < 80) // Very wet
+        {
+            setSectionColor(LED_HUM, CRGB::Magenta);
+        }
+        else // Saturated
+        {
+            setSectionColor(LED_HUM, CRGB::White);
+        }
 	}
 }
 
