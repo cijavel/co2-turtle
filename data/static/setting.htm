@@ -12,69 +12,87 @@
                 <a href="/index" class="button">Back to Index</a>
             </div>
             <div class="content">
-                <h1>Module Switch</h1>
-                <form action="/submitmodulswitch" method="POST" id="moduleSwitchForm">
-                    <div>
-                        <label for="switchWIFI">WiFi Check
-                            <input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}} title="Check WLAN status">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="switchEPD">EPD Display
-                            <input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}} title="Display sensor data on EPD">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="switchLED">LED
-                            <input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}} title="Display sensor data on LED strips">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="switchMQTT">MQTT
-                            <input type="checkbox" id="switchMQTT" name="switchMQTT" {{switchMQTT_checked}} title="Send sensor data via MQTT">
-                        </label>
-                    </div>
-                    <button type="submit" class="btn" id="saveModulBtn">Save Settings</button>
-                </form>
-                <h1>Modul Time Interval</h1>
-                <form action="/submitmodulinterval" method="POST" id="moduleIntervalForm">
-                    <div>
-                        <label for="intervalMHZ19">MHZ19 Interval (s)
-                            <input type="number" id="intervalMHZ19" name="intervalMHZ19" value="{{intervalMHZ19}}">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="intervalBME680">BME680 Interval (s)
-                            <input type="number" id="intervalBME680" name="intervalBME680" value="{{intervalBME680}}">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="intervalWiFi">WiFi Check Interval (s)
-                            <input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="intervalPRINT">RAM Printout Interval (s)
-                            <input type="number" id="intervalPRINT" name="intervalPRINT" value="{{intervalPRINT}}">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="intervalEPD">EPD Refresh Interval (s)
-                            <input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="intervalLED">LED Update Interval (s)
-                            <input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}">
-                        </label>
-                    </div>
-                    <div>
-                        <label for="intervalMQTT">MQTT Interval (s)
-                            <input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}">
-                        </label>
-                    </div>
-                    <button type="submit" class="btn" id="saveIntervalBtn">Save Interval</button>
-                </form>
+                <div>
+                    <h1>Module Switch</h1>
+                    <form action="/submitmodulswitch" method="POST" id="moduleSwitchForm">
+                        <div>
+                            <label for="switchWIFI">WiFi Check
+                                <input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}} title="Check WLAN status">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="switchEPD">EPD Display
+                                <input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}} title="Display sensor data on EPD">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="switchLED">LED
+                                <input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}} title="Display sensor data on LED strips">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="switchMQTT">MQTT
+                                <input type="checkbox" id="switchMQTT" name="switchMQTT" {{switchMQTT_checked}} title="Send sensor data via MQTT">
+                            </label>
+                        </div>
+                        <button type="submit" class="btn" id="saveModulBtn">Save Settings</button>
+                    </form>
+                </div>
+                <div>
+                    <h1>Modul Time Interval</h1>
+                    <form action="/submitmodulinterval" method="POST" id="moduleIntervalForm">
+                        <div>
+                            <label for="intervalMHZ19">MHZ19 Interval (s)
+                                <input type="number" id="intervalMHZ19" name="intervalMHZ19" value="{{intervalMHZ19}}">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="intervalBME680">BME680 Interval (s)
+                                <input type="number" id="intervalBME680" name="intervalBME680" value="{{intervalBME680}}">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="intervalWiFi">WiFi Check Interval (s)
+                                <input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="intervalPRINT">RAM Printout Interval (s)
+                                <input type="number" id="intervalPRINT" name="intervalPRINT" value="{{intervalPRINT}}">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="intervalEPD">EPD Refresh Interval (s)
+                                <input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="intervalLED">LED Update Interval (s)
+                                <input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="intervalMQTT">MQTT Interval (s)
+                                <input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}">
+                            </label>
+                        </div>
+                        <button type="submit" class="btn" id="saveIntervalBtn">Save Interval</button>
+                    </form>
+                </div>
+                <div>
+                    <h1>LED Brightness</h1>
+                    <form action="/submitLEDConfig" method="POST" id="ledconfigForm">
+                        <div id="ledconfig">
+                            <label for="ledBrightness">Brightness: 
+                                <span id="brightnessValue">{{LEDbrightness}}</span>
+                            </label>
+                            <input type="range" id="ledBrightness" name="LEDbrightness" min="2" max="255" value="{{LEDbrightness}}">
+                        </div>
+                        <div id="ledsubmitbtn">
+                            <button type="submit" class="btn" id="saveBrightnessBtn">Save Brightness</button>
+                        </div>
+                    </form>
+                </div>
                 <h1>ESP32 Option</h1>
                 <form action="/restart" method="POST">
                     <button type="submit" class="btn" id="resetESP32Btn">restart ESP32</button>
@@ -88,6 +106,7 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
+
                 const form = document.querySelector('form[action="/submitmodulswitch"]');
                 const checkboxes = form.querySelectorAll('input[type="checkbox"]');
         
@@ -138,6 +157,37 @@
                     });
                 });
 
+                const brightnessSlider = document.getElementById("ledBrightness");
+                const brightnessValue = document.getElementById("brightnessValue");
+                const brightnessForm = document.getElementById("ledconfigForm");
+
+                brightnessSlider.addEventListener("input", function () {
+                    brightnessValue.textContent = brightnessSlider.value;
+                });
+
+                brightnessForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+
+                    const brightness = brightnessSlider.value;
+
+                    fetch("/submitLEDConfig", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded", 
+                        },
+                        body: `LEDbrightness=${encodeURIComponent(brightness)}`,
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("LED brightness saved successfully!");
+                        } else {
+                            console.error("Failed to save LED brightness.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                });
 
             });
         </script>

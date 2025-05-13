@@ -22,6 +22,7 @@ public:
 	bool setup_black(const unsigned long currentSeconds);
 	bool ledstatus(const unsigned long currentSeconds);
 	void setInputDataforLED(DataCO2 co2Sensordata, Bsec enviromentdata);
+	void updateLEDBrightness(int brightness);
 
 private:
 	void setSectionColor(SectionName sectionName, CRGB color);
