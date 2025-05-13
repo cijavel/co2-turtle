@@ -111,3 +111,20 @@ body {
 #wlanForm div input {
   margin-bottom: 8px;
 }
+#ledBrightnessForm {
+  
+  display: flex;
+  align-items: baseline;
+  flex-direction: column;
+  /*! justify-content: space-around; */
+  gap: 5px;
+  width: 400px;
+}
+#ledconfig {
+  
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  justify-content: space-between;
+  width: 367px;
+}

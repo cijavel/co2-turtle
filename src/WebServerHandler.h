@@ -39,6 +39,7 @@ private:
 	void handle_submit_WLANcredentials(AsyncWebServerRequest *request);
 	void handle_submit_modulinterval(AsyncWebServerRequest *request);
 	void handle_submit_modulswitch(AsyncWebServerRequest *request);
+	void handle_submit_ledconfig(AsyncWebServerRequest *request);
 	void handle_restoreDefaultConfiguration(AsyncWebServerRequest *request);
 	void handle_restart(AsyncWebServerRequest *request);
 

@@ -4,6 +4,7 @@
 #include <LittleFS.h>
 #include "ConfigHandler.h"
 extern ConfigHandler configHandler;
+#include "LEDHandler.h"
 
 WebServerHandler::WebServerHandler()
 	: server(80) {}
@@ -20,6 +21,7 @@ void WebServerHandler::start()
 	server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_WLANcredentials(request); });
 	server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulinterval(request); });
 	server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulswitch(request); });
+	server.on("/submitLEDConfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_ledconfig(request); });
 	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restoreDefaultConfiguration(request); });
 	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restart(request); });
 	server.onNotFound(handle_page_NotFound);
@@ -213,6 +215,8 @@ void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest *request
 	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
 	content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
 
+	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
+
 	request->send(200, "text/html; charset=utf-8", content);
 }
 
@@ -337,6 +341,25 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	request->redirect("/sensorsettings");
 }
 
+void WebServerHandler::handle_submit_ledconfig(AsyncWebServerRequest *request)
+{
+    if (request->hasParam("LEDbrightness", true)) // Prüft POST-Parameter
+    {
+        int brightness = request->getParam("LEDbrightness", true)->value().toInt();
+        configHandler.setConfigLED("LEDbrightness", brightness);
+
+        LEDHandler &ledhandler = LEDHandler::getInstance();
+        ledhandler.updateLEDBrightness(brightness);
+    }
+    else
+    {
+        request->send(400, "text/plain", "Bad Request: Missing parameters");
+        return;
+    }
+    request->send(200, "text/plain", "LED Settings Saved!");
+    request->redirect("/sensorsettings");
+}
+
 void WebServerHandler::handle_restoreDefaultConfiguration(AsyncWebServerRequest *request)
 {
 	configHandler.restoreDefaultConfiguration(); 
@@ -355,6 +378,7 @@ void WebServerHandler::handle_restart(AsyncWebServerRequest *request)
 	delay(500);
 	ESP.restart();
 }
+
 
 // --------------------
 // Helpers
