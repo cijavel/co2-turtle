@@ -9,93 +9,78 @@
         <div class="container">
             <div class="nav">
                 <a href="/index" class="button">Back to Index</a>
+                <a href="/status"class="button">Refresh</a>
             </div>
             <br>
             <div class="content">
-              <h1>sensor data status</h1>
-              <table class="content">
-                <tr>
-                  <th class="title">Co2 Level</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_MHZ19B_co2}} ppm</td>
-                  <td class="space"> </td>
-                  <td class="status" style="background-color: {{color_MHZ19B_co2}};"> </td>
-                  <td class="space"> </td>
-                  <td class="description">{{descr_MHZ19B_co2}}</td>
-                </tr>
-                <tr>
-                  <th class="title">Temperature</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_temp}} °C</td>
-                  <td class="space"> </td>
-                  <td class="status" style="background-color: {{color_temp}};"> </td>
-                  <td class="space"> </td>
-                  <td class="description">{{descr_temp}}</td>
-                </tr>
-                <tr>
-                  <th class="title">Humidity</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_relativehumidity}} %</td>
-                  <td class="space"> </td>
-                  <td class="status" style="background-color: {{color_relativehumidity}};"> </td>
-                  <td class="space"> </td>
-                  <td class="description">{{descr_relativehumidity}}</td>
-                </tr>
-                <tr>
-                  <th class="title">Air Quality </th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_iaq}} IAQ</td>
-                  <td class="space"> </td>
-                  <td class="status" style="background-color: {{color_iaq}};"> </td>
-                  <td class="space"> </td>
-                  <td class="description">{{descr_iaq}}</td>
-                </tr>
-                <tr>
-                  <th class="title">Sensor Accuracy</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_iaqaccuracy}} level</td>
-                  <td class="space"> </td>
-                  <td class="status" style="background-color: {{color_iaqaccuracy}};"> </td>
-                  <td class="space"> </td>
-                  <td class="description">{{descr_iaqaccuracy}}</td>
-                </tr>
-                <tr>
-                  <th class="title"> .....  </th>
-                </tr>
-                <tr>
-                  <th class="title">Air pressure</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_pressure}} hPa</td>
-                </tr>
-                <tr>
-                  <th class="title">Gas resistance</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_gas}} Ohm</td>
-                </tr>
-                <tr>
-                  <th class="title">breath VOC Equivalent</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_breahtvoc}} ppm</td>
-                </tr>
-                <tr>
-                  <th class="title"> .....  </th>
-                </tr>
-                <tr>
-                  <th class="title">Timestep</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_timestep}}</td>
-                </tr>
-                <tr>
-                  <th class="title">Time</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_time}}</td>
-                </tr>
-                <tr>
-                  <th class="title">Timezone</th>
-                  <td class="space"> </td>
-                  <td class="data">{{data_zone}}</td>
-                </tr>
-              </table>
+                <h1>Sensor Data Status</h1>
+                <div class="status-container">
+                  <div>
+                    <h2>MHZ19</h2>
+                    <div class="status-item">
+                        <div class="title">CO2 Level</div>
+                        <div class="data">{{data_MHZ19B_co2}} ppm</div>
+                        <div class="status-indicator" style="background-color: {{color_MHZ19B_co2}};"></div>
+                        <div class="description">{{descr_MHZ19B_co2}}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h2>BME680</h2>
+                    <div class="status-item">
+                        <div class="title">Temperature</div>
+                        <div class="data">{{data_temp}} °C</div>
+                        <div class="status-indicator" style="background-color: {{color_temp}};"></div>
+                        <div class="description">{{descr_temp}}</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="title">Humidity</div>
+                        <div class="data">{{data_relativehumidity}} %</div>
+                        <div class="status-indicator" style="background-color: {{color_relativehumidity}};"></div>
+                        <div class="description">{{descr_relativehumidity}}</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="title">Air Quality</div>
+                        <div class="data">{{data_iaq}} IAQ</div>
+                        <div class="status-indicator" style="background-color: {{color_iaq}};"></div>
+                        <div class="description">{{descr_iaq}}</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="title">Sensor Accuracy</div>
+                        <div class="data">{{data_iaqaccuracy}} level</div>
+                        <div class="status-indicator" style="background-color: {{color_iaqaccuracy}};"></div>
+                        <div class="description">{{descr_iaqaccuracy}}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h2>BME680 more</h2>
+                    <div class="status-item">
+                        <div class="title">Air Pressure</div>
+                        <div class="data">{{data_pressure}} hPa</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="title">Gas Resistance</div>
+                        <div class="data">{{data_gas}} Ohm</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="title">Breath VOC Equivalent</div>
+                        <div class="data">{{data_breahtvoc}} ppm</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h2>Time</h2>
+                    <div class="status-item">
+                        <div class="title">Timestep</div>
+                        <div class="data">{{data_timestep}}</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="title">Time</div>
+                        <div class="data">{{data_time}}</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="title">Timezone</div>
+                        <div class="data">{{data_zone}}</div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="footer">&copy; 2025 SensorTurtle</div>
