@@ -4,7 +4,6 @@ body {
   padding: 0;
   background-color: #f0f0f0;
 }
-
 .container {
   max-width: 800px;
   margin: 20px auto;
@@ -13,7 +12,6 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .nav {
   display: flex;
   width: 100%;
@@ -21,7 +19,6 @@ body {
   align-items: stretch;
   gap: 10px;
 }
-
 .nav .button {
   text-decoration: none;
   color: #fff;
@@ -29,45 +26,10 @@ body {
   padding: 10px 34px;
   border-radius: 5px;
 }
-
 .content h1 {
   font-size: 24px;
   margin-bottom: 20px;
 }
-
-#moduleSwitchForm div, #moduleIntervalForm div {
-  display: block; 
-  margin-bottom: 15px;
-}
-
-#moduleSwitchForm div label {
-  display: inline-block;
-  overflow: hidden;
-  width: 120px; 
-}
-
-#moduleIntervalForm div label {
-  display: inline-block;
-  width: 400px; 
-}
-
-#moduleSwitchForm div label input[type="checkbox"] {
-  vertical-align: middle; 
-  float: right; 
-  transform: scale(1.2);
-}
-
-#moduleIntervalForm div label input[type="number"] {
-  padding: 5px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 200px; 
-  box-sizing: border-box; 
-  vertical-align: middle; 
-  float: right; 
-}
-
 .btn {
   background: #28a745;
   color: #fff;
@@ -79,18 +41,44 @@ body {
   font-size: 105%;
   text-decoration: none;
 }
-
 .btn:hover, .nav .button:hover {
   background: #218838;
 }
-
 .footer {
   text-align: center;
   margin-top: 20px;
   font-size: 14px;
   color: #666;
 }
-
+/*  CONFIG   */
+#moduleSwitchForm div, #moduleIntervalForm div {
+  display: block; 
+  margin-bottom: 15px;
+}
+#moduleSwitchForm div label {
+  display: inline-block;
+  overflow: hidden;
+  width: 120px; 
+}
+#moduleIntervalForm div label {
+  display: inline-block;
+  width: 400px; 
+}
+#moduleSwitchForm div label input[type="checkbox"] {
+  vertical-align: middle; 
+  float: right; 
+  transform: scale(1.2);
+}
+#moduleIntervalForm div label input[type="number"] {
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px; 
+  box-sizing: border-box; 
+  vertical-align: middle; 
+  float: right; 
+}
 .wlanlabel {
   display: inline-block;
   width: 120px; 
@@ -112,19 +100,52 @@ body {
   margin-bottom: 8px;
 }
 #ledBrightnessForm {
-  
   display: flex;
   align-items: baseline;
   flex-direction: column;
-  /*! justify-content: space-around; */
   gap: 5px;
   width: 400px;
 }
 #ledconfig {
-  
   display: flex;
   align-items: center;
   margin-bottom: 5px;
   justify-content: space-between;
   width: 367px;
+}
+
+/*  STATUS   */
+
+.status-container {
+  display: block;
+}
+.status-item {
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 10px;
+}
+.status-item .title {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #333;
+  width: 30%;
+  min-width: 200px;
+}
+.status-item .data {
+  margin-bottom: 10px;
+  color: #555;
+  min-width: 130px;
+}
+.status-item .status-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 30%;
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+.status-item .description {
+  font-size: 0.9em;
+  color: #666;
+  line-height: 1.4;
 }
