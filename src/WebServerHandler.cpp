@@ -2,6 +2,7 @@
 #include "Configuration.h"
 #include "Credentials.h"
 #include <LittleFS.h>
+#include "MHZ19Handler.h"
 #include "ConfigHandler.h"
 extern ConfigHandler configHandler;
 #include "LEDHandler.h"
@@ -24,6 +25,7 @@ void WebServerHandler::start()
 	server.on("/submitLEDConfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_ledconfig(request); });
 	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restoreDefaultConfiguration(request); });
 	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restart(request); });
+	server.on("/calibrateMHZ19", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_calibrate_mhz19(request); });
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
 }
@@ -379,6 +381,14 @@ void WebServerHandler::handle_restart(AsyncWebServerRequest *request)
 	ESP.restart();
 }
 
+void WebServerHandler::handle_calibrate_mhz19(AsyncWebServerRequest *request)
+{
+    MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
+    mhz19Handler.calibrate();
+    request->send(200, "text/plain", "Calibration started.");
+	delay(1000);
+	request->redirect("/sensorsettings");
+}
 
 // --------------------
 // Helpers
