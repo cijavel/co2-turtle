@@ -18,9 +18,9 @@ public:
 	void printoutLastReadout();
 	DataCO2 getLastReadout();
 	bool runUpdate(unsigned long currentSeconds);
+	void calibrate();
 
 private:
-	void calibrate();
 	bool updateLastReadout();
 	DataCO2 _lastReadout;
 	MHZ19 myMHZ19;

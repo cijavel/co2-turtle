@@ -93,13 +93,22 @@
                         </div>
                     </form>
                 </div>
-                <h1>ESP32 Option</h1>
-                <form action="/restart" method="POST">
-                    <button type="submit" class="btn" id="resetESP32Btn">restart ESP32</button>
-                </form>
-                <form action="/restoredefaultconfiguration" method="POST">
-                    <button type="submit" class="btn" id="restoreDefaultsConfigBtn" onclick="loadDefaults()">Load Default Configuration</button>
-                </form>
+                <div>
+                    <h1>Sensor Option</h1>
+                    <form action="/calibrateMHZ19" method="POST">
+                        <button type="submit" class="btn" id="resetMHZ19SensorBtn">Calibrate MHZ19</button>
+                    </form>
+                </div>
+                <div>
+                    <h1>ESP32 Option</h1>
+                    <form action="/restart" method="POST">
+                        <button type="submit" class="btn" id="resetESP32Btn">restart ESP32</button>
+                    </form>
+                    <form action="/restoredefaultconfiguration" method="POST">
+                        <button type="submit" class="btn" id="restoreDefaultsConfigBtn" onclick="loadDefaults()">Load Default Configuration</button>
+                    </form>
+                </div>
+                
             </div>
         </div>
         <div class="footer">&copy; 2025 SensorTurtle</div>
@@ -187,6 +196,26 @@
                     .catch(error => {
                         console.error("Error:", error);
                     });
+                });
+                const calibrateForm = document.querySelector('form[action="/calibrateMHZ19"]');
+                calibrateForm.addEventListener("submit", function (event) {
+                    event.preventDefault(); 
+                    if (confirm("Are you sure you want to calibrate the MHZ19 sensor? Make sure the sensor is in fresh air (400 ppm).")) {
+                        fetch("/calibrateMHZ19", {
+                            method: "POST",
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                alert("Calibration started successfully!");
+                            } else {
+                                alert("Failed to start calibration. Please try again.");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            alert("An error occurred while starting calibration.");
+                        });
+                    }
                 });
 
             });
