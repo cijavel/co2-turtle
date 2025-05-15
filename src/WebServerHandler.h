@@ -42,6 +42,8 @@ private:
 	void handle_submit_ledconfig(AsyncWebServerRequest *request);
 	void handle_restoreDefaultConfiguration(AsyncWebServerRequest *request);
 	void handle_restart(AsyncWebServerRequest *request);
+	void handle_calibrate_mhz19(AsyncWebServerRequest *request);
+
 
 	// helper function
 	void replaceColorDescr(String &str, const String &key, const String &color, const String &descr);

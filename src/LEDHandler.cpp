@@ -10,7 +10,7 @@ CRGB leds[NUM_LEDS];
 SectionStruc sections[NUM_SECTIONS] = {
 	//{0, 6},	  // LED_TEMP
 	{0, 16},  // LED_HUM
-	{16, 17}, // LED_WLANCONNECT
+	{17, 18}, // LED_WLANCONNECT
 	{21, 37}  // LED_CO2
 };
 
