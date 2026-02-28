@@ -21,7 +21,7 @@
 #define SEALEVELPRESSURE_HPA 1015
 #define TEMPERATUR_OFFSET -3.5
 
-#define DeviceName "Turtle 10.05.2025"
+#define DeviceName "Turtle 28.02.2026"
 #define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 #define PIN_BME680_SDA 21
