@@ -243,9 +243,18 @@ void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *requ
 		request->send(400, "text/plain", "Bad Request: Missing parameters");
 		return;
 	}
-	request->send(200, "text/plain", "WLAN Settings Saved!");
-	request->redirect("/index");
-	ESP.restart();
+	request->send(200, "text/html",
+    "<html><head>"
+    "<meta http-equiv='refresh' content='6;url=/'>"
+    "</head><body style='font-family:sans-serif;padding:40px'>"
+    "<h2>WLAN Einstellungen gespeichert.</h2>"
+    "<p>Weiterleitung in 6 Sekunden.</p>"
+    "</body></html>");
+
+	xTaskCreate([](void*) {
+		vTaskDelay(1500 / portTICK_PERIOD_MS);
+		ESP.restart();
+	}, "wlan_restart_task", 1024, nullptr, 1, nullptr);
 }
 
 void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *request)
