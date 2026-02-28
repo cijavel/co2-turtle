@@ -4,6 +4,7 @@
 #include "Credentials.h"
 #include "Configuration.h"
 #include "ConfigHandler.h"
+unsigned long WiFiHandler::_lastRunSeconds = 0;
 extern ConfigHandler configHandler;
 String password;
 String ssid;
@@ -92,8 +93,9 @@ bool WiFiHandler::StatusCheck()
 
 bool WiFiHandler::checkWifiStatus(unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalWiFi") == 0)
+	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalWiFi"))
 	{
+		_lastRunSeconds = currentSeconds;
 		return WiFiHandler::StatusCheck();
 	}
 	return false;

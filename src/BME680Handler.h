@@ -27,5 +27,6 @@ private:
     BME680Handler(BME680Handler const &);
     void operator=(BME680Handler const &); 
     void updateSensorDataInternal();
+    unsigned long _lastRunSeconds = 0;
 };
 #endif // CO2_TURTLE_BME680HANDLER_H

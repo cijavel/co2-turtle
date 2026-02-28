@@ -29,11 +29,12 @@ private:
 	void ledStatusWiFi();
 	void ledStatusBME();
 	void ledStatusCO2();
-
+	
 	DataCO2 co2data;
 	Bsec bmedata;
 	LEDHandler() {};					// Constructor? (the {} brackets) are needed here.
 	LEDHandler(LEDHandler const &); // Don't Implement
 	void operator=(LEDHandler const &); // Don't implement
+	unsigned long _lastRunSeconds = 0;
 };
 #endif // CO2_TURTLE_LEDHANDLER_H
