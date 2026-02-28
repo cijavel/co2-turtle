@@ -92,7 +92,7 @@ void WebServerHandler::handle_page_data(AsyncWebServerRequest *request)
 	headerData.replace("{{nextCall}}", String(bmedata.nextCall));
 	headerData.replace("{{outputTimestamp}}", String(bmedata.outputTimestamp));
 	headerData.replace("{{temperature}}", String(bmedata.temperature));
-	headerData.replace("{{temperature_offset}}", String(bmedata.temperature + TEMPERATUR_OFFSET));
+	headerData.replace("{{temperature_offset}}", String(bmedata.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f));
 	headerData.replace("{{temperature_raw}}", String(bmedata.rawTemperature));
 	headerData.replace("{{humidity}}", String(bmedata.humidity));
 	headerData.replace("{{humidity_raw}}", String(bmedata.rawHumidity));
@@ -377,7 +377,7 @@ void WebServerHandler::handle_submit_sensorconfig(AsyncWebServerRequest *request
     }
     if (request->hasParam("TEMPERATUR_OFFSET", true)) {
         float tempOffset = request->getParam("TEMPERATUR_OFFSET", true)->value().toFloat();
-        configHandler.setConfigSensor("tempOffset", tempOffset);
+        configHandler.setConfigSensor("tempOffset", (int)(tempOffset * 10));
         updated = true;
     }
 
