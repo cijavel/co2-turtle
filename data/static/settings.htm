@@ -12,7 +12,7 @@
                 <a href="/index" class="button">Back to Index</a>
             </div>
             <div class="content">
-                <div>
+                <div id="switchConfig">
                     <h1>Module Switch</h1>
                     <form action="/submitmodulswitch" method="POST" id="moduleSwitchForm">
                         <div>
@@ -38,7 +38,23 @@
                         <button type="submit" class="btn" id="saveModulBtn">Save Settings</button>
                     </form>
                 </div>
-                <div>
+                <div id="sensorConfig">
+                    <h1>Sensor Configuration</h1>
+                    <form action="/submitSensorConfig" method="POST" id="sensorConfigForm">
+                        <div>
+                            <label for="sealevelpressure">Sea Level Pressure (hPa)
+                                <input type="number" id="sealevelpressure" name="SEALEVELPRESSURE_HPA" value="{{SEALEVELPRESSURE_HPA}}" step="1">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="temperatureoffset">Temperature Offset (°C)
+                                <input type="number" id="temperatureoffset" name="TEMPERATUR_OFFSET" value="{{TEMPERATUR_OFFSET}}" step="0.1">
+                            </label>
+                        </div>
+                        <button type="submit" class="btn" id="saveSensorConfigBtn">Save Sensor Config</button>
+                    </form>
+                </div>
+                <div id="intervalConfig">
                     <h1>Modul Time Interval</h1>
                     <form action="/submitmodulinterval" method="POST" id="moduleIntervalForm">
                         <div>
@@ -79,10 +95,10 @@
                         <button type="submit" class="btn" id="saveIntervalBtn">Save Interval</button>
                     </form>
                 </div>
-                <div>
+                <div id="ledConfig">
                     <h1>LED Brightness</h1>
                     <form action="/submitLEDConfig" method="POST" id="ledconfigForm">
-                        <div id="ledconfig">
+                        <div id="ledconfigSlider">
                             <label for="ledBrightness">Brightness: 
                                 <span id="brightnessValue">{{LEDbrightness}}</span>
                             </label>
@@ -93,13 +109,13 @@
                         </div>
                     </form>
                 </div>
-                <div>
+                <div id="sensorOption">
                     <h1>Sensor Option</h1>
                     <form action="/calibrateMHZ19" method="POST">
                         <button type="submit" class="btn" id="resetMHZ19SensorBtn">Calibrate MHZ19</button>
                     </form>
                 </div>
-                <div>
+                <div id="esp32Option">
                     <h1>ESP32 Option</h1>
                     <form action="/restart" method="POST">
                         <button type="submit" class="btn" id="resetESP32Btn">restart ESP32</button>
@@ -108,7 +124,6 @@
                         <button type="submit" class="btn" id="restoreDefaultsConfigBtn" onclick="loadDefaults()">Load Default Configuration</button>
                     </form>
                 </div>
-                
             </div>
         </div>
         <div class="footer">&copy; 2025 SensorTurtle</div>
@@ -218,6 +233,34 @@
                     }
                 });
 
+                const sensorConfigForm = document.getElementById("sensorConfigForm");
+                const sensorConfigInputs = sensorConfigForm.querySelectorAll('input[type="number"]');
+
+                sensorConfigForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+
+                    const sensorConfigParams = Array.from(sensorConfigInputs).map(input => {
+                        return `${encodeURIComponent(input.name)}=${encodeURIComponent(input.value)}`;
+                    }).join("&");
+
+                    fetch("/submitSensorConfig", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: sensorConfigParams,
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log("Sensor configuration saved successfully!");
+                        } else {
+                            console.error("Failed to save sensor configuration.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                });
             });
         </script>
     </body>

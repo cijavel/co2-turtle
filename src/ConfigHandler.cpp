@@ -33,13 +33,13 @@ void ConfigHandler::loadAllPersistedSettings()
 		configMapforDevice["mqttUSER"] = preferences.getString("mqttUSER", MQTT_USER);
 		configMapforDevice["mqttPASSWORD"] = preferences.getString("mqttPASSWORD", MQTT_PASS);
 		configMapforDevice["mqttHOST"] = preferences.getString("mqttHOST", MQTT_HOST);
-		configMapforDevice["mqttPORT"] = preferences.getInt("mqttPORT", MQTT_PORT);
-		configMapforDevice["mqttUSERen"] = preferences.getBool("mqttUSERen", MQTT_USER_ENABLED);
+		configMapforDevice["mqttPORT"] = String(preferences.getInt("mqttPORT", MQTT_PORT));
+		configMapforDevice["mqttUSERen"] = preferences.getBool("mqttUSERen", MQTT_USER_ENABLED) ? "1" : "0";
 
 		configMapforLED["LEDbrightness"] = preferences.getInt("LEDbrightness", BRIGHTNESS_LEDS);
 
 		configMapforSensor["pressure"] = preferences.getInt("pressure", SEALEVELPRESSURE_HPA);
-		configMapforSensor["tempOffset"] = preferences.getInt("tempOffset", TEMPERATUR_OFFSET);
+		configMapforSensor["tempOffset"] = preferences.getInt("tempOffset", (int)(TEMPERATUR_OFFSET * 10));
 	preferences.end();
 }
 
@@ -92,13 +92,13 @@ void ConfigHandler::persistAllSettings()
 	preferences.putBool("switchLED", configMapforSwitch["switchLED"]);
 	preferences.putBool("switchMQTT", configMapforSwitch["switchMQTT"]);
 
-	preferences.putInt("intervalMHZ19", configMapforSwitch["intervalMHZ19"]);
-	preferences.putInt("intervalBME680", configMapforSwitch["intervalBME680"]);
-	preferences.putInt("intervalWiFi", configMapforSwitch["intervalWiFi"]);
-	preferences.putInt("intervalPRINT", configMapforSwitch["intervalPRINT"]);
-	preferences.putInt("intervalEPD", configMapforSwitch["intervalEPD"]);
-	preferences.putInt("intervalLED", configMapforSwitch["intervalLED"]);
-	preferences.putInt("intervalMQTT", configMapforSwitch["intervalMQTT"]);
+	preferences.putInt("intervalMHZ19", configMapforInterval["intervalMHZ19"]);
+	preferences.putInt("intervalBME680", configMapforInterval["intervalBME680"]);
+	preferences.putInt("intervalWiFi", configMapforInterval["intervalWiFi"]);
+	preferences.putInt("intervalPRINT", configMapforInterval["intervalPRINT"]);
+	preferences.putInt("intervalEPD", configMapforInterval["intervalEPD"]);
+	preferences.putInt("intervalLED", configMapforInterval["intervalLED"]);
+	preferences.putInt("intervalMQTT", configMapforInterval["intervalMQTT"]);
 	preferences.end();
 }
 
@@ -133,20 +133,10 @@ void ConfigHandler::restoreDefaultConfiguration()
 	preferences.putBool("mqttUSERen", MQTT_USER_ENABLED);
 
 	preferences.putInt("pressure", SEALEVELPRESSURE_HPA);
-	preferences.putInt("tempOffset", TEMPERATUR_OFFSET);
+	preferences.putInt("tempOffset", (int)(TEMPERATUR_OFFSET * 10));
 
 
-	if (BRIGHTNESS_LEDS > 1 || BRIGHTNESS_LEDS < 256) {
-		preferences.putInt("LEDbrightness", BRIGHTNESS_LEDS);
-	}
-	else {
-		if (BRIGHTNESS_LEDS < 2 ) {
-			preferences.putInt("LEDbrightness", 2);
-		}
-		if ( BRIGHTNESS_LEDS > 255) {
-			preferences.putInt("LEDbrightness", 255);
-		}
-	}
+	preferences.putInt("LEDbrightness", constrain(BRIGHTNESS_LEDS, 2, 255));
 	preferences.end();
 }
 
