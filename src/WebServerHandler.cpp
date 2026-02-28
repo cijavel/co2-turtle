@@ -12,12 +12,13 @@ WebServerHandler::WebServerHandler()
 
 void WebServerHandler::start()
 {
-    server.serveStatic("/static", LittleFS, "/static").setDefaultFile("index.htm");
+	DefaultHeaders::Instance().addHeader("Content-Encoding", "identity");
+    server.serveStatic("/static", LittleFS, "/static").setDefaultFile("index.htm").setCacheControl("no-cache");
     server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {request->redirect("/index"); });
     server.on("/index", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_index(request);});
 	server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_data(request); });
 	server.on("/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_status(request); });
-	server.on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_settings(request); });
+	server.on("/sensorsettings", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_settings(request); });
 	server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_wlan(request); });
 	server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_WLANcredentials(request); });
 	server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulinterval(request); });
@@ -332,7 +333,7 @@ void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *reques
 	}
 	configHandler.persistAllSettings();
 	request->send(200, "text/plain", "Interval Settings Saved!");
-	request->redirect("/settings");
+	request->redirect("/sensorsettings");
 }
 
 void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
@@ -355,7 +356,7 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	} 
 	configHandler.persistAllSettings();
 	request->send(200, "text/plain", "Modul Settings Saved!");
-	request->redirect("/settings");
+	request->redirect("/sensorsettings");
 }
 
 void WebServerHandler::handle_submit_ledconfig(AsyncWebServerRequest *request)
@@ -375,7 +376,7 @@ void WebServerHandler::handle_submit_ledconfig(AsyncWebServerRequest *request)
     }
 	configHandler.persistAllSettings();
     request->send(200, "text/plain", "LED Settings Saved!");
-    request->redirect("/settings");
+    request->redirect("/sensorsettings");
 }
 
 void WebServerHandler::handle_submit_sensorconfig(AsyncWebServerRequest *request)
@@ -440,7 +441,7 @@ void WebServerHandler::handle_option_calibrate_mhz19(AsyncWebServerRequest *requ
     mhz19Handler.calibrate();
     request->send(200, "text/plain", "Calibration started.");
 	delay(1000);
-	request->redirect("/settings");
+	request->redirect("/sensorsettings");
 }
 
 // --------------------
