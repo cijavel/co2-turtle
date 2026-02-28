@@ -137,7 +137,7 @@ void WebServerHandler::handle_page_status(AsyncWebServerRequest *request)
 	header_data.replace("{{data_breahtvoc}}", String(bmedata.breathVocEquivalent));
 	header_data.replace("{{data_pressure}}", String(bmedata.pressure/100));
 	header_data.replace("{{data_timestep}}", String(bmedata.outputTimestamp));
-	header_data.replace("{{data_zone}}", TIMEZONE);
+	header_data.replace("{{data_zone}}", configHandler.getConfigDevice("timezone"));
 	header_data.replace("{{data_time}}", acDate);
 
 	// Sensor Accuracy
@@ -220,7 +220,7 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 
 	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
 	content.replace("{{SEALEVELPRESSURE_HPA}}", String(configHandler.getConfigSensor("pressure")));
-	content.replace("{{TEMPERATUR_OFFSET}}", String(configHandler.getConfigSensor("tempOffset")));
+	content.replace("{{TEMPERATUR_OFFSET}}", String(configHandler.getConfigSensor("tempOffset") / 10.0f));
 
 	request->send(200, "text/html; charset=utf-8", content);
 }
@@ -330,6 +330,7 @@ void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *reques
 		Serial.println("MQTT Interval not set. Using default value.");
 		configHandler.setConfigInterval("intervalMQTT", interval_mqtt_in_Seconds);
 	}
+	configHandler.persistAllSettings();
 	request->send(200, "text/plain", "Interval Settings Saved!");
 	request->redirect("/settings");
 }
@@ -352,6 +353,7 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	{
 		configHandler.setConfigSwitch("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
 	} 
+	configHandler.persistAllSettings();
 	request->send(200, "text/plain", "Modul Settings Saved!");
 	request->redirect("/settings");
 }
@@ -371,6 +373,7 @@ void WebServerHandler::handle_submit_ledconfig(AsyncWebServerRequest *request)
         request->send(400, "text/plain", "Bad Request: Missing parameters");
         return;
     }
+	configHandler.persistAllSettings();
     request->send(200, "text/plain", "LED Settings Saved!");
     request->redirect("/settings");
 }
@@ -391,6 +394,7 @@ void WebServerHandler::handle_submit_sensorconfig(AsyncWebServerRequest *request
     }
 
     if (updated) {
+		configHandler.persistAllSettings();
         request->send(200, "text/plain", "Sensor configuration saved!");
     } else {
         request->send(400, "text/plain", "Bad Request: Missing parameters");

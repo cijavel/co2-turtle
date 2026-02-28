@@ -26,12 +26,12 @@ public:
 	void setConfigSensor(String settingName, int value);
 	void setSettingsOnFirstRun();
 	void validateConfigMaps();
+	void persistAllSettings();
 
 
 private:
 	Preferences preferences;
 	void loadAllPersistedSettings();
-	void persistAllSettings();
 };
 
 #endif
