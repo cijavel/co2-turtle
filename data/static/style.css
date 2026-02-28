@@ -28,6 +28,7 @@ body {
 }
 .content h1 {
   font-size: 24px;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 .btn {
@@ -60,9 +61,10 @@ body {
   overflow: hidden;
   width: 120px; 
 }
-div label {
+#moduleIntervalForm div label,
+#sensorConfigForm div label {
   display: inline-block;
-  width: 400px; 
+  width: 400px;
 }
 #moduleSwitchForm div label input[type="checkbox"] {
   vertical-align: middle; 
@@ -83,14 +85,13 @@ div label input[type="number"] {
   display: inline-block;
   width: 120px; 
 }
-#wlanSSID, #wlanPASSWORD{
-  width: 200px; 
+#wlanSSID, #wlanPASSWORD {
+  width: 350px;
   padding: 5px;
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-sizing: border-box; 
-  width: 350px
+  box-sizing: border-box;
 }
 
 .saved-credentials div label, 
