@@ -66,27 +66,29 @@ BME680Handler::BME680Handler()
 
 bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
 {
-
-	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalBME680"))
+	// BSEC benötigt regelmäßige Aufrufe alle 3 Sekunden (BSEC_SAMPLE_RATE_LP)
+	// bmeSensor.run() muss daher bei JEDEM Loop-Durchlauf aufgerufen werden
+	// BSEC entscheidet selbst wann neue Daten verfügbar sind
+	
+	bool hasNewData = bmeSensor.run();
+	
+	if (hasNewData)
 	{
-		_lastRunSeconds = currentSeconds;
-		updateState();
-		updateSensorDataInternal();
+		// updateState() nur im konfigurierten Intervall aufrufen
+		// um unnötige EEPROM-Schreibzugriffe zu vermeiden
+		if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalBME680"))
+		{
+			_lastRunSeconds = currentSeconds;
+			digitalWrite(LED_BUILTIN, HIGH);
+			updateState();
+			digitalWrite(LED_BUILTIN, LOW);
+		}
 		return true;
 	}
+	checkSensorStatus();
 	return false;
 }
 
-void BME680Handler::updateSensorDataInternal()
-{
-	digitalWrite(LED_BUILTIN, HIGH);
-	bool hasNewData = bmeSensor.run();
-	digitalWrite(LED_BUILTIN, LOW);
-	if (!hasNewData)
-	{ 
-		checkSensorStatus();
-	}
-}
 
 void BME680Handler::executeLedError()
 {
