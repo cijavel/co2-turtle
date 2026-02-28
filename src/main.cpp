@@ -49,6 +49,7 @@
 #include "MqttClientHandler.h"
 #include "ConfigHandler.h"
 #include <LittleFS.h>
+ConfigHandler &configHandler = ConfigHandler::getInstance();
 
 // --------------------------------------------------------------------------
 // time functions
@@ -81,7 +82,6 @@ String localTime(const String &format)
 #ifdef DEBUG
 static void PrintRamUsage(unsigned long currentSeconds)
 {
-	ConfigHandler &configHandler = ConfigHandler::getInstance();
 	static unsigned long lastPrintSeconds = 0;
 	if (currentSeconds - lastPrintSeconds >= (unsigned long)configHandler.getConfigInterval("intervalPRINT"))
 	{
@@ -109,7 +109,6 @@ void setup()
 		Serial.println("Failed to mount LittleFS!");
 		return;
 	}
-	ConfigHandler &configHandler = ConfigHandler::getInstance();
 	configHandler.setSettingsOnFirstRun();
 
 	WiFiHandler::initWifi();
@@ -146,8 +145,6 @@ void loop()
 			last = currentSeconds;
 		}
 	}
-	ConfigHandler &configHandler = ConfigHandler::getInstance();
-
 	BME680Handler &bmehandler = BME680Handler::getInstance();
 	Bsec bme_data = bmehandler.getData();
 

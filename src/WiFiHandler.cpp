@@ -4,8 +4,8 @@
 #include "Credentials.h"
 #include "Configuration.h"
 #include "ConfigHandler.h"
+extern ConfigHandler &configHandler;
 unsigned long WiFiHandler::_lastRunSeconds = 0;
-ConfigHandler &configHandler = ConfigHandler::getInstance();
 String password;
 String ssid;
 
