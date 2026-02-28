@@ -147,6 +147,15 @@
                         el.className = "form-feedback";
                     }, 3000);
                 }
+                function submitForm(url, params, feedbackId) {
+                    fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: params
+                    })
+                    .then(response => showFeedback(feedbackId, response.ok))
+                    .catch(() => showFeedback(feedbackId, false));
+                }
         
                 form.addEventListener("submit", function (event) {
                     event.preventDefault();
@@ -155,19 +164,7 @@
                         return `${encodeURIComponent(checkbox.name)}=${checkbox.checked ? 1 : 0}`;
                     }).join("&");
         
-                    fetch(`/submitmodulswitch?${params}`, {
-                        method: "POST",
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            showFeedback("feedbackSwitch", true);
-                        } else {
-                            showFeedback("feedbackSwitch", false);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+                    submitForm(`/submitmodulswitch?${params}`, "", "feedbackSwitch");
                 });
 
                 const intervalForm = document.querySelector('form[action="/submitmodulinterval"]');
@@ -180,19 +177,7 @@
                         return `${encodeURIComponent(input.name)}=${encodeURIComponent(input.value)}`;
                     }).join("&");
 
-                    fetch(`/submitmodulinterval?${intervalParams}`, {
-                        method: "POST",
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            showFeedback("feedbackInterval", true);
-                        } else {
-                            showFeedback("feedbackInterval", false);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+                    submitForm(`/submitmodulinterval?${intervalParams}`, "", "feedbackInterval");
                 });
 
                 const brightnessSlider = document.getElementById("ledBrightness");
@@ -208,23 +193,7 @@
 
                     const brightness = brightnessSlider.value;
 
-                    fetch("/submitLEDConfig", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded", 
-                        },
-                        body: `LEDbrightness=${encodeURIComponent(brightness)}`,
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            showFeedback("feedbackBrightness", true);
-                        } else {
-                            showFeedback("feedbackBrightness", false);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+                    submitForm("/submitLEDConfig", `LEDbrightness=${encodeURIComponent(brightness)}`, "feedbackBrightness");
                 });
                 const calibrateForm = document.querySelector('form[action="/calibrateMHZ19"]');
                 calibrateForm.addEventListener("submit", function (event) {
@@ -257,23 +226,7 @@
                         return `${encodeURIComponent(input.name)}=${encodeURIComponent(input.value)}`;
                     }).join("&");
 
-                    fetch("/submitSensorConfig", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                        body: sensorConfigParams,
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            showFeedback("feedbackSensor", true);
-                        } else {
-                            showFeedback("feedbackSensor", false);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+                    submitForm("/submitSensorConfig", sensorConfigParams, "feedbackSensor");
                 });
             });
         </script>
