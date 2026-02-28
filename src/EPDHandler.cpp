@@ -1,6 +1,5 @@
 #include "EPDHandler.h"
 #include "ConfigHandler.h"
-ConfigHandler &configHandler = ConfigHandler::getInstance();
 #include <GxEPD2_3C.h>
 #include "GxEPD2_display_selection_new_style.h"
 #include "../font/BabelSans8pt7b.h"
@@ -18,6 +17,7 @@ ConfigHandler &configHandler = ConfigHandler::getInstance();
 #include "Configuration.h"
 #include "symbol.h" // own symbol
 
+extern ConfigHandler &configHandler;
 unsigned long EPDHandler::_lastRunSeconds = 0;
 #define EPDPrintFormatBufferSize 5
 
