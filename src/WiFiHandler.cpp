@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include "WiFiHandler.h"
+#include "mdns.h"
 // please rename credentials_example.h to credentials.h and set your WIFI Credentials there
 #include "Credentials.h"
 #include "Configuration.h"
@@ -30,7 +31,9 @@ void WiFiHandler::setupAPMode()
 void WiFiHandler::initWifi()
 {
 	int wifiWaitCount = 0;
-	WiFiClass::setHostname(DeviceName);
+	String hostname = configHandler.getConfigDevice("deviceName");
+	hostname.replace(" ", "-");  // spaces are not allowed
+	WiFiClass::setHostname(hostname.c_str());
 #ifdef DEBUG
 	Serial.print("\n[WIFI] Connecting to ");
 	Serial.println(WIFI_SSID);
@@ -47,6 +50,13 @@ void WiFiHandler::initWifi()
 	{
 		Serial.print("[WIFI] connected. IP address: ");
 		Serial.println(WiFi.localIP());
+		String mdnsName = configHandler.getConfigDevice("deviceName");
+		mdnsName.replace(" ", "-");
+		if (mdns_init() == ESP_OK)
+		{
+			mdns_hostname_set(mdnsName.c_str());
+			Serial.println("[WIFI] mDNS gestartet: http://" + mdnsName + ".local");
+		}
 	}
 	else
 	{
