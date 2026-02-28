@@ -4,7 +4,7 @@
 #include <LittleFS.h>
 #include "MHZ19Handler.h"
 #include "ConfigHandler.h"
-extern ConfigHandler configHandler;
+ConfigHandler &configHandler = ConfigHandler::getInstance();
 #include "LEDHandler.h"
 
 WebServerHandler::WebServerHandler()

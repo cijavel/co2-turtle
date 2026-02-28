@@ -48,7 +48,6 @@
 #include "LEDHandler.h"
 #include "MqttClientHandler.h"
 #include "ConfigHandler.h"
-ConfigHandler configHandler;
 #include <LittleFS.h>
 
 // --------------------------------------------------------------------------
@@ -82,6 +81,7 @@ String localTime(const String &format)
 #ifdef DEBUG
 static void PrintRamUsage(unsigned long currentSeconds)
 {
+	ConfigHandler &configHandler = ConfigHandler::getInstance();
 	static unsigned long lastPrintSeconds = 0;
 	if (currentSeconds - lastPrintSeconds >= (unsigned long)configHandler.getConfigInterval("intervalPRINT"))
 	{

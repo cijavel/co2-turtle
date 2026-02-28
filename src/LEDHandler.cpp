@@ -2,7 +2,7 @@
 #include "LEDHandler.h"
 #include "LEDsection.h"
 #include "ConfigHandler.h"
-extern ConfigHandler configHandler;
+ConfigHandler &configHandler = ConfigHandler::getInstance();
 
 CRGB leds[NUM_LEDS];
 
