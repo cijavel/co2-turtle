@@ -12,7 +12,7 @@ WebServerHandler::WebServerHandler()
 
 void WebServerHandler::start()
 {
-    server.serveStatic("/static", LittleFS, "/static");
+    server.serveStatic("/static", LittleFS, "/static").setDefaultFile("index.htm");
     server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {request->redirect("/index"); });
     server.on("/index", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_index(request);});
 	server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_data(request); });
