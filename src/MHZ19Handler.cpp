@@ -1,6 +1,6 @@
 #include "MHZ19Handler.h" //myMHZ19.calibrate();    // Take a reading which be used as the zero point f
 #include "ConfigHandler.h"
-ConfigHandler &configHandler = ConfigHandler::getInstance();
+extern ConfigHandler &configHandler;
 
 const String name_MHZ19_co2               = "[MHZ19] CO2 [ppm]";
 const String name_MHZ19_co2_raw           = "[MHZ19] CO2 raw [ppm]";

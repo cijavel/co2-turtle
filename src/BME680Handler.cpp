@@ -1,7 +1,7 @@
 #include "BME680Handler.h"
 #include "Configuration.h"
 #include "ConfigHandler.h"
-ConfigHandler &configHandler = ConfigHandler::getInstance();
+extern ConfigHandler &configHandler;
 
 /* Configure the BSEC library with information about the sensor
 		18v/33v = Voltage at Vdd. 1.8V or 3.3V
