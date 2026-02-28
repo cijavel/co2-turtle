@@ -31,9 +31,13 @@ void WiFiHandler::setupAPMode()
 void WiFiHandler::initWifi()
 {
 	int wifiWaitCount = 0;
+	// set device for mDNS and hostname
 	String hostname = configHandler.getConfigDevice("deviceName");
-	hostname.replace(" ", "-");  // spaces are not allowed
-	WiFiClass::setHostname(hostname.c_str());
+	hostname.replace(" ", "-");
+	hostname.toLowerCase();
+	WiFi.setHostname(hostname.c_str());
+	WiFi.setAutoReconnect(true);
+	WiFi.persistent(true);
 #ifdef DEBUG
 	Serial.print("\n[WIFI] Connecting to ");
 	Serial.println(WIFI_SSID);
@@ -73,6 +77,8 @@ void WiFiHandler::ReStart()
 	Serial.println(WIFI_SSID);
 #endif
 	loadWiFiCredentials();
+	WiFi.disconnect(true);
+	delay(100);
 	WiFi.begin(ssid.c_str(), password.c_str());
 	int wifiWaitCount = 0;
 	while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)

@@ -13,7 +13,7 @@ WebServerHandler::WebServerHandler()
 void WebServerHandler::start()
 {
 	DefaultHeaders::Instance().addHeader("Content-Encoding", "identity");
-    server.serveStatic("/static", LittleFS, "/static").setDefaultFile("index.htm").setCacheControl("no-cache");
+	server.serveStatic("/static", LittleFS, "/static").setDefaultFile("index.htm").setCacheControl("no-cache");
     server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {request->redirect("/index"); });
     server.on("/index", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_index(request);});
 	server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_data(request); });
