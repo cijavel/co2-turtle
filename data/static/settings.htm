@@ -44,12 +44,12 @@
                     <form action="/submitSensorConfig" method="POST" id="sensorConfigForm">
                         <div>
                             <label for="sealevelpressure">Sea Level Pressure (hPa)
-                                <input type="number" id="sealevelpressure" name="SEALEVELPRESSURE_HPA" value="{{SEALEVELPRESSURE_HPA}}" step="1">
+                                <input type="number" id="sealevelpressure" name="SEALEVELPRESSURE_HPA" value="{{SEALEVELPRESSURE_HPA}}" step="1" min="900" max="1100">
                             </label>
                         </div>
                         <div>
                             <label for="temperatureoffset">Temperature Offset (°C)
-                                <input type="number" id="temperatureoffset" name="TEMPERATUR_OFFSET" value="{{TEMPERATUR_OFFSET}}" step="0.1">
+                                <input type="number" id="temperatureoffset" name="TEMPERATUR_OFFSET" value="{{TEMPERATUR_OFFSET}}" step="0.1" min="-10" max="10">
                             </label>
                         </div>
                         <button type="submit" class="btn" id="saveSensorConfigBtn">Save Sensor Config</button>
@@ -61,37 +61,37 @@
                     <form action="/submitmodulinterval" method="POST" id="moduleIntervalForm">
                         <div>
                             <label for="intervalMHZ19">MHZ19 Interval (s)
-                                <input type="number" id="intervalMHZ19" name="intervalMHZ19" value="{{intervalMHZ19}}">
+                                <input type="number" id="intervalMHZ19" name="intervalMHZ19" value="{{intervalMHZ19}}" min="1">
                             </label>
                         </div>
                         <div>
                             <label for="intervalBME680">BME680 Interval (s)
-                                <input type="number" id="intervalBME680" name="intervalBME680" value="{{intervalBME680}}">
+                                <input type="number" id="intervalBME680" name="intervalBME680" value="{{intervalBME680}}" min="3">
                             </label>
                         </div>
                         <div>
                             <label for="intervalWiFi">WiFi Check Interval (s)
-                                <input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}">
+                                <input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}" min="1">
                             </label>
                         </div>
                         <div>
                             <label for="intervalPRINT">RAM Printout Interval (s)
-                                <input type="number" id="intervalPRINT" name="intervalPRINT" value="{{intervalPRINT}}">
+                                <input type="number" id="intervalPRINT" name="intervalPRINT" value="{{intervalPRINT}}" min="1">
                             </label>
                         </div>
                         <div>
                             <label for="intervalEPD">EPD Refresh Interval (s)
-                                <input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}">
+                                <input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}" min="1">
                             </label>
                         </div>
                         <div>
                             <label for="intervalLED">LED Update Interval (s)
-                                <input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}">
+                                <input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}" min="1">
                             </label>
                         </div>
                         <div>
                             <label for="intervalMQTT">MQTT Interval (s)
-                                <input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}">
+                                <input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}" min="1">
                             </label>
                         </div>
                         <button type="submit" class="btn" id="saveIntervalBtn">Save Interval</button>
