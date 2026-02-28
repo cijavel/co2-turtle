@@ -1,6 +1,6 @@
 #include "EPDHandler.h"
 #include "ConfigHandler.h"
-extern ConfigHandler configHandler;
+ConfigHandler &configHandler = ConfigHandler::getInstance();
 #include <GxEPD2_3C.h>
 #include "GxEPD2_display_selection_new_style.h"
 #include "../font/BabelSans8pt7b.h"

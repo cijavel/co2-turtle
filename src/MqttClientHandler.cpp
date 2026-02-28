@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include "ConfigHandler.h"
 unsigned long MqttClientHandler::_lastRunSeconds = 0;
-extern ConfigHandler configHandler;
+ConfigHandler &configHandler = ConfigHandler::getInstance();
 
 extern "C"
 {

@@ -99,6 +99,20 @@ void ConfigHandler::persistAllSettings()
 	preferences.putInt("intervalEPD", configMapforInterval["intervalEPD"]);
 	preferences.putInt("intervalLED", configMapforInterval["intervalLED"]);
 	preferences.putInt("intervalMQTT", configMapforInterval["intervalMQTT"]);
+
+	preferences.putString("deviceName",   configMapforDevice["deviceName"]);
+	preferences.putString("timezone",     configMapforDevice["timezone"]);
+	preferences.putString("wlanSSID",     configMapforDevice["wlanSSID"]);
+	preferences.putString("wlanPASSWORD", configMapforDevice["wlanPASSWORD"]);
+	preferences.putString("mqttUSER",     configMapforDevice["mqttUSER"]);
+	preferences.putString("mqttPASSWORD", configMapforDevice["mqttPASSWORD"]);
+	preferences.putString("mqttHOST",     configMapforDevice["mqttHOST"]);
+
+	preferences.putInt("LEDbrightness", configMapforLED["LEDbrightness"]);
+
+	preferences.putInt("pressure",   configMapforSensor["pressure"]);
+	preferences.putInt("tempOffset", configMapforSensor["tempOffset"]);
+
 	preferences.end();
 }
 
