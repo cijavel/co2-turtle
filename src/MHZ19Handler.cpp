@@ -96,6 +96,7 @@ bool MHZ19Handler::updateLastReadout()
 {
 	if (myMHZ19.errorCode == RESULT_OK)
 	{
+		_consecutiveErrors = 0;
 		_lastReadout = DataCO2(
 			myMHZ19.getCO2(),
 			myMHZ19.getCO2Raw(),
@@ -108,17 +109,29 @@ bool MHZ19Handler::updateLastReadout()
 	}
 	else
 	{
-		Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
-		Serial.print("[MHZ19] Response Code: ");
-		Serial.println(myMHZ19.errorCode); // Get the Error Code value
+		_consecutiveErrors++;
+		Serial.printf("[MHZ19] Fehler %d: Response Code %d\n",
+			_consecutiveErrors, myMHZ19.errorCode);
+
+		if (_consecutiveErrors >= 3)
+		{
+			Serial.println("[MHZ19] Recovery: Serial neu initialisieren...");
+			Serial_MHZ19->end();
+			vTaskDelay(500 / portTICK_PERIOD_MS);
+			Serial_MHZ19->begin(BAUDRATE);
+			myMHZ19.begin(*Serial_MHZ19);
+			_consecutiveErrors = 0;
+		}
 		return false;
 	}
 }
 
 bool MHZ19Handler::runUpdate(const unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalMHZ19") == 0)
+	if (currentSeconds - _lastRunSeconds >=
+		(unsigned long)configHandler.getConfigInterval("intervalMHZ19"))
 	{
+		_lastRunSeconds = currentSeconds;
 		return updateLastReadout();
 	}
 	return false;
