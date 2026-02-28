@@ -36,6 +36,7 @@
                             </label>
                         </div>
                         <button type="submit" class="btn" id="saveModulBtn">Save Settings</button>
+                        <div class="form-feedback" id="feedbackSwitch"></div>
                     </form>
                 </div>
                 <div id="sensorConfig">
@@ -52,6 +53,7 @@
                             </label>
                         </div>
                         <button type="submit" class="btn" id="saveSensorConfigBtn">Save Sensor Config</button>
+                        <div class="form-feedback" id="feedbackSensor"></div>
                     </form>
                 </div>
                 <div id="intervalConfig">
@@ -93,6 +95,7 @@
                             </label>
                         </div>
                         <button type="submit" class="btn" id="saveIntervalBtn">Save Interval</button>
+                        <div class="form-feedback" id="feedbackInterval"></div>
                     </form>
                 </div>
                 <div id="ledConfig">
@@ -106,6 +109,7 @@
                         </div>
                         <div id="ledsubmitbtn">
                             <button type="submit" class="btn" id="saveBrightnessBtn">Save Brightness</button>
+                            <div class="form-feedback" id="feedbackBrightness"></div>
                         </div>
                     </form>
                 </div>
@@ -133,6 +137,16 @@
 
                 const form = document.querySelector('form[action="/submitmodulswitch"]');
                 const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+
+                function showFeedback(elementId, success) {
+                    const el = document.getElementById(elementId);
+                    el.textContent = success ? "Saved successfully!" : "Error saving settings.";
+                    el.className = "form-feedback " + (success ? "success" : "error");
+                    setTimeout(() => {
+                        el.textContent = "";
+                        el.className = "form-feedback";
+                    }, 3000);
+                }
         
                 form.addEventListener("submit", function (event) {
                     event.preventDefault();
@@ -146,9 +160,9 @@
                     })
                     .then(response => {
                         if (response.ok) {
-                            console.log("Settings saved successfully!");
+                            showFeedback("feedbackSwitch", true);
                         } else {
-                            console.error("Failed to save settings.");
+                            showFeedback("feedbackSwitch", false);
                         }
                     })
                     .catch(error => {
@@ -171,9 +185,9 @@
                     })
                     .then(response => {
                         if (response.ok) {
-                            console.log("Module interval settings saved successfully!");
+                            showFeedback("feedbackInterval", true);
                         } else {
-                            console.error("Failed to save module interval settings.");
+                            showFeedback("feedbackInterval", false);
                         }
                     })
                     .catch(error => {
@@ -203,9 +217,9 @@
                     })
                     .then(response => {
                         if (response.ok) {
-                            console.log("LED brightness saved successfully!");
+                            showFeedback("feedbackBrightness", true);
                         } else {
-                            console.error("Failed to save LED brightness.");
+                            showFeedback("feedbackBrightness", false);
                         }
                     })
                     .catch(error => {
@@ -252,9 +266,9 @@
                     })
                     .then(response => {
                         if (response.ok) {
-                            console.log("Sensor configuration saved successfully!");
+                            showFeedback("feedbackSensor", true);
                         } else {
-                            console.error("Failed to save sensor configuration.");
+                            showFeedback("feedbackSensor", false);
                         }
                     })
                     .catch(error => {

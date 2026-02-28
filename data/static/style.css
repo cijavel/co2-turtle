@@ -150,3 +150,15 @@ div label input[type="number"] {
   color: #666;
   line-height: 1.4;
 }
+/* FEEDBACK */
+.form-feedback {
+  font-size: 14px;
+  margin-top: 8px;
+  height: 18px;
+}
+.form-feedback.success {
+  color: #28a745;
+}
+.form-feedback.error {
+  color: #dc3545;
+}
