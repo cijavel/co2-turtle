@@ -196,8 +196,6 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 
 	content.replace("{{deviceName}}", DeviceName);
 	content.replace("{{ssid}}", String(ssid));
-	content.replace("{{password}}", String(password));
-
 	request->send(200, "text/html", content);
 }
 
