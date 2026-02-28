@@ -145,7 +145,7 @@ void BME680Handler::printout() const
 	Serial.println("[BME680] run in status:                " + String(bmeSensor.runInStatus));
 	Serial.println("[BME680] gas percentage:               " + String(bmeSensor.gasPercentage));
 	Serial.println("[BME680] temperature [°C]:             " + String(bmeSensor.temperature));
-	Serial.println("[BME680] temperature with offset [°C]: " + String(bmeSensor.temperature + TEMPERATUR_OFFSET));
+	Serial.println("[BME680] temperature with offset [°C]: " + String(bmeSensor.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f));
 	Serial.println("[BME680] raw temperature [°C]:         " + String(bmeSensor.rawTemperature));
 	Serial.println("[BME680] relative humidity [%]:        " + String(bmeSensor.humidity));
 	Serial.println("[BME680] raw relative humidity [%]:    " + String(bmeSensor.rawHumidity));
