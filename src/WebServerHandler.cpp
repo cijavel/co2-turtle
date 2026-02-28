@@ -17,15 +17,16 @@ void WebServerHandler::start()
     server.on("/index", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_index(request);});
 	server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_data(request); });
 	server.on("/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_status(request); });
-	server.on("/sensorsettings", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_sensorsettings(request); });
+	server.on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_settings(request); });
 	server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_wlan(request); });
 	server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_WLANcredentials(request); });
 	server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulinterval(request); });
 	server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulswitch(request); });
 	server.on("/submitLEDConfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_ledconfig(request); });
-	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restoreDefaultConfiguration(request); });
-	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_restart(request); });
-	server.on("/calibrateMHZ19", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_calibrate_mhz19(request); });
+	server.on("/submitSensorConfig", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_submit_sensorconfig(request); });
+	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restoreDefaultConfiguration(request); });
+	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restart(request); });
+	server.on("/calibrateMHZ19", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_option_calibrate_mhz19(request); });
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
 }
@@ -192,12 +193,12 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 	request->send(200, "text/html", content);
 }
 
-void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest *request)
+void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 {
-	File file = LittleFS.open("/static/setting.htm", "r");
+	File file = LittleFS.open("/static/settings.htm", "r");
 	if (!file || file.isDirectory())
 	{
-		request->send(500, "text/plain", "Internal Server Error: Cannot open setting.htm");
+		request->send(500, "text/plain", "Internal Server Error: Cannot open settings.htm");
 		return;
 	}
 	String content = file.readString();
@@ -218,9 +219,17 @@ void WebServerHandler::handle_page_sensorsettings(AsyncWebServerRequest *request
 	content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
 
 	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
+	content.replace("{{SEALEVELPRESSURE_HPA}}", String(configHandler.getConfigSensor("pressure")));
+	content.replace("{{TEMPERATUR_OFFSET}}", String(configHandler.getConfigSensor("tempOffset")));
 
 	request->send(200, "text/html; charset=utf-8", content);
 }
+
+void WebServerHandler::handle_page_NotFound(AsyncWebServerRequest *request)
+{
+	request->send(404, "text/plain", "404: Not found");
+}
+
 
 void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *request)
 {
@@ -237,11 +246,6 @@ void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *requ
 	request->send(200, "text/plain", "WLAN Settings Saved!");
 	request->redirect("/index");
 	ESP.restart();
-}
-
-void WebServerHandler::handle_page_NotFound(AsyncWebServerRequest *request)
-{
-	request->send(404, "text/plain", "404: Not found");
 }
 
 void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *request)
@@ -318,7 +322,7 @@ void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *reques
 		configHandler.setConfigInterval("intervalMQTT", interval_mqtt_in_Seconds);
 	}
 	request->send(200, "text/plain", "Interval Settings Saved!");
-	request->redirect("/sensorsettings");
+	request->redirect("/settings");
 }
 
 void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
@@ -340,7 +344,7 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 		configHandler.setConfigSwitch("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
 	} 
 	request->send(200, "text/plain", "Modul Settings Saved!");
-	request->redirect("/sensorsettings");
+	request->redirect("/settings");
 }
 
 void WebServerHandler::handle_submit_ledconfig(AsyncWebServerRequest *request)
@@ -359,35 +363,71 @@ void WebServerHandler::handle_submit_ledconfig(AsyncWebServerRequest *request)
         return;
     }
     request->send(200, "text/plain", "LED Settings Saved!");
-    request->redirect("/sensorsettings");
+    request->redirect("/settings");
 }
 
-void WebServerHandler::handle_restoreDefaultConfiguration(AsyncWebServerRequest *request)
+void WebServerHandler::handle_submit_sensorconfig(AsyncWebServerRequest *request)
 {
-	configHandler.restoreDefaultConfiguration(); 
-	request->redirect("/index");
-	delay(1000);
-	request->send(200, "text/plain", "Defaults loaded");
-	delay(500);
-	ESP.restart();
+    bool updated = false;
+
+    if (request->hasParam("SEALEVELPRESSURE_HPA", true)) {
+        int sealevel = request->getParam("SEALEVELPRESSURE_HPA", true)->value().toInt();
+        configHandler.setConfigSensor("pressure", sealevel);
+        updated = true;
+    }
+    if (request->hasParam("TEMPERATUR_OFFSET", true)) {
+        float tempOffset = request->getParam("TEMPERATUR_OFFSET", true)->value().toFloat();
+        configHandler.setConfigSensor("tempOffset", tempOffset);
+        updated = true;
+    }
+
+    if (updated) {
+        request->send(200, "text/plain", "Sensor configuration saved!");
+    } else {
+        request->send(400, "text/plain", "Bad Request: Missing parameters");
+    }
 }
 
-void WebServerHandler::handle_restart(AsyncWebServerRequest *request)
+
+void WebServerHandler::handle_option_restoreDefaultConfiguration(AsyncWebServerRequest *request)
 {
-	request->send(200, "text/html", "Device is restarting...");
-	delay(1000);
-	request->redirect("/index");
-	delay(500);
-	ESP.restart();
+	request->send(200, "text/html",
+    "<html><head>"
+    "<meta http-equiv='refresh' content='6;url=/'>"
+    "</head><body style='font-family:sans-serif;padding:40px'>"
+    "<h2>Standardkonfiguration geladen.</h2>"
+    "<p>Weiterleitung in 6 Sekunden.</p>"
+    "</body></html>");
+
+	xTaskCreate([](void*) {
+		vTaskDelay(1500 / portTICK_PERIOD_MS);
+		ESP.restart();
+	}, "restore_task", 1024, nullptr, 1, nullptr);
 }
 
-void WebServerHandler::handle_calibrate_mhz19(AsyncWebServerRequest *request)
+void WebServerHandler::handle_option_restart(AsyncWebServerRequest *request)
+{
+	    request->send(200, "text/html",
+        "<html><head>"
+        "<meta http-equiv='refresh' content='6;url=/'>"
+        "</head><body style='font-family:sans-serif;padding:40px'>"
+        "<h2>Neustart läuft...</h2>"
+        "<p>Weiterleitung in 6 Sekunden.</p>"
+        "</body></html>");
+
+    xTaskCreate([](void*) {
+        vTaskDelay(1500 / portTICK_PERIOD_MS);
+        ESP.restart();
+    }, "restart_task", 1024, nullptr, 1, nullptr);
+}
+
+void WebServerHandler::handle_option_calibrate_mhz19(AsyncWebServerRequest *request)
 {
     MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
     mhz19Handler.calibrate();
     request->send(200, "text/plain", "Calibration started.");
 	delay(1000);
-	request->redirect("/sensorsettings");
+	request->redirect("/settings");
 }
 
 // --------------------

@@ -33,16 +33,17 @@ private:
 	static void handle_page_index(AsyncWebServerRequest *request);
 	void handle_page_data(AsyncWebServerRequest *request);
 	void handle_page_status(AsyncWebServerRequest *request);
-	void handle_page_sensorsettings(AsyncWebServerRequest *request);
+	void handle_page_settings(AsyncWebServerRequest *request);
 	void handle_page_wlan(AsyncWebServerRequest *request);
 	static void handle_page_NotFound(AsyncWebServerRequest *request);
 	void handle_submit_WLANcredentials(AsyncWebServerRequest *request);
 	void handle_submit_modulinterval(AsyncWebServerRequest *request);
 	void handle_submit_modulswitch(AsyncWebServerRequest *request);
 	void handle_submit_ledconfig(AsyncWebServerRequest *request);
-	void handle_restoreDefaultConfiguration(AsyncWebServerRequest *request);
-	void handle_restart(AsyncWebServerRequest *request);
-	void handle_calibrate_mhz19(AsyncWebServerRequest *request);
+	void handle_submit_sensorconfig(AsyncWebServerRequest *request);
+	void handle_option_restoreDefaultConfiguration(AsyncWebServerRequest *request);
+	void handle_option_restart(AsyncWebServerRequest *request);
+	void handle_option_calibrate_mhz19(AsyncWebServerRequest *request);
 
 
 	// helper function

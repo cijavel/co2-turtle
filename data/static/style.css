@@ -51,7 +51,7 @@ body {
   color: #666;
 }
 /*  CONFIG   */
-#moduleSwitchForm div, #moduleIntervalForm div {
+#sensorConfigForm div, #moduleSwitchForm div, #moduleIntervalForm div  {
   display: block; 
   margin-bottom: 15px;
 }
@@ -60,7 +60,7 @@ body {
   overflow: hidden;
   width: 120px; 
 }
-#moduleIntervalForm div label {
+div label {
   display: inline-block;
   width: 400px; 
 }
@@ -69,7 +69,7 @@ body {
   float: right; 
   transform: scale(1.2);
 }
-#moduleIntervalForm div label input[type="number"] {
+div label input[type="number"] {
   padding: 5px;
   font-size: 14px;
   border: 1px solid #ccc;
@@ -106,7 +106,7 @@ body {
   gap: 5px;
   width: 400px;
 }
-#ledconfig {
+#ledconfigSlider {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
