@@ -82,8 +82,10 @@ String localTime(const String &format)
 #ifdef DEBUG
 static void PrintRamUsage(unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalPRINT") == 0)
+	static unsigned long lastPrintSeconds = 0;
+	if (currentSeconds - lastPrintSeconds >= (unsigned long)configHandler.getConfigInterval("intervalPRINT"))
 	{
+		lastPrintSeconds = currentSeconds;
 		Serial.print("Memory Usage: ");
 		uint32_t freeHeap = ESP.getFreeHeap();
 		uint32_t maximumHeap = ESP.getHeapSize();
