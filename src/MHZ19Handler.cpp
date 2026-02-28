@@ -17,8 +17,8 @@ const String name_MHZ19_zone              = "[MHZ19] Timezone";
 
 MHZ19Handler::MHZ19Handler()
 {
-	Serial_MHZ19 = new SoftwareSerial(PIN_MHZ19_RX, PIN_MHZ19_TX);
-	Serial_MHZ19->begin(BAUDRATE); // Uno Example: Begin Stream with MHZ19 baudrate
+	Serial_MHZ19 = &Serial2;
+	Serial2.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19_RX, PIN_MHZ19_TX); // Uno Example: Begin Stream with MHZ19 baudrate
 	myMHZ19 = MHZ19();
 	myMHZ19.begin(*Serial_MHZ19); // *Important, Pass your Stream reference
 	// myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
@@ -118,7 +118,7 @@ bool MHZ19Handler::updateLastReadout()
 			Serial.println("[MHZ19] Recovery: Serial neu initialisieren...");
 			Serial_MHZ19->end();
 			vTaskDelay(500 / portTICK_PERIOD_MS);
-			Serial_MHZ19->begin(BAUDRATE);
+			Serial2.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19_RX, PIN_MHZ19_TX);
 			myMHZ19.begin(*Serial_MHZ19);
 			_consecutiveErrors = 0;
 		}

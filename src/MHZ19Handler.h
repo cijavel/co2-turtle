@@ -1,6 +1,6 @@
 #ifndef CO2_TURTLE_MHZ19HANDLER_H
 #define CO2_TURTLE_MHZ19HANDLER_H
-#include <SoftwareSerial.h>
+#include <HardwareSerial.h>
 #include "MHZ19.h"
 #include "Arduino.h"
 #include "Configuration.h"
@@ -26,7 +26,7 @@ private:
 	bool updateLastReadout();
 	DataCO2 _lastReadout;
 	MHZ19 myMHZ19;
-	SoftwareSerial *Serial_MHZ19;
+	HardwareSerial *Serial_MHZ19;
 	int _consecutiveErrors = 0;
 	unsigned long _lastRunSeconds = 0;
 	MHZ19Handler();						  // Constructor? (the {} brackets) are needed here.
