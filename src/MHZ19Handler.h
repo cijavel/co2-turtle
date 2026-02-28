@@ -20,11 +20,15 @@ public:
 	bool runUpdate(unsigned long currentSeconds);
 	void calibrate();
 
+
+
 private:
 	bool updateLastReadout();
 	DataCO2 _lastReadout;
 	MHZ19 myMHZ19;
 	SoftwareSerial *Serial_MHZ19;
+	int _consecutiveErrors = 0;
+	unsigned long _lastRunSeconds = 0;
 	MHZ19Handler();						  // Constructor? (the {} brackets) are needed here.
 	MHZ19Handler(MHZ19Handler const &);	  // Don't Implement
 	void operator=(MHZ19Handler const &); // Don't implement
