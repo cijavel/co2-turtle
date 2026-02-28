@@ -12,8 +12,15 @@ WebServerHandler::WebServerHandler()
 
 void WebServerHandler::start()
 {
-	DefaultHeaders::Instance().addHeader("Content-Encoding", "identity");
-	server.serveStatic("/static", LittleFS, "/static").setDefaultFile("index.htm").setCacheControl("no-cache");
+	//load files directly without triggering gz error in console
+	server.on("/static/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/style.css", "text/css");});
+	server.on("/static/index.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/index.htm", "text/html");});
+	server.on("/static/status.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/status.htm", "text/html");});
+	server.on("/static/settings.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/settings.htm", "text/html");});
+	server.on("/static/wlan.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/wlan.htm", "text/html");});
+	server.on("/static/template.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/template.htm", "text/html");});
+
+	// webserver linking
     server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {request->redirect("/index"); });
     server.on("/index", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_index(request);});
 	server.on("/json", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_data(request); });
