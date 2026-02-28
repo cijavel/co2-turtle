@@ -12,6 +12,7 @@ private:
 	static bool StatusCheck();
 	static void ReStart();
 	static void loadWiFiCredentials();
+	static unsigned long _lastRunSeconds;
 };
 
 #endif // CO2_TURTLE_WIFIHANDLER_H

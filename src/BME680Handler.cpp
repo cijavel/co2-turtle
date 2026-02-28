@@ -67,8 +67,9 @@ BME680Handler::BME680Handler()
 bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
 {
 
-	if (currentSeconds % configHandler.getConfigInterval("intervalBME680") == 0)
+	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalBME680"))
 	{
+		_lastRunSeconds = currentSeconds;
 		updateState();
 		updateSensorDataInternal();
 		return true;
