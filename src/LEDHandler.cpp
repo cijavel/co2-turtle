@@ -47,8 +47,9 @@ void LEDHandler::setInputDataforLED(DataCO2 co2Sensordata, Bsec enviromentdata)
 
 bool LEDHandler::ledstatus(const unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalLED")  == 0)
+	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalLED"))
 	{
+		_lastRunSeconds = currentSeconds;
 		ledStatusWiFi();
 		ledStatusBME();
 		ledStatusCO2();
@@ -230,8 +231,9 @@ void LEDHandler::ledStatusCO2()
 
 bool LEDHandler::setup_black(const unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalLED")  == 0)
+	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalLED"))
 	{
+		_lastRunSeconds = currentSeconds;
 		FastLED.addLeds<LED_TYPE, DATA_LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
 		FastLED.clear(true);
 		FastLED.setBrightness(BRIGHTNESS_LEDS);

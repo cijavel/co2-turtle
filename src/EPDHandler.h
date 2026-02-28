@@ -22,5 +22,6 @@ private:
 	EPDHandler(EPDHandler const &);
 	void operator=(EPDHandler const &);
 	static void PrintEspLine(char *buff, int16_t cursorX, int16_t cursorY, uint16_t color, float toPrint);
+	static unsigned long _lastRunSeconds;
 };
 #endif // CO2_TURTLE_EPDHANDLER_H

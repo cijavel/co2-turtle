@@ -24,5 +24,6 @@ private:
 	static void connectToMqtt();
 	static void disconnectfromMqtt();
 	static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+	static unsigned long _lastRunSeconds;
 };
 #endif // CO2_TURTLE_MQTTCLIENTHANDLER_H

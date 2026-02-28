@@ -3,6 +3,7 @@
 #include "Credentials.h"
 #include <WiFi.h>
 #include "ConfigHandler.h"
+unsigned long MqttClientHandler::_lastRunSeconds = 0;
 extern ConfigHandler configHandler;
 
 extern "C"
@@ -62,8 +63,9 @@ void MqttClientHandler::setup_Mqtt()
 
 void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme, const unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalMQTT") == 0)
+	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalMQTT"))
 	{
+		_lastRunSeconds = currentSeconds;
 		connectToMqtt();
 		if (mqttClient.connected() == false)
 		{

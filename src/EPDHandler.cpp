@@ -18,6 +18,7 @@ extern ConfigHandler configHandler;
 #include "Configuration.h"
 #include "symbol.h" // own symbol
 
+unsigned long EPDHandler::_lastRunSeconds = 0;
 #define EPDPrintFormatBufferSize 5
 
 void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time)
@@ -235,16 +236,18 @@ void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const
 
 void EPDHandler::updateEPDvertical(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, const unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalEPD") == 0)
+	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalEPD"))
 	{
+		_lastRunSeconds = currentSeconds;
 		printVertically(co2, bme_data, epd_date, epd_time);
 	}
 }
 
 void EPDHandler::updateEPDhorizontal(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, const unsigned long currentSeconds)
 {
-	if (currentSeconds % configHandler.getConfigInterval("intervalEPD") == 0)
+	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalEPD"))
 	{
+		_lastRunSeconds = currentSeconds;
 		printHorizontally(co2, bme_data, epd_date, epd_time);
 	}
 }
