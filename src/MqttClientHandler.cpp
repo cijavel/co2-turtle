@@ -67,7 +67,7 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 	{
 		_lastRunSeconds = currentSeconds;
 		connectToMqtt();
-		if (mqttClient.connected() == false)
+		if (mqttClient.connected() == true)
 		{
 			mqttClient.publish("sensor/bme680/temperature", 1, true, String(data_bme.temperature).c_str());
 			mqttClient.publish("sensor/bme680/temperature_offset", 1, true, String(data_bme.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f).c_str());
