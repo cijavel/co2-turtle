@@ -49,34 +49,35 @@ BME680Handler::BME680Handler()
 	} while (retries < 3);
 
 	if (bmeSensor.bme68xStatus == BME68X_OK) {
-		bmeSensor.setConfig(bsec_config_iaq);
-		checkSensorStatus();
-		loadState();
-	} else {
-		Serial.println("[BME680] Init failed after 3 retries!");
-	}
+        _sensorOk = true;
+        bmeSensor.setConfig(bsec_config_iaq);
+        checkSensorStatus();
+        loadState();
+    } else {
+        _sensorOk = false;
+        _bme68xError = bmeSensor.bme68xStatus;
+        Serial.println("[BME680] Init failed after 3 retries! Error: " + String(_bme68xError));
+    }
 
 
 #ifdef DEBUG
 	Serial.println("\n[BME] BSEC library version " + String(bmeSensor.version.major) + "." + String(bmeSensor.version.minor) + "." + String(bmeSensor.version.major_bugfix) + "." + String(bmeSensor.version.minor_bugfix));
 #endif
-	bsec_virtual_sensor_t sensorList[13] = {
-		BSEC_OUTPUT_IAQ,                                // Indoor Air Quality
-		BSEC_OUTPUT_STATIC_IAQ,                        // Static IAQ
-		BSEC_OUTPUT_CO2_EQUIVALENT,                    // CO2 equivalent
-		BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,             // Breath VOC equivalent
-		BSEC_OUTPUT_RAW_TEMPERATURE,                   // Raw temperature
-		BSEC_OUTPUT_RAW_PRESSURE,                      // Raw pressure
-		BSEC_OUTPUT_RAW_HUMIDITY,                      // Raw humidity
-		BSEC_OUTPUT_RAW_GAS,                           // Raw gas resistance
-		BSEC_OUTPUT_STABILIZATION_STATUS,              // Stabilization status
-		BSEC_OUTPUT_RUN_IN_STATUS,                     // Run-in status
-		BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE, // Compensated temperature
-		BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,  // Compensated humidity
-		BSEC_OUTPUT_GAS_PERCENTAGE                     // Gas percentage
-	};
+	_sensorList[0]  = BSEC_OUTPUT_IAQ;
+    _sensorList[1]  = BSEC_OUTPUT_STATIC_IAQ;
+    _sensorList[2]  = BSEC_OUTPUT_CO2_EQUIVALENT;
+    _sensorList[3]  = BSEC_OUTPUT_BREATH_VOC_EQUIVALENT;
+    _sensorList[4]  = BSEC_OUTPUT_RAW_TEMPERATURE;
+    _sensorList[5]  = BSEC_OUTPUT_RAW_PRESSURE;
+    _sensorList[6]  = BSEC_OUTPUT_RAW_HUMIDITY;
+    _sensorList[7]  = BSEC_OUTPUT_RAW_GAS;
+    _sensorList[8]  = BSEC_OUTPUT_STABILIZATION_STATUS;
+    _sensorList[9]  = BSEC_OUTPUT_RUN_IN_STATUS;
+    _sensorList[10] = BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE;
+    _sensorList[11] = BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY;
+    _sensorList[12] = BSEC_OUTPUT_GAS_PERCENTAGE;
 
-	bmeSensor.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
+	bmeSensor.updateSubscription(_sensorList, 13, BSEC_SAMPLE_RATE_LP);
 
 	pinMode(LED_BUILTIN, OUTPUT);
 	digitalWrite(LED_BUILTIN, LOW);
@@ -85,27 +86,67 @@ BME680Handler::BME680Handler()
 
 bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
 {
-	// BSEC benötigt regelmäßige Aufrufe alle 3 Sekunden (BSEC_SAMPLE_RATE_LP)
-	// bmeSensor.run() muss daher bei JEDEM Loop-Durchlauf aufgerufen werden
-	// BSEC entscheidet selbst wann neue Daten verfügbar sind
-	
-	bool hasNewData = bmeSensor.run();
-	
-	if (hasNewData)
-	{
-		// updateState() nur im konfigurierten Intervall aufrufen
-		// um unnötige EEPROM-Schreibzugriffe zu vermeiden
-		if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalBME680"))
-		{
-			_lastRunSeconds = currentSeconds;
-			digitalWrite(LED_BUILTIN, HIGH);
-			updateState();
-			digitalWrite(LED_BUILTIN, LOW);
-		}
-		return true;
-	}
-	checkSensorStatus();
-	return false;
+    // Ebene 2 – Laufzeit-Recovery wenn Sensor nicht ok
+    if (!_sensorOk)
+    {
+        if (currentSeconds - _lastRecoverySeconds >= 60)
+        {
+            _lastRecoverySeconds = currentSeconds;
+            Serial.println("[BME680] Attempting recovery...");
+            Wire.end();
+            delay(100);
+            Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
+            Wire.setClock(100000);
+            delay(500);
+            bmeSensor.begin(BME68X_I2C_ADDR_LOW, Wire);
+            if (bmeSensor.bme68xStatus == BME68X_OK)
+            {
+                bmeSensor.setConfig(bsec_config_iaq);
+                bmeSensor.updateSubscription(_sensorList, 13, BSEC_SAMPLE_RATE_LP);
+                _sensorOk = true;
+                _consecutiveErrors = 0;
+                _bme68xError = 0;
+                Serial.println("[BME680] Recovery successful!");
+                loadState();
+            }
+            else
+            {
+                _bme68xError = bmeSensor.bme68xStatus;
+                Serial.println("[BME680] Recovery failed, error: " + String(_bme68xError));
+            }
+        }
+        return false;
+    }
+
+    bool hasNewData = bmeSensor.run();
+
+    if (hasNewData)
+    {
+        _consecutiveErrors = 0;
+        if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalBME680"))
+        {
+            _lastRunSeconds = currentSeconds;
+            digitalWrite(LED_BUILTIN, HIGH);
+            updateState();
+            digitalWrite(LED_BUILTIN, LOW);
+        }
+        return true;
+    }
+
+    if (bmeSensor.bme68xStatus < BME68X_OK)
+    {
+        _consecutiveErrors++;
+        _bme68xError = bmeSensor.bme68xStatus;
+        Serial.println("[BME680] Runtime error: " + String(_bme68xError) +
+                       " (" + String(_consecutiveErrors) + " consecutive)");
+        if (_consecutiveErrors >= 5)
+        {
+            _sensorOk = false;
+            Serial.println("[BME680] Too many errors, triggering recovery.");
+        }
+    }
+    checkSensorStatus();
+    return false;
 }
 
 void BME680Handler::checkSensorStatus() const
@@ -249,4 +290,12 @@ void BME680Handler::updateState(void)
     }
 }
 
+bool BME680Handler::isSensorOk() const
+{
+    return _sensorOk;
+}
 
+int BME680Handler::getSensorError() const
+{
+    return _bme68xError;
+}
