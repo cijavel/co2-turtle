@@ -21,7 +21,6 @@ private:
     void checkSensorStatus() const;
     void loadState(void);
     void updateState(void);
-    [[noreturn]] static void executeLedError();
     Bsec bmeSensor;
     BME680Handler();
     BME680Handler(BME680Handler const &);

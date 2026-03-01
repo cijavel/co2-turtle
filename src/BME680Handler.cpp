@@ -26,16 +26,35 @@ uint16_t stateUpdateCounter = 0;
 
 BME680Handler::BME680Handler()
 {
-	// IMPORTANT
+	// IMPORTANT to set up connection with an condensator
+	Wire.end();
+	delay(100);
 	Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
-	delay(1000);
+	Wire.setClock(100000);
+	delay(500);
 	pinMode(LED_BUILTIN, OUTPUT);
 
-	// IMPORTANT
-	bmeSensor.begin(BME68X_I2C_ADDR_HIGH, Wire);
-	bmeSensor.setConfig(bsec_config_iaq);
-	checkSensorStatus();
-	loadState();
+	// IMPORTANT Retry mechanism
+	uint8_t retries = 0;
+	do {
+		bmeSensor.begin(BME68X_I2C_ADDR_LOW, Wire);
+		if (bmeSensor.bme68xStatus == BME68X_OK) break;
+		Serial.println("[BME680] Init failed, retry " + String(retries + 1) + "/3");
+		Wire.end();
+		delay(500);
+		Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
+		Wire.setClock(100000);
+		delay(500);
+		retries++;
+	} while (retries < 3);
+
+	if (bmeSensor.bme68xStatus == BME68X_OK) {
+		bmeSensor.setConfig(bsec_config_iaq);
+		checkSensorStatus();
+		loadState();
+	} else {
+		Serial.println("[BME680] Init failed after 3 retries!");
+	}
 
 
 #ifdef DEBUG
@@ -89,19 +108,6 @@ bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
 	return false;
 }
 
-
-void BME680Handler::executeLedError()
-{
-	while (true)
-	{
-		pinMode(LED_BUILTIN, OUTPUT);
-		digitalWrite(LED_BUILTIN, HIGH);
-		delay(500);
-		digitalWrite(LED_BUILTIN, LOW);
-		delay(500);
-	}
-}
-
 void BME680Handler::checkSensorStatus() const
 {
 	if (bmeSensor.bsecStatus != BSEC_OK)
@@ -109,7 +115,6 @@ void BME680Handler::checkSensorStatus() const
 		if (bmeSensor.bsecStatus < BSEC_OK)
 		{
 			Serial.println("[BME680] BSEC error code : " + String(bmeSensor.bsecStatus));
-			executeLedError(); 
 		}
 		else
 		{
@@ -122,8 +127,6 @@ void BME680Handler::checkSensorStatus() const
 		if (bmeSensor.bme68xStatus < BME68X_OK)
 		{
 			Serial.println("[BME680] BME68X error code : " + String(bmeSensor.bme68xStatus));
-
-			executeLedError(); 
 		}
 		else
 		{
