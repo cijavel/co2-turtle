@@ -41,7 +41,7 @@ void WebServerHandler::start()
 	server.on("/mqtt", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_mqtt(request); });
 	server.on("/submitMQTTconfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_mqttconfig(request); });
 	server.on("/api/mqtt/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_mqtt_status(request); });
-	
+
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
 }
@@ -475,7 +475,6 @@ void WebServerHandler::handle_page_mqtt(AsyncWebServerRequest *request)
     content.replace("{{mqttPORT}}", configHandler.getConfigDevice("mqttPORT"));
     content.replace("{{mqttUSERen_checked}}", configHandler.getConfigDevice("mqttUSERen") == "1" ? "checked" : "");
     content.replace("{{mqttUSER}}", configHandler.getConfigDevice("mqttUSER"));
-    content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
 
     request->send(200, "text/html", content);
 }

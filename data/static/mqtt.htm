@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{{deviceName}} - MQTT Settings</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="nav">
+                <a href="/index" class="button">Back to Index</a>
+            </div>
+            <div class="content">
+                <h1>MQTT Settings</h1>
+
+                <div id="mqttStatus">
+                    <h2>Connection Status</h2>
+                    <div class="status-item">
+                        <div class="title">Broker</div>
+                        <div class="data" id="statusHost">–</div>
+                        <div class="status-indicator" id="statusIndicator"></div>
+                        <div class="description" id="statusText">Loading...</div>
+                    </div>
+                </div>
+
+                <div id="mqttSwitch">
+                    <h2>Module Switch</h2>
+                    <form action="/submitMQTTconfig" method="POST" id="mqttSwitchForm">
+                        <div>
+                            <label for="switchMQTT">Enable MQTT
+                                <input type="checkbox" id="switchMQTT" name="switchMQTT" {{switchMQTT_checked}} title="Send sensor data via MQTT">
+                            </label>
+                        </div>
+                        <button type="submit" class="btn">Save</button>
+                        <div class="form-feedback" id="feedbackSwitch"></div>
+                    </form>
+                </div>
+
+                <div id="mqttCredentials">
+                    <h2>Broker Configuration</h2>
+                    <form action="/submitMQTTconfig" method="POST" id="mqttConfigForm">
+                        <div>
+                            <label for="mqttHOST">Host / IP
+                                <input type="text" id="mqttHOST" name="mqttHOST" value="{{mqttHOST}}" placeholder="192.168.1.100">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="mqttPORT">Port
+                                <input type="number" id="mqttPORT" name="mqttPORT" value="{{mqttPORT}}" min="1" max="65535">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="mqttUSERen">Use Credentials
+                                <input type="checkbox" id="mqttUSERen" name="mqttUSERen" {{mqttUSERen_checked}}>
+                            </label>
+                        </div>
+                        <div id="credentialsFields">
+                            <div>
+                                <label for="mqttUSER">Username
+                                    <input type="text" id="mqttUSER" name="mqttUSER" value="{{mqttUSER}}">
+                                </label>
+                            </div>
+                            <div>
+                                <label for="mqttPASSWORD">Password
+                                    <input type="password" id="mqttPASSWORD" name="mqttPASSWORD" placeholder="leave empty to keep current">
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">Save Configuration</button>
+                        <div class="form-feedback" id="feedbackConfig"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="footer">&copy; 2025 SensorTurtle</div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                function showFeedback(elementId, success) {
+                    const el = document.getElementById(elementId);
+                    el.textContent = success ? "Saved successfully!" : "Error saving settings.";
+                    el.className = "form-feedback " + (success ? "success" : "error");
+                    setTimeout(() => {
+                        el.textContent = "";
+                        el.className = "form-feedback";
+                    }, 3000);
+                }
+
+                function submitForm(url, params, feedbackId) {
+                    fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: params
+                    })
+                    .then(response => showFeedback(feedbackId, response.ok))
+                    .catch(() => showFeedback(feedbackId, false));
+                }
+
+                // Verbindungsstatus laden
+                fetch("/api/mqtt/status")
+                    .then(response => response.json())
+                    .then(data => {
+                        const indicator = document.getElementById("statusIndicator");
+                        const statusText = document.getElementById("statusText");
+                        const statusHost = document.getElementById("statusHost");
+
+                        statusHost.textContent = document.getElementById("mqttHOST").value || "–";
+
+                        if (data.connected) {
+                            indicator.style.backgroundColor = "#28a745";
+                            statusText.textContent = "Connected";
+                        } else if (data.hasCredentials) {
+                            indicator.style.backgroundColor = "#ffc107";
+                            statusText.textContent = "Not connected – broker configured but unreachable";
+                        } else {
+                            indicator.style.backgroundColor = "#dc3545";
+                            statusText.textContent = "Not connected – no broker configured";
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById("statusText").textContent = "Status unavailable";
+                    });
+
+                // Credentials Felder ein-/ausblenden
+                const mqttUSERen = document.getElementById("mqttUSERen");
+                const credentialsFields = document.getElementById("credentialsFields");
+
+                function toggleCredentials() {
+                    credentialsFields.style.display = mqttUSERen.checked ? "block" : "none";
+                }
+                mqttUSERen.addEventListener("change", toggleCredentials);
+                toggleCredentials();
+
+                // Switch Form
+                const switchForm = document.getElementById("mqttSwitchForm");
+                switchForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+                    const checked = document.getElementById("switchMQTT").checked;
+                    submitForm("/submitMQTTconfig", `switchMQTT=${checked ? 1 : 0}`, "feedbackSwitch");
+                });
+
+                // Config Form
+                const configForm = document.getElementById("mqttConfigForm");
+                configForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+                    const inputs = configForm.querySelectorAll("input");
+                    const params = Array.from(inputs).map(input => {
+                        if (input.type === "checkbox") {
+                            return `${encodeURIComponent(input.name)}=${input.checked ? 1 : 0}`;
+                        }
+                        return `${encodeURIComponent(input.name)}=${encodeURIComponent(input.value)}`;
+                    }).join("&");
+                    submitForm("/submitMQTTconfig", params, "feedbackConfig");
+                });
+            });
+        </script>
+    </body>
+</html>
