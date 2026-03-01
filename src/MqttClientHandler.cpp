@@ -108,6 +108,5 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 			Serial.println("[MQTT] No data send");
 #endif
 		}
-		disconnectfromMqtt();
 	}
 }
