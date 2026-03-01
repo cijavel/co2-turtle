@@ -7,4 +7,7 @@
 #define WIFI_SSID "";
 #define WIFI_PW "";
 
+#define MQTT_USER "";
+#define MQTT_PASS "";
+
 #endif
