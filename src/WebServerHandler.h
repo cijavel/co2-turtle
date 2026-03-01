@@ -46,6 +46,11 @@ private:
 	void handle_option_calibrate_mhz19(AsyncWebServerRequest *request);
 
 
+	void handle_page_mqtt(AsyncWebServerRequest *request);
+	void handle_submit_mqttconfig(AsyncWebServerRequest *request);
+	void handle_api_mqtt_status(AsyncWebServerRequest *request);
+
+
 	// helper function
 	void replaceColorDescr(String &str, const String &key, const String &color, const String &descr);
 	void replaceIaqAccuracy(String &str, int iaqAccuracy);
