@@ -22,6 +22,11 @@ void MqttClientHandler::connectToMqtt()
 	}
 }
 
+bool MqttClientHandler::isConnected()
+{
+    return mqttClient.connected();
+}
+
 void MqttClientHandler::WiFiEvent(WiFiEvent_t event)
 {
 	Serial.printf("[MQTT] event: %d\n", event);
@@ -48,9 +53,18 @@ void MqttClientHandler::setup_Mqtt()
 
 	mqttClient.onDisconnect(onMqttDisconnect);
 
-	mqttClient.setServer(MQTT_HOST, MQTT_PORT);
-	mqttClient.setCredentials(MQTT_USER, MQTT_PASS);
-	Serial.println("[MQTT] connected");
+	String host = configHandler.getConfigDevice("mqttHOST");
+	int port = configHandler.getConfigDevice("mqttPORT").toInt();
+	mqttClient.setServer(host.c_str(), port);
+
+	if (configHandler.getConfigDevice("mqttUSERen") == "1")
+	{
+		mqttClient.setCredentials(
+			configHandler.getConfigDevice("mqttUSER").c_str(),
+			configHandler.getConfigDevice("mqttPASSWORD").c_str()
+		);
+	}
+	Serial.println("[MQTT] setup done, server: " + host + ":" + String(port));
 }
 
 void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme, const unsigned long currentSeconds)

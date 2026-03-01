@@ -38,10 +38,10 @@
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 
-#define MQTT_HOST "192.168.178.38"
 //#define MQTT_HOST "example.com"
+#define MQTT_HOST ""
 #define MQTT_PORT 1883
-#define MQTT_USER_ENABLED 1
+#define MQTT_USER_ENABLED 0
 
 
 extern const char* DeviceNameConf;
