@@ -4,6 +4,7 @@
 #include <LittleFS.h>
 #include "MHZ19Handler.h"
 #include "ConfigHandler.h"
+#include "MqttClientHandler.h"
 #include "LEDHandler.h"
 extern ConfigHandler &configHandler;
 
@@ -35,6 +36,12 @@ void WebServerHandler::start()
 	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restoreDefaultConfiguration(request); });
 	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restart(request); });
 	server.on("/calibrateMHZ19", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_option_calibrate_mhz19(request); });
+
+	//mqtt
+	server.on("/mqtt", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_mqtt(request); });
+	server.on("/submitMQTTconfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_mqttconfig(request); });
+	server.on("/api/mqtt/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_mqtt_status(request); });
+	
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
 }
@@ -447,6 +454,77 @@ void WebServerHandler::handle_option_calibrate_mhz19(AsyncWebServerRequest *requ
 	delay(1000);
 	request->redirect("/sensorsettings");
 }
+
+
+// --------------------
+// MQTT Handlers
+// --------------------
+void WebServerHandler::handle_page_mqtt(AsyncWebServerRequest *request)
+{
+    File file = LittleFS.open("/static/mqtt.htm", "r");
+    if (!file)
+    {
+        request->send(500, "text/plain", "Internal Server Error: Cannot open mqtt.htm");
+        return;
+    }
+    String content = file.readString();
+    file.close();
+
+    content.replace("{{deviceName}}", DeviceName);
+    content.replace("{{mqttHOST}}", configHandler.getConfigDevice("mqttHOST"));
+    content.replace("{{mqttPORT}}", configHandler.getConfigDevice("mqttPORT"));
+    content.replace("{{mqttUSERen_checked}}", configHandler.getConfigDevice("mqttUSERen") == "1" ? "checked" : "");
+    content.replace("{{mqttUSER}}", configHandler.getConfigDevice("mqttUSER"));
+    content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
+
+    request->send(200, "text/html", content);
+}
+
+void WebServerHandler::handle_submit_mqttconfig(AsyncWebServerRequest *request)
+{
+    bool updated = false;
+
+    if (request->hasParam("mqttHOST", true)) {
+        configHandler.setConfigDevice("mqttHOST", request->getParam("mqttHOST", true)->value());
+        updated = true;
+    }
+    if (request->hasParam("mqttPORT", true)) {
+        configHandler.setConfigDevice("mqttPORT", request->getParam("mqttPORT", true)->value());
+        updated = true;
+    }
+    if (request->hasParam("mqttUSER", true)) {
+        configHandler.setConfigDevice("mqttUSER", request->getParam("mqttUSER", true)->value());
+        updated = true;
+    }
+    if (request->hasParam("mqttPASSWORD", true)) {
+        configHandler.setConfigDevice("mqttPASSWORD", request->getParam("mqttPASSWORD", true)->value());
+        updated = true;
+    }
+    configHandler.setConfigDevice("mqttUSERen",
+        request->hasParam("mqttUSERen", true) ? "1" : "0");
+
+    if (request->hasParam("switchMQTT", true)) {
+        configHandler.setConfigSwitch("switchMQTT",
+            atoi(request->getParam("switchMQTT", true)->value().c_str()));
+    }
+
+    if (updated) {
+        configHandler.persistAllSettings();
+        request->send(200, "text/plain", "MQTT configuration saved!");
+    } else {
+        request->send(400, "text/plain", "Bad Request: Missing parameters");
+    }
+}
+
+void WebServerHandler::handle_api_mqtt_status(AsyncWebServerRequest *request)
+{
+    bool connected = MqttClientHandler::isConnected();
+    bool hasHost = configHandler.getConfigDevice("mqttHOST") != "";
+    String json = "{\"connected\":" + String(connected ? "true" : "false") +
+                  ",\"hasCredentials\":" + String(hasHost ? "true" : "false") + "}";
+    request->send(200, "application/json", json);
+}
+
 
 // --------------------
 // Helpers
