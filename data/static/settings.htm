@@ -1,230 +1,163 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>{{deviceName}} - Sensor Settings</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/static/style.css">
-    </head>
-    <body>
-        <div class="container">
-            <div class="nav">
-                <a href="/index" class="button">Back to Index</a>
-            </div>
-            <div class="content">
-                <div id="switchConfig">
-                    <h1>Module Switch</h1>
-                    <form action="/submitmodulswitch" method="POST" id="moduleSwitchForm">
-                        <div>
-                            <label for="switchWIFI">WiFi Check
-                                <input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}} title="Check WLAN status">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="switchEPD">EPD Display
-                                <input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}} title="Display sensor data on EPD">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="switchLED">LED
-                                <input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}} title="Display sensor data on LED strips">
-                            </label>
-                        </div>
-                        <button type="submit" class="btn" id="saveModulBtn">Save Settings</button>
-                        <div class="form-feedback" id="feedbackSwitch"></div>
-                    </form>
-                </div>
-                <div id="sensorConfig">
-                    <h1>Sensor Configuration</h1>
-                    <form action="/submitSensorConfig" method="POST" id="sensorConfigForm">
-                        <div>
-                            <label for="sealevelpressure">Sea Level Pressure (hPa)
-                                <input type="number" id="sealevelpressure" name="SEALEVELPRESSURE_HPA" value="{{SEALEVELPRESSURE_HPA}}" step="1" min="900" max="1100">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="temperatureoffset">Temperature Offset (°C)
-                                <input type="number" id="temperatureoffset" name="TEMPERATUR_OFFSET" value="{{TEMPERATUR_OFFSET}}" step="0.1" min="-10" max="10">
-                            </label>
-                        </div>
-                        <button type="submit" class="btn" id="saveSensorConfigBtn">Save Sensor Config</button>
-                        <div class="form-feedback" id="feedbackSensor"></div>
-                    </form>
-                </div>
-                <div id="intervalConfig">
-                    <h1>Modul Time Interval</h1>
-                    <form action="/submitmodulinterval" method="POST" id="moduleIntervalForm">
-                        <div>
-                            <label for="intervalMHZ19">MHZ19 Interval (s)
-                                <input type="number" id="intervalMHZ19" name="intervalMHZ19" value="{{intervalMHZ19}}" min="1">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="intervalBME680">BME680 Interval (s)
-                                <input type="number" id="intervalBME680" name="intervalBME680" value="{{intervalBME680}}" min="3">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="intervalWiFi">WiFi Check Interval (s)
-                                <input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}" min="1">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="intervalPRINT">RAM Printout Interval (s)
-                                <input type="number" id="intervalPRINT" name="intervalPRINT" value="{{intervalPRINT}}" min="1">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="intervalEPD">EPD Refresh Interval (s)
-                                <input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}" min="1">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="intervalLED">LED Update Interval (s)
-                                <input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}" min="1">
-                            </label>
-                        </div>
-                        <div>
-                            <label for="intervalMQTT">MQTT Interval (s)
-                                <input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}" min="1">
-                            </label>
-                        </div>
-                        <button type="submit" class="btn" id="saveIntervalBtn">Save Interval</button>
-                        <div class="form-feedback" id="feedbackInterval"></div>
-                    </form>
-                </div>
-                <div id="ledConfig">
-                    <h1>LED Brightness</h1>
-                    <form action="/submitLEDConfig" method="POST" id="ledconfigForm">
-                        <div id="ledconfigSlider">
-                            <label for="ledBrightness">Brightness: 
-                                <span id="brightnessValue">{{LEDbrightness}}</span>
-                            </label>
-                            <input type="range" id="ledBrightness" name="LEDbrightness" min="2" max="255" value="{{LEDbrightness}}">
-                        </div>
-                        <div id="ledsubmitbtn">
-                            <button type="submit" class="btn" id="saveBrightnessBtn">Save Brightness</button>
-                            <div class="form-feedback" id="feedbackBrightness"></div>
-                        </div>
-                    </form>
-                </div>
-                <div id="sensorOption">
-                    <h1>Sensor Option</h1>
-                    <form action="/calibrateMHZ19" method="POST">
-                        <button type="submit" class="btn" id="resetMHZ19SensorBtn">Calibrate MHZ19</button>
-                    </form>
-                </div>
-                <div id="esp32Option">
-                    <h1>ESP32 Option</h1>
-                    <form action="/restart" method="POST">
-                        <button type="submit" class="btn" id="resetESP32Btn">restart ESP32</button>
-                    </form>
-                    <form action="/restoredefaultconfiguration" method="POST">
-                        <button type="submit" class="btn" id="restoreDefaultsConfigBtn" onclick="loadDefaults()">Load Default Configuration</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="footer">&copy; 2025 SensorTurtle</div>
+<head>
+<meta charset="utf-8">
+<title>{{deviceName}} - Sensor Settings</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+<div class="nav">
+<a href="/index" class="button">Back to Index</a>
+</div>
+<div class="content">
+<h1>Sensor Settings</h1>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
+<h2>Module Switch</h2>
+<form action="/submitmodulswitch" method="POST" id="moduleSwitchForm">
+<div class="form-row">
+<label for="switchWIFI">WiFi Check</label>
+<input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}}>
+</div>
+<div class="form-row">
+<label for="switchEPD">EPD Display</label>
+<input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}}>
+</div>
+<div class="form-row">
+<label for="switchLED">LED</label>
+<input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}}>
+</div>
+<button type="submit" class="btn">Save Settings</button>
+<div class="form-feedback" id="feedbackSwitch"></div>
+</form>
 
-                const form = document.querySelector('form[action="/submitmodulswitch"]');
-                const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+<h2>Sensor Configuration</h2>
+<form action="/submitSensorConfig" method="POST" id="sensorConfigForm">
+<div class="form-row">
+<label for="sealevelpressure">Sea Level Pressure (hPa)</label>
+<input type="number" id="sealevelpressure" name="SEALEVELPRESSURE_HPA" value="{{SEALEVELPRESSURE_HPA}}" step="1" min="900" max="1100">
+</div>
+<div class="form-row">
+<label for="temperatureoffset">Temperature Offset (°C)</label>
+<input type="number" id="temperatureoffset" name="TEMPERATUR_OFFSET" value="{{TEMPERATUR_OFFSET}}" step="0.1" min="-10" max="10">
+</div>
+<button type="submit" class="btn">Save Sensor Config</button>
+<div class="form-feedback" id="feedbackSensor"></div>
+</form>
 
-                function showFeedback(elementId, success) {
-                    const el = document.getElementById(elementId);
-                    el.textContent = success ? "Saved successfully!" : "Error saving settings.";
-                    el.className = "form-feedback " + (success ? "success" : "error");
-                    setTimeout(() => {
-                        el.textContent = "";
-                        el.className = "form-feedback";
-                    }, 3000);
-                }
-                function submitForm(url, params, feedbackId) {
-                    fetch(url, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                        body: params
-                    })
-                    .then(response => showFeedback(feedbackId, response.ok))
-                    .catch(() => showFeedback(feedbackId, false));
-                }
-        
-                form.addEventListener("submit", function (event) {
-                    event.preventDefault();
-        
-                    const params = Array.from(checkboxes).map(checkbox => {
-                        return `${encodeURIComponent(checkbox.name)}=${checkbox.checked ? 1 : 0}`;
-                    }).join("&");
-        
-                    submitForm(`/submitmodulswitch?${params}`, "", "feedbackSwitch");
-                });
+<h2>Module Time Interval</h2>
+<form action="/submitmodulinterval" method="POST" id="moduleIntervalForm">
+<div class="form-row">
+<label for="intervalMHZ19">MHZ19 Interval (s)</label>
+<input type="number" id="intervalMHZ19" name="intervalMHZ19" value="{{intervalMHZ19}}" min="1">
+</div>
+<div class="form-row">
+<label for="intervalBME680">BME680 Interval (s)</label>
+<input type="number" id="intervalBME680" name="intervalBME680" value="{{intervalBME680}}" min="3">
+</div>
+<div class="form-row">
+<label for="intervalWiFi">WiFi Check Interval (s)</label>
+<input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}" min="1">
+</div>
+<div class="form-row">
+<label for="intervalPRINT">RAM Printout Interval (s)</label>
+<input type="number" id="intervalPRINT" name="intervalPRINT" value="{{intervalPRINT}}" min="1">
+</div>
+<div class="form-row">
+<label for="intervalEPD">EPD Refresh Interval (s)</label>
+<input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}" min="1">
+</div>
+<div class="form-row">
+<label for="intervalLED">LED Update Interval (s)</label>
+<input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}" min="1">
+</div>
+<div class="form-row">
+<label for="intervalMQTT">MQTT Interval (s)</label>
+<input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}" min="1">
+</div>
+<button type="submit" class="btn">Save Interval</button>
+<div class="form-feedback" id="feedbackInterval"></div>
+</form>
 
-                const intervalForm = document.querySelector('form[action="/submitmodulinterval"]');
-                const intervalInputs = intervalForm.querySelectorAll('input[type="number"]');
+<h2>LED Brightness</h2>
+<form id="ledconfigForm">
+<div class="form-row">
+<label for="ledBrightness">Brightness: <span id="brightnessValue">{{LEDbrightness}}</span></label>
+<input type="range" id="ledBrightness" name="LEDbrightness" min="2" max="255" value="{{LEDbrightness}}">
+</div>
+<button type="submit" class="btn">Save Brightness</button>
+<div class="form-feedback" id="feedbackBrightness"></div>
+</form>
 
-                intervalForm.addEventListener("submit", function (event) {
-                    event.preventDefault();
+<h2>Sensor Option</h2>
+<form action="/calibrateMHZ19" method="POST" id="calibrateForm">
+<button type="submit" class="btn">Calibrate MHZ19</button>
+</form>
 
-                    const intervalParams = Array.from(intervalInputs).map(input => {
-                        return `${encodeURIComponent(input.name)}=${encodeURIComponent(input.value)}`;
-                    }).join("&");
+<h2>ESP32 Option</h2>
+<form action="/restart" method="POST">
+<button type="submit" class="btn">Restart ESP32</button>
+</form>
+<form action="/restoredefaultconfiguration" method="POST">
+<button type="submit" class="btn">Load Defaults</button>
+</form>
 
-                    submitForm(`/submitmodulinterval?${intervalParams}`, "", "feedbackInterval");
-                });
-
-                const brightnessSlider = document.getElementById("ledBrightness");
-                const brightnessValue = document.getElementById("brightnessValue");
-                const brightnessForm = document.getElementById("ledconfigForm");
-
-                brightnessSlider.addEventListener("input", function () {
-                    brightnessValue.textContent = brightnessSlider.value;
-                });
-
-                brightnessForm.addEventListener("submit", function (event) {
-                    event.preventDefault();
-
-                    const brightness = brightnessSlider.value;
-
-                    submitForm("/submitLEDConfig", `LEDbrightness=${encodeURIComponent(brightness)}`, "feedbackBrightness");
-                });
-                const calibrateForm = document.querySelector('form[action="/calibrateMHZ19"]');
-                calibrateForm.addEventListener("submit", function (event) {
-                    event.preventDefault(); 
-                    if (confirm("Are you sure you want to calibrate the MHZ19 sensor? Make sure the sensor is in fresh air (400 ppm).")) {
-                        fetch("/calibrateMHZ19", {
-                            method: "POST",
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                alert("Calibration started successfully!");
-                            } else {
-                                alert("Failed to start calibration. Please try again.");
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error:", error);
-                            alert("An error occurred while starting calibration.");
-                        });
-                    }
-                });
-
-                const sensorConfigForm = document.getElementById("sensorConfigForm");
-                const sensorConfigInputs = sensorConfigForm.querySelectorAll('input[type="number"]');
-
-                sensorConfigForm.addEventListener("submit", function (event) {
-                    event.preventDefault();
-
-                    const sensorConfigParams = Array.from(sensorConfigInputs).map(input => {
-                        return `${encodeURIComponent(input.name)}=${encodeURIComponent(input.value)}`;
-                    }).join("&");
-
-                    submitForm("/submitSensorConfig", sensorConfigParams, "feedbackSensor");
-                });
-            });
-        </script>
-    </body>
-
+</div>
+</div>
+<div class="footer">&copy; 2025 SensorTurtle</div>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+function showFeedback(id,ok){
+var el=document.getElementById(id);
+el.textContent=ok?"Saved successfully!":"Error saving settings.";
+el.className="form-feedback "+(ok?"success":"error");
+setTimeout(function(){el.textContent="";el.className="form-feedback";},3000);
+}
+function submitForm(url,params,id){
+fetch(url,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:params})
+.then(function(r){showFeedback(id,r.ok);})
+.catch(function(){showFeedback(id,false);});
+}
+var switchForm=document.getElementById("moduleSwitchForm");
+switchForm.addEventListener("submit",function(e){
+e.preventDefault();
+var params=Array.from(switchForm.querySelectorAll("input[type=checkbox]")).map(function(c){
+return encodeURIComponent(c.name)+"="+(c.checked?1:0);
+}).join("&");
+submitForm("/submitmodulswitch?"+params,"","feedbackSwitch");
+});
+var intervalForm=document.getElementById("moduleIntervalForm");
+intervalForm.addEventListener("submit",function(e){
+e.preventDefault();
+var params=Array.from(intervalForm.querySelectorAll("input[type=number]")).map(function(i){
+return encodeURIComponent(i.name)+"="+encodeURIComponent(i.value);
+}).join("&");
+submitForm("/submitmodulinterval?"+params,"","feedbackInterval");
+});
+var slider=document.getElementById("ledBrightness");
+slider.addEventListener("input",function(){document.getElementById("brightnessValue").textContent=slider.value;});
+document.getElementById("ledconfigForm").addEventListener("submit",function(e){
+e.preventDefault();
+submitForm("/submitLEDConfig","LEDbrightness="+encodeURIComponent(slider.value),"feedbackBrightness");
+});
+document.getElementById("calibrateForm").addEventListener("submit",function(e){
+e.preventDefault();
+if(confirm("Calibrate MHZ19? Make sure sensor is in fresh air (400 ppm).")){
+fetch("/calibrateMHZ19",{method:"POST"}).then(function(r){
+alert(r.ok?"Calibration started!":"Failed to start calibration.");
+}).catch(function(){alert("An error occurred.");});
+}
+});
+var sensorForm=document.getElementById("sensorConfigForm");
+sensorForm.addEventListener("submit",function(e){
+e.preventDefault();
+var params=Array.from(sensorForm.querySelectorAll("input[type=number]")).map(function(i){
+return encodeURIComponent(i.name)+"="+encodeURIComponent(i.value);
+}).join("&");
+submitForm("/submitSensorConfig",params,"feedbackSensor");
+});
+});
+</script>
+</body>
 </html>
