@@ -1,164 +1,23 @@
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f0f0f0;
-}
-.container {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.nav {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 10px;
-}
-.nav .button {
-  text-decoration: none;
-  color: #fff;
-  background: #28a745;
-  padding: 10px 34px;
-  border-radius: 5px;
-}
-.content h1 {
-  font-size: 24px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-.btn {
-  background: #28a745;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 165px;
-  font-size: 105%;
-  text-decoration: none;
-}
-.btn:hover, .nav .button:hover {
-  background: #218838;
-}
-.footer {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-  color: #666;
-}
-/*  CONFIG   */
-#sensorConfigForm div, #moduleSwitchForm div, #moduleIntervalForm div  {
-  display: block; 
-  margin-bottom: 15px;
-}
-#moduleSwitchForm div label {
-  display: inline-block;
-  overflow: hidden;
-  width: 120px; 
-}
-#moduleIntervalForm div label,
-#sensorConfigForm div label {
-  display: inline-block;
-  width: 400px;
-}
-#moduleSwitchForm div label input[type="checkbox"] {
-  vertical-align: middle; 
-  float: right; 
-  transform: scale(1.2);
-}
-div label input[type="number"] {
-  padding: 5px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 200px; 
-  box-sizing: border-box; 
-  vertical-align: middle; 
-  float: right; 
-}
-.wlanlabel {
-  display: inline-block;
-  width: 120px; 
-}
-#wlanSSID, #wlanPASSWORD {
-  width: 350px;
-  padding: 5px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.saved-credentials div label, 
-.saved-credentials div span,
-#wlanForm div label,
-#wlanForm div input {
-  margin-bottom: 8px;
-}
-#ledBrightnessForm {
-  display: flex;
-  align-items: baseline;
-  flex-direction: column;
-  gap: 5px;
-  width: 400px;
-}
-#ledconfigSlider {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-  justify-content: space-between;
-  width: 367px;
-}
-
-/*  STATUS   */
-
-.status-container {
-  display: block;
-}
-.status-item {
-  display: flex;
-  flex-direction: row;
-  padding-bottom: 10px;
-}
-.status-item .title {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 5px;
-  color: #333;
-  width: 30%;
-  min-width: 200px;
-}
-.status-item .data {
-  margin-bottom: 10px;
-  color: #555;
-  min-width: 130px;
-}
-.status-item .status-indicator {
-  width: 20px;
-  height: 20px;
-  border-radius: 30%;
-  margin-bottom: 10px;
-  margin-right: 10px;
-}
-.status-item .description {
-  font-size: 0.9em;
-  color: #666;
-  line-height: 1.4;
-}
-/* FEEDBACK */
-.form-feedback {
-  font-size: 14px;
-  margin-top: 8px;
-  height: 18px;
-}
-.form-feedback.success {
-  color: #28a745;
-}
-.form-feedback.error {
-  color: #dc3545;
-}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#f0f0f0}
+.container{max-width:800px;margin:20px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.nav{display:flex;width:100%;justify-content:space-between;align-items:stretch;gap:10px}
+.nav .button{text-decoration:none;color:#fff;background:#28a745;padding:10px 34px;border-radius:5px}
+.nav .button:hover,.btn:hover{background:#218838}
+.content h1{font-size:24px;margin:20px 0}
+.content h2{font-size:18px;margin:20px 0 10px}
+.btn{background:#28a745;color:#fff;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;width:165px;font-size:105%;margin-top:20px}
+.footer{text-align:center;margin-top:20px;font-size:14px;color:#666}
+.form-row{display:flex;align-items:center;margin-bottom:15px}
+.form-row label{display:inline-block;width:220px;font-size:14px;color:#333;flex-shrink:0}
+.form-row input[type=text],.form-row input[type=password],.form-row input[type=number]{padding:5px;font-size:14px;border:1px solid #ccc;border-radius:4px;width:220px;box-sizing:border-box}
+.form-row input[type=checkbox]{transform:scale(1.2)}
+.form-row input[type=range]{width:200px}
+.form-feedback{font-size:14px;margin-top:8px;height:18px}
+.form-feedback.success{color:#28a745}
+.form-feedback.error{color:#dc3545}
+.status-item{display:flex;flex-direction:row;padding-bottom:10px;align-items:center}
+.status-item .title{font-weight:bold;font-size:16px;color:#333;width:220px;flex-shrink:0}
+.status-item .data{color:#555;width:130px;flex-shrink:0}
+.status-item .status-indicator{width:20px;height:20px;border-radius:30%;margin-right:10px}
+.status-item .description{font-size:.9em;color:#666;line-height:1.4}
+.show-password-button{background:none;border:1px solid #ccc;border-radius:4px;cursor:pointer;padding:3px 6px;margin-left:5px;vertical-align:middle}
