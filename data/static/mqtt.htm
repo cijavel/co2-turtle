@@ -5,6 +5,36 @@
         <title>{{deviceName}} - MQTT Settings</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="/static/style.css">
+        <style>
+            .mqtt-form-row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            .mqtt-form-row label {
+                display: inline-block;
+                width: 160px;
+                font-size: 14px;
+                color: #333;
+                flex-shrink: 0;
+            }
+            .mqtt-form-row input[type="text"],
+            .mqtt-form-row input[type="password"],
+            .mqtt-form-row input[type="number"] {
+                padding: 5px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                width: 250px;
+                box-sizing: border-box;
+            }
+            .mqtt-form-row input[type="checkbox"] {
+                transform: scale(1.2);
+            }
+            .mqtt-btn-row {
+                margin-top: 20px;
+            }
+        </style>
     </head>
     <body>
         <div class="container">
@@ -26,49 +56,47 @@
 
                 <div id="mqttSwitch">
                     <h2>Module Switch</h2>
-                    <form action="/submitMQTTconfig" method="POST" id="mqttSwitchForm">
-                        <div>
-                            <label for="switchMQTT">Enable MQTT
-                                <input type="checkbox" id="switchMQTT" name="switchMQTT" {{switchMQTT_checked}} title="Send sensor data via MQTT">
-                            </label>
+                    <form id="mqttSwitchForm">
+                        <div class="mqtt-form-row">
+                            <label for="switchMQTT">Enable MQTT</label>
+                            <input type="checkbox" id="switchMQTT" name="switchMQTT" {{switchMQTT_checked}} title="Send sensor data via MQTT">
                         </div>
-                        <button type="submit" class="btn">Save</button>
-                        <div class="form-feedback" id="feedbackSwitch"></div>
+                        <div class="mqtt-btn-row">
+                            <button type="submit" class="btn">Save</button>
+                            <div class="form-feedback" id="feedbackSwitch"></div>
+                        </div>
                     </form>
                 </div>
 
                 <div id="mqttCredentials">
                     <h2>Broker Configuration</h2>
-                    <form action="/submitMQTTconfig" method="POST" id="mqttConfigForm">
-                        <div>
-                            <label for="mqttHOST">Host / IP
-                                <input type="text" id="mqttHOST" name="mqttHOST" value="{{mqttHOST}}" placeholder="192.168.1.100">
-                            </label>
+                    <form id="mqttConfigForm">
+                        <div class="mqtt-form-row">
+                            <label for="mqttHOST">Host / IP</label>
+                            <input type="text" id="mqttHOST" name="mqttHOST" value="{{mqttHOST}}" placeholder="192.168.1.100">
                         </div>
-                        <div>
-                            <label for="mqttPORT">Port
-                                <input type="number" id="mqttPORT" name="mqttPORT" value="{{mqttPORT}}" min="1" max="65535">
-                            </label>
+                        <div class="mqtt-form-row">
+                            <label for="mqttPORT">Port</label>
+                            <input type="number" id="mqttPORT" name="mqttPORT" value="{{mqttPORT}}" min="1" max="65535">
                         </div>
-                        <div>
-                            <label for="mqttUSERen">Use Credentials
-                                <input type="checkbox" id="mqttUSERen" name="mqttUSERen" {{mqttUSERen_checked}}>
-                            </label>
+                        <div class="mqtt-form-row">
+                            <label for="mqttUSERen">Use Credentials</label>
+                            <input type="checkbox" id="mqttUSERen" name="mqttUSERen" {{mqttUSERen_checked}}>
                         </div>
                         <div id="credentialsFields">
-                            <div>
-                                <label for="mqttUSER">Username
-                                    <input type="text" id="mqttUSER" name="mqttUSER" value="{{mqttUSER}}">
-                                </label>
+                            <div class="mqtt-form-row">
+                                <label for="mqttUSER">Username</label>
+                                <input type="text" id="mqttUSER" name="mqttUSER" value="{{mqttUSER}}">
                             </div>
-                            <div>
-                                <label for="mqttPASSWORD">Password
-                                    <input type="password" id="mqttPASSWORD" name="mqttPASSWORD" placeholder="leave empty to keep current">
-                                </label>
+                            <div class="mqtt-form-row">
+                                <label for="mqttPASSWORD">Password</label>
+                                <input type="password" id="mqttPASSWORD" name="mqttPASSWORD" placeholder="leave empty to keep current">
                             </div>
                         </div>
-                        <button type="submit" class="btn">Save Configuration</button>
-                        <div class="form-feedback" id="feedbackConfig"></div>
+                        <div class="mqtt-btn-row">
+                            <button type="submit" class="btn">Save Configuration</button>
+                            <div class="form-feedback" id="feedbackConfig"></div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -134,18 +162,16 @@
                 toggleCredentials();
 
                 // Switch Form
-                const switchForm = document.getElementById("mqttSwitchForm");
-                switchForm.addEventListener("submit", function (event) {
+                document.getElementById("mqttSwitchForm").addEventListener("submit", function (event) {
                     event.preventDefault();
                     const checked = document.getElementById("switchMQTT").checked;
                     submitForm("/submitMQTTconfig", `switchMQTT=${checked ? 1 : 0}`, "feedbackSwitch");
                 });
 
                 // Config Form
-                const configForm = document.getElementById("mqttConfigForm");
-                configForm.addEventListener("submit", function (event) {
+                document.getElementById("mqttConfigForm").addEventListener("submit", function (event) {
                     event.preventDefault();
-                    const inputs = configForm.querySelectorAll("input");
+                    const inputs = document.getElementById("mqttConfigForm").querySelectorAll("input");
                     const params = Array.from(inputs).map(input => {
                         if (input.type === "checkbox") {
                             return `${encodeURIComponent(input.name)}=${input.checked ? 1 : 0}`;
