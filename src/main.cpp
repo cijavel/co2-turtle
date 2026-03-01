@@ -127,6 +127,7 @@ void setup()
 	{
 		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
 		MqttHandler.setup_Mqtt();
+		MqttHandler.publishDiscovery();
 	}
 }
 
