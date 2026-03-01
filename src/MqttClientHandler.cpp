@@ -22,14 +22,6 @@ void MqttClientHandler::connectToMqtt()
 	}
 }
 
-void MqttClientHandler::disconnectfromMqtt()
-{
-	if (mqttClient.connected() == true)
-	{
-		mqttClient.disconnect();
-	}
-}
-
 void MqttClientHandler::WiFiEvent(WiFiEvent_t event)
 {
 	Serial.printf("[MQTT] event: %d\n", event);
