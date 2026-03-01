@@ -228,7 +228,6 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 	content.replace("{{switchWIFI_checked}}", configHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
 	content.replace("{{switchEPD_checked}}", configHandler.getConfigSwitch("switchEPD") ? "checked" : "");
 	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
-	content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
 
 	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
 	content.replace("{{SEALEVELPRESSURE_HPA}}", String(configHandler.getConfigSensor("pressure")));
@@ -361,10 +360,6 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	{
 		configHandler.setConfigSwitch("switchLED", atoi(request->getParam("switchLED")->value().c_str()));
 	}
-	if (request->hasParam("switchMQTT"))
-	{
-		configHandler.setConfigSwitch("switchMQTT", atoi(request->getParam("switchMQTT")->value().c_str()));
-	} 
 	configHandler.persistAllSettings();
 	request->send(200, "text/plain", "Modul Settings Saved!");
 	request->redirect("/sensorsettings");
