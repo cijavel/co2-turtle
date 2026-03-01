@@ -139,34 +139,28 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 		connectToMqtt();
 		if (mqttClient.connected() == true)
 		{
-			mqttClient.publish("sensor/bme680/temperature", 1, true, String(data_bme.temperature).c_str());
-			mqttClient.publish("sensor/bme680/temperature_offset", 1, true, String(data_bme.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f).c_str());
-			mqttClient.publish("sensor/bme680/temperature_raw", 1, true, String(data_bme.rawTemperature).c_str());
-			mqttClient.publish("sensor/bme680/humidity", 1, true, String(data_bme.humidity).c_str());
-			mqttClient.publish("sensor/bme680/humidity_raw", 1, true, String(data_bme.rawHumidity).c_str());
-			mqttClient.publish("sensor/bme680/pressure", 1, true, String(data_bme.pressure).c_str());
-			mqttClient.publish("sensor/bme680/gas", 1, true, String(data_bme.gasResistance).c_str());
-			mqttClient.publish("sensor/bme680/bme68xStatus", 1, true, String(data_bme.bme68xStatus).c_str());
-			mqttClient.publish("sensor/bme680/breathVocAccuracy", 1, true, String(data_bme.breathVocAccuracy).c_str());
-			mqttClient.publish("sensor/bme680/breathVocEquivalent", 1, true, String(data_bme.breathVocEquivalent).c_str());
-			mqttClient.publish("sensor/bme680/bsecStatus", 1, true, String(data_bme.bsecStatus).c_str());
-			mqttClient.publish("sensor/bme680/co2Accuracy", 1, true, String(data_bme.co2Accuracy).c_str());
-			mqttClient.publish("sensor/bme680/co2Equivalent", 1, true, String(data_bme.co2Equivalent).c_str());
-			mqttClient.publish("sensor/bme680/compGasAccuracy", 1, true, String(data_bme.compGasAccuracy).c_str());
-			mqttClient.publish("sensor/bme680/compGasValue", 1, true, String(data_bme.compGasValue).c_str());
-			mqttClient.publish("sensor/bme680/gasPercentage", 1, true, String(data_bme.gasPercentage).c_str());
-			mqttClient.publish("sensor/bme680/gasPercentageAccuracy", 1, true, String(data_bme.gasPercentageAccuracy).c_str());
-			mqttClient.publish("sensor/bme680/iaq", 1, true, String(data_bme.iaq).c_str());
-			mqttClient.publish("sensor/bme680/iaqAccuracy", 1, true, String(data_bme.iaqAccuracy).c_str());
-			mqttClient.publish("sensor/bme680/staticIaqAccuracy", 1, true, String(data_bme.staticIaqAccuracy).c_str());
+			// BME680
+			mqttClient.publish("homeassistant/sensor/sensorturtle/temperature/state",         1, true, String(data_bme.temperature).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/temperature_offset/state",  1, true, String(data_bme.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/humidity/state",            1, true, String(data_bme.humidity).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/pressure/state",            1, true, String(data_bme.pressure / 100.0f).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/gas/state",                 1, true, String(data_bme.gasResistance).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/iaq/state",                 1, true, String(data_bme.iaq).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/iaq_accuracy/state",        1, true, String(data_bme.iaqAccuracy).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/breath_voc/state",          1, true, String(data_bme.breathVocEquivalent).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_equivalent/state",      1, true, String(data_bme.co2Equivalent).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/static_iaq_accuracy/state", 1, true, String(data_bme.staticIaqAccuracy).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/comp_gas_value/state",      1, true, String(data_bme.compGasValue).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/gas_percentage/state",      1, true, String(data_bme.gasPercentage).c_str());
 
-			mqttClient.publish("sensor/mhz19/accuracy", 1, true, String(data_co2.getAccuracy()).c_str());
-			mqttClient.publish("sensor/mhz19/background", 1, true, String(data_co2.getBackground()).c_str());
-			mqttClient.publish("sensor/mhz19/limited", 1, true, String(data_co2.getLimited()).c_str());
-			mqttClient.publish("sensor/mhz19/raw", 1, true, String(data_co2.getRaw()).c_str());
-			mqttClient.publish("sensor/mhz19/regular", 1, true, String(data_co2.getRegular()).c_str());
-			mqttClient.publish("sensor/mhz19/tempAdjustment", 1, true, String(data_co2.getTempAdjustment()).c_str());
-			mqttClient.publish("sensor/mhz19/temperature", 1, true, String(data_co2.getTemperature()).c_str());
+			// MHZ19
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2/state",                 1, true, String(data_co2.getRegular()).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_raw/state",             1, true, String(data_co2.getRaw()).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_accuracy/state",        1, true, String(data_co2.getAccuracy()).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_limited/state",         1, true, String(data_co2.getLimited()).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_background/state",      1, true, String(data_co2.getBackground()).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_temp_adjustment/state", 1, true, String(data_co2.getTempAdjustment()).c_str());
+			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_temperature/state",     1, true, String(data_co2.getTemperature()).c_str());
 
 #ifdef DEBUG
 			Serial.println("[MQTT] Send data");
