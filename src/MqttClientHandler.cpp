@@ -82,13 +82,13 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 			mqttClient.publish("sensor/bme680/iaqAccuracy", 1, true, String(data_bme.iaqAccuracy).c_str());
 			mqttClient.publish("sensor/bme680/staticIaqAccuracy", 1, true, String(data_bme.staticIaqAccuracy).c_str());
 
-			mqttClient.publish("sensor/mhz19/Accuracy", 1, true, String(data_co2.getAccuracy()).c_str());
-			mqttClient.publish("sensor/mhz19/Background", 1, true, String(data_co2.getBackground()).c_str());
-			mqttClient.publish("sensor/mhz19/Limited", 1, true, String(data_co2.getLimited()).c_str());
-			mqttClient.publish("sensor/mhz19/Raw", 1, true, String(data_co2.getRaw()).c_str());
-			mqttClient.publish("sensor/mhz19/Regular", 1, true, String(data_co2.getRegular()).c_str());
-			mqttClient.publish("sensor/mhz19/TempAdjustment", 1, true, String(data_co2.getTempAdjustment()).c_str());
-			mqttClient.publish("sensor/mhz19/Temperature", 1, true, String(data_co2.getTemperature()).c_str());
+			mqttClient.publish("sensor/mhz19/accuracy", 1, true, String(data_co2.getAccuracy()).c_str());
+			mqttClient.publish("sensor/mhz19/background", 1, true, String(data_co2.getBackground()).c_str());
+			mqttClient.publish("sensor/mhz19/limited", 1, true, String(data_co2.getLimited()).c_str());
+			mqttClient.publish("sensor/mhz19/raw", 1, true, String(data_co2.getRaw()).c_str());
+			mqttClient.publish("sensor/mhz19/regular", 1, true, String(data_co2.getRegular()).c_str());
+			mqttClient.publish("sensor/mhz19/tempAdjustment", 1, true, String(data_co2.getTempAdjustment()).c_str());
+			mqttClient.publish("sensor/mhz19/temperature", 1, true, String(data_co2.getTemperature()).c_str());
 
 #ifdef DEBUG
 			Serial.println("[MQTT] Send data");
