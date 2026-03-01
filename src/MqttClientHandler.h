@@ -22,7 +22,6 @@ public:
 private:
 	static void WiFiEvent(WiFiEvent_t event);
 	static void connectToMqtt();
-	static void disconnectfromMqtt();
 	static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
 	static unsigned long _lastRunSeconds;
 };
