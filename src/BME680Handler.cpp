@@ -299,3 +299,7 @@ int BME680Handler::getSensorError() const
 {
     return _bme68xError;
 }
+bool BME680Handler::isRecovering() const
+{
+    return !_sensorOk && _lastRecoverySeconds > 0;
+}

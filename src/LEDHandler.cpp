@@ -129,14 +129,13 @@ void LEDHandler::ledStatusBME()
 
 	if (!BME680Handler::getInstance().isSensorOk())
     {
-        // Sensor error – blink purple
-        setSectionColor(LED_SENSORSTATE, CRGB::Purple);
-        delay(300);
-        setSectionColor(LED_SENSORSTATE, CRGB::Black);
-        delay(300);
-        setSectionColor(LED_SENSORSTATE, CRGB::Purple);
+        if (BME680Handler::getInstance().isRecovering())
+            setSectionColor(LED_SENSORSTATE, CRGB::Orange);
+        else
+            setSectionColor(LED_SENSORSTATE, CRGB::Red);
         return;
     }
+    setSectionColor(LED_SENSORSTATE, CRGB::Green);
 
     if (bmedata.humidity)
     {
