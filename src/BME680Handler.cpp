@@ -77,7 +77,10 @@ BME680Handler::BME680Handler()
     _sensorList[11] = BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY;
     _sensorList[12] = BSEC_OUTPUT_GAS_PERCENTAGE;
 
-	bmeSensor.updateSubscription(_sensorList, 13, BSEC_SAMPLE_RATE_LP);
+	if (_sensorOk)
+	{
+		bmeSensor.updateSubscription(_sensorList, 13, BSEC_SAMPLE_RATE_LP);
+	}
 
 	pinMode(LED_BUILTIN, OUTPUT);
 	digitalWrite(LED_BUILTIN, LOW);
@@ -298,4 +301,9 @@ bool BME680Handler::isSensorOk() const
 int BME680Handler::getSensorError() const
 {
     return _bme68xError;
+}
+
+bool BME680Handler::isRecovering() const
+{
+    return !_sensorOk && _lastRecoverySeconds > 0;
 }
