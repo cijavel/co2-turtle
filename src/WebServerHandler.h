@@ -50,6 +50,7 @@ private:
 	void handle_submit_mqttconfig(AsyncWebServerRequest *request);
 	void handle_api_mqtt_status(AsyncWebServerRequest *request);
 
+	void handle_api_system_status(AsyncWebServerRequest *request);
 
 	// helper function
 	void replaceColorDescr(String &str, const String &key, const String &color, const String &descr);

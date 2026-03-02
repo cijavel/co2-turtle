@@ -1,25 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>{{deviceName}}</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="/static/style.css">
+    <meta charset="utf-8">
+    <title>{{deviceName}}</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <div class="container">
-<h1>{{deviceName}}</h1>
-<div class="nav">
-<a href="/status" class="button">Status</a>
-<a href="/json" class="button">JSON</a>
-<a href="/sensorsettings" class="button">Sensor Settings</a>
-<a href="/WLAN" class="button">WLAN Settings</a>
-<a href="/mqtt" class="button">MQTT Settings</a>
-</div>
-<div class="content">
-
-</div>
+    <h1>{{deviceName}}</h1>
+    <div class="nav">
+        <a href="/status" class="button">Status</a>
+        <a href="/json" class="button">JSON</a>
+        <a href="/sensorsettings" class="button">Sensor Settings</a>
+        <a href="/WLAN" class="button">WLAN Settings</a>
+        <a href="/mqtt" class="button">MQTT Settings</a>
+    </div>
+    <div class="content">
+        <div id="warningBanner" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:15px;margin-top:20px;">
+            <strong>⚠ BME680 sensor error</strong>
+            <span id="warningText"></span>
+            <div style="margin-top:10px;">
+                <form action="/restart" method="POST" id="restartForm">
+                    <button type="submit" class="btn" style="background:#dc3545;width:auto;padding:8px 20px;">Restart ESP32</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="footer">&copy; 2025 SensorTurtle</div>
 </body>
+<script>
+    fetch("/api/system/status")
+    .then(function(r){return r.json();})
+    .then(function(data){
+        if(!data.bme680.ok){
+            var b=document.getElementById("warningBanner");
+            var t=document.getElementById("warningText");
+            t.textContent=" – not responding (error "+data.bme680.error+"). Restart ESP32 to retry.";
+            b.style.display="block";
+        }
+    })
+    .catch(function(){});
+    document.getElementById("restartForm").addEventListener("submit",function(e){
+        e.preventDefault();
+        if(confirm("Restart ESP32?")){
+            fetch("/restart",{method:"POST"}).then(function(){
+                setTimeout(function(){window.location.reload();},5000);
+            });
+        }
+    });
+</script>
 </html>
