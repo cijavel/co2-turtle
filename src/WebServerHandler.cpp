@@ -6,6 +6,7 @@
 #include "ConfigHandler.h"
 #include "MqttClientHandler.h"
 #include "LEDHandler.h"
+#include "BME680Handler.h"
 extern ConfigHandler &configHandler;
 
 WebServerHandler::WebServerHandler()
@@ -41,6 +42,7 @@ void WebServerHandler::start()
 	server.on("/mqtt", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_mqtt(request); });
 	server.on("/submitMQTTconfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_mqttconfig(request); });
 	server.on("/api/mqtt/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_mqtt_status(request); });
+	server.on("/api/system/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_system_status(request); });
 
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
@@ -519,6 +521,21 @@ void WebServerHandler::handle_api_mqtt_status(AsyncWebServerRequest *request)
     request->send(200, "application/json", json);
 }
 
+
+// --------------------
+// API Handlers
+// --------------------
+void WebServerHandler::handle_api_system_status(AsyncWebServerRequest *request)
+{
+    BME680Handler &bme = BME680Handler::getInstance();
+    String json = "{";
+    json += "\"bme680\":{";
+    json += "\"ok\":" + String(bme.isSensorOk() ? "true" : "false") + ",";
+    json += "\"error\":" + String(bme.getSensorError());
+    json += "}";
+    json += "}";
+    request->send(200, "application/json", json);
+}
 
 // --------------------
 // Helpers
