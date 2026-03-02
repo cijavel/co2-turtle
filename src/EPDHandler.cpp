@@ -134,8 +134,8 @@ void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const S
 	display.print(DeviceName);
 	display.drawInvertedBitmap(line0, 248 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
 
-	display.display(false);
 	display.hibernate();
+	display.display(false);
 	display.end();
 }
 
@@ -250,8 +250,8 @@ void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const
 	display.print(DeviceName);
 	display.drawInvertedBitmap(140, 32 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
 
-	display.hibernate();
 	display.display(false);
+	display.hibernate();
 }
 
 void EPDHandler::updateEPDvertical(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, const unsigned long currentSeconds)

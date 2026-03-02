@@ -109,7 +109,14 @@ bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
             Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
             Wire.setClock(100000);
             delay(500);
-            bmeSensor.begin(BME68X_I2C_ADDR_LOW, Wire);
+            
+            uint8_t recoveryAddresses[2] = {BME68X_I2C_ADDR_LOW, BME68X_I2C_ADDR_HIGH};
+            for (uint8_t i = 0; i < 2; i++)
+            {
+                bmeSensor.begin(recoveryAddresses[i], Wire);
+                if (bmeSensor.bme68xStatus == BME68X_OK) break;
+            }
+
             if (bmeSensor.bme68xStatus == BME68X_OK)
             {
                 bmeSensor.setConfig(bsec_config_iaq);
