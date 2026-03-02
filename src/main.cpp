@@ -147,19 +147,20 @@ void loop()
 		}
 	}
 	BME680Handler &bmehandler = BME680Handler::getInstance();
-	Bsec bme_data = bmehandler.getData();
 
-	if (DEBUG)
-	{
-		if (bmehandler.updateSensorData(currentSeconds))
-		{
-			bmehandler.printout();
-		}
-	}
-	else
-	{
-		bmehandler.updateSensorData(currentSeconds);
-	}
+    if (DEBUG)
+    {
+        if (bmehandler.updateSensorData(currentSeconds))
+        {
+            bmehandler.printout();
+        }
+    }
+    else
+    {
+        bmehandler.updateSensorData(currentSeconds);
+    }
+
+    Bsec bme_data = bmehandler.getData(); 
 
 	MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
 	if (DEBUG)
