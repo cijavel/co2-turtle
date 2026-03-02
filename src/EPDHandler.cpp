@@ -21,7 +21,7 @@ extern ConfigHandler &configHandler;
 unsigned long EPDHandler::_lastRunSeconds = 0;
 #define EPDPrintFormatBufferSize 5
 
-void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time)
+void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk)
 {
 	display.init(BAUDRATE);
 
@@ -82,11 +82,21 @@ void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const S
 	display.setRotation(2); // 0-3
 	char buffer[EPDPrintFormatBufferSize];
 	display.setFont(&Inter_Bold12pt7b);
-	PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
-	display.drawInvertedBitmap(line2 - 1, ab_temp - 10, bitmap_grad18, 18, 18, color_temp);
 
-	PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
-	PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.iaq);
+	if (bmeOk)
+    {
+        PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
+        display.drawInvertedBitmap(line2 - 1, ab_temp - 10, bitmap_grad18, 18, 18, color_temp);
+        PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
+        PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.iaq);
+    }
+    else
+    {
+        display.setTextColor(GxEPD_BLACK);
+        display.setCursor(line1, ab_temp); display.print("--");
+        display.setCursor(line1, ab_hum);  display.print("--");
+        display.setCursor(line1, ab_iaq);  display.print("--");
+    }
 
 	display.setFont(&Inter_Bold12pt7b);
 	display.setTextColor(color_co2);
@@ -129,7 +139,7 @@ void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const S
 	display.end();
 }
 
-void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time)
+void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk)
 {
 	display.init(BAUDRATE);
 
@@ -190,9 +200,19 @@ void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const
 	char buffer[EPDPrintFormatBufferSize];
 	display.setFont(&Inter_Bold12pt7b);
 
-	PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
-	PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
-	PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.staticIaq);
+	if (bmeOk)
+    {
+        PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
+        PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
+        PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.staticIaq);
+    }
+    else
+    {
+        display.setTextColor(GxEPD_BLACK);
+        display.setCursor(line1, ab_temp); display.print("--");
+        display.setCursor(line1, ab_hum);  display.print("--");
+        display.setCursor(line1, ab_iaq);  display.print("--");
+    }
 
 	display.setFont(&Inter_Bold12pt7b);
 	display.setTextColor(color_co2);
@@ -239,7 +259,7 @@ void EPDHandler::updateEPDvertical(const DataCO2 co2, const Bsec bme_data, const
 	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalEPD"))
 	{
 		_lastRunSeconds = currentSeconds;
-		printVertically(co2, bme_data, epd_date, epd_time);
+		printVertically(co2, bme_data, epd_date, epd_time, BME680Handler::getInstance().isSensorOk());
 	}
 }
 
@@ -248,7 +268,7 @@ void EPDHandler::updateEPDhorizontal(const DataCO2 co2, const Bsec bme_data, con
 	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalEPD"))
 	{
 		_lastRunSeconds = currentSeconds;
-		printHorizontally(co2, bme_data, epd_date, epd_time);
+		printHorizontally(co2, bme_data, epd_date, epd_time, BME680Handler::getInstance().isSensorOk());
 	}
 }
 

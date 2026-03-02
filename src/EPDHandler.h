@@ -3,6 +3,7 @@
 
 #include "DataCO2.h"
 #include "bsec.h"
+#include "BME680Handler.h"
 
 class EPDHandler
 {
@@ -16,8 +17,8 @@ public:
 	static void updateEPDhorizontal(DataCO2 co2, Bsec data, const String &epd_date, const String &epd_time, unsigned long currentSeconds);
 
 private:
-	static void printVertically(DataCO2 co2, Bsec bme_data, const String &epd_date, const String &epd_time);
-	static void printHorizontally(DataCO2 co2, Bsec bme_data, const String &epd_date, const String &epd_time);
+	static void printVertically(DataCO2 co2, Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk);
+	static void printHorizontally(DataCO2 co2, Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk);
 	EPDHandler() {};
 	EPDHandler(EPDHandler const &);
 	void operator=(EPDHandler const &);
