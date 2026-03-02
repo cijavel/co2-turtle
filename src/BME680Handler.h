@@ -18,7 +18,6 @@ public:
     void printout() const;
     bool isSensorOk() const;
     int getSensorError() const;
-    bool isRecovering() const;
 
 private:
     void checkSensorStatus() const;
