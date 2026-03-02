@@ -129,10 +129,7 @@ void LEDHandler::ledStatusBME()
 
 	if (!BME680Handler::getInstance().isSensorOk())
     {
-        if (BME680Handler::getInstance().isRecovering())
-            setSectionColor(LED_SENSORSTATE, CRGB::Orange);
-        else
-            setSectionColor(LED_SENSORSTATE, CRGB::Red);
+        setSectionColor(LED_SENSORSTATE, CRGB::Red);
         return;
     }
     setSectionColor(LED_SENSORSTATE, CRGB::Green);
