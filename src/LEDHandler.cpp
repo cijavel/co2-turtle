@@ -2,6 +2,7 @@
 #include "LEDHandler.h"
 #include "LEDsection.h"
 #include "ConfigHandler.h"
+#include "BME680Handler.h"
 extern ConfigHandler &configHandler;
 
 CRGB leds[NUM_LEDS];
@@ -10,7 +11,8 @@ CRGB leds[NUM_LEDS];
 SectionStruc sections[NUM_SECTIONS] = {
 	//{0, 6},	  // LED_TEMP
 	{0, 16},  // LED_HUM
-	{18, 19}, // LED_WLANCONNECT
+	{18, 18}, // LED_WLANCONNECT
+	{19, 19}, // LED_SENSORSTATE
 	{21, 37}  // LED_CO2
 };
 
@@ -124,6 +126,17 @@ void LEDHandler::ledStatusBME()
 			setSectionColor(LED_TEMP, CRGB::Magenta);
 		}
 	}*/
+
+	if (!BME680Handler::getInstance().isSensorOk())
+    {
+        // Sensor error – blink purple
+        setSectionColor(LED_SENSORSTATE, CRGB::Purple);
+        delay(300);
+        setSectionColor(LED_SENSORSTATE, CRGB::Black);
+        delay(300);
+        setSectionColor(LED_SENSORSTATE, CRGB::Purple);
+        return;
+    }
 
     if (bmedata.humidity)
     {
