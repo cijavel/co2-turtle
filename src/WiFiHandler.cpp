@@ -7,13 +7,13 @@
 #include "ConfigHandler.h"
 extern ConfigHandler &configHandler;
 unsigned long WiFiHandler::_lastRunSeconds = 0;
-String password;
-String ssid;
+static String _ssid;
+static String _password;
 
 void WiFiHandler::loadWiFiCredentials()
 {
-	ssid = configHandler.getConfigDevice("wlanSSID");
-	password = configHandler.getConfigDevice("wlanPASSWORD");
+    _ssid     = configHandler.getConfigDevice("wlanSSID");
+    _password = configHandler.getConfigDevice("wlanPASSWORD");
 	Serial.println("[WIFI] get credentails");
 }
 
@@ -43,7 +43,7 @@ void WiFiHandler::initWifi()
 	Serial.println(WIFI_SSID);
 #endif
 	loadWiFiCredentials();
-	WiFi.begin(ssid.c_str(), password.c_str());
+	WiFi.begin(_ssid.c_str(), _password.c_str());
 
 	while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
 	{
@@ -79,7 +79,7 @@ void WiFiHandler::ReStart()
 	loadWiFiCredentials();
 	WiFi.disconnect(true);
 	delay(100);
-	WiFi.begin(ssid.c_str(), password.c_str());
+	WiFi.begin(_ssid.c_str(), _password.c_str());
 	int wifiWaitCount = 0;
 	while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
 	{
