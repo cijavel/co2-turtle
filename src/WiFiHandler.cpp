@@ -19,8 +19,8 @@ void WiFiHandler::loadWiFiCredentials()
 
 void WiFiHandler::setupAPMode()
 {
-	const char *apSSID = "sensorturle 192.168.4.1";
-	const char *apPassword = "sensorturtle";
+	const char *apSSID = AP_SSID;
+    const char *apPassword = AP_PASSWORD;
 
 	WiFi.softAP(apSSID, apPassword);
 	Serial.println("[AP MODE] no known wifi credentials found, starting AP mode");
