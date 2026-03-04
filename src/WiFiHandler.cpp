@@ -91,29 +91,10 @@ void WiFiHandler::initWifi()
 
 void WiFiHandler::ReStart()
 {
-#ifdef DEBUG
-	Serial.println();
-	Serial.print("[WIFI] Connecting to: ");
-	Serial.println(WIFI_SSID);
-#endif
-	loadWiFiCredentials();
-	WiFi.disconnect(true);
-	delay(100);
-	WiFi.begin(_ssid.c_str(), _password.c_str());
-	int wifiWaitCount = 0;
-	while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
-	{
-		delay(250);
-		wifiWaitCount++;
-	}
-#ifdef DEBUG
-	if (WiFiClass::status() == WL_CONNECTED)
-	{
-		Serial.println();
-		Serial.print("[WIFI] still connected. IP: ");
-		Serial.println(WiFi.localIP());
-	}
-#endif
+    loadWiFiCredentials();
+    WiFi.disconnect(true);
+    delay(100);
+    connectToWifi();
 }
 
 bool WiFiHandler::StatusCheck()
