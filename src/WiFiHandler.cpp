@@ -54,6 +54,19 @@ void WiFiHandler::setupAPMode()
 	Serial.println(WiFi.softAPIP());
 }
 
+static void setupMDNS()
+{
+    String name = configHandler.getConfigDevice("deviceName");
+    name.replace(" ", "-");
+    name.toLowerCase();
+
+    if (mdns_init() == ESP_OK)
+    {
+        mdns_hostname_set(name.c_str());
+        Serial.println("[WIFI] mDNS started: http://" + name + ".local");
+    }
+}
+
 void WiFiHandler::initWifi()
 {
 	int wifiWaitCount = 0;
