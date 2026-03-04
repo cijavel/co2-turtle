@@ -69,43 +69,24 @@ static void setupMDNS()
 
 void WiFiHandler::initWifi()
 {
-	int wifiWaitCount = 0;
-	// set device for mDNS and hostname
-	String hostname = configHandler.getConfigDevice("deviceName");
-	hostname.replace(" ", "-");
-	hostname.toLowerCase();
-	WiFi.setHostname(hostname.c_str());
-	WiFi.setAutoReconnect(true);
-	WiFi.persistent(true);
-#ifdef DEBUG
-	Serial.print("\n[WIFI] Connecting to ");
-	Serial.println(WIFI_SSID);
-#endif
-	loadWiFiCredentials();
-	WiFi.begin(_ssid.c_str(), _password.c_str());
+    String hostname = configHandler.getConfigDevice("deviceName");
+    hostname.replace(" ", "-");
+    hostname.toLowerCase();
+    WiFi.setHostname(hostname.c_str());
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
 
-	while (WiFiClass::status() != WL_CONNECTED && wifiWaitCount < 20)
-	{
-		delay(250);
-		wifiWaitCount++;
-	}
-	if (WiFiClass::status() == WL_CONNECTED)
-	{
-		Serial.print("[WIFI] connected. IP address: ");
-		Serial.println(WiFi.localIP());
-		String mdnsName = configHandler.getConfigDevice("deviceName");
-		mdnsName.replace(" ", "-");
-		if (mdns_init() == ESP_OK)
-		{
-			mdns_hostname_set(mdnsName.c_str());
-			Serial.println("[WIFI] mDNS gestartet: http://" + mdnsName + ".local");
-		}
-	}
-	else
-	{
-		Serial.println("[WIFI] Starting AP mode. Please connect to the esp32 wlan");
-		setupAPMode();
-	}
+    loadWiFiCredentials();
+
+    if (connectToWifi())
+    {
+        setupMDNS();
+    }
+    else
+    {
+        Serial.println("[WIFI] No connection, starting AP mode");
+        setupAPMode();
+    }
 }
 
 void WiFiHandler::ReStart()
