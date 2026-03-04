@@ -17,6 +17,32 @@ void WiFiHandler::loadWiFiCredentials()
 	Serial.println("[WIFI] get credentails");
 }
 
+static bool connectToWifi()
+{
+    if (_ssid.isEmpty())
+    {
+        Serial.println("[WIFI] No SSID configured, skipping connection attempt");
+        return false;
+    }
+
+    WiFi.begin(_ssid.c_str(), _password.c_str());
+
+    int attempts = 0;
+    while (WiFiClass::status() != WL_CONNECTED && attempts < 20)
+    {
+        delay(250);
+        attempts++;
+    }
+
+    bool connected = (WiFiClass::status() == WL_CONNECTED);
+    if (connected)
+        Serial.println("[WIFI] Connected. IP: " + WiFi.localIP().toString());
+    else
+        Serial.println("[WIFI] Connection failed after " + String(attempts) + " attempts");
+
+    return connected;
+}
+
 void WiFiHandler::setupAPMode()
 {
 	const char *apSSID = AP_SSID;
@@ -98,13 +124,14 @@ void WiFiHandler::ReStart()
 
 bool WiFiHandler::StatusCheck()
 {
-	wl_status_t status = WiFiClass::status();
-	if (status != WL_CONNECTED)
-	{
-		ReStart();
-		Serial.println("[WIFI] restarting WiFi connection");
-	}
-	return status == WL_CONNECTED;
+    bool connected = (WiFiClass::status() == WL_CONNECTED);
+    if (!connected)
+    {
+        Serial.println("[WIFI] Connection lost, reconnecting...");
+        ReStart();
+        connected = (WiFiClass::status() == WL_CONNECTED);
+    }
+    return connected;
 }
 
 bool WiFiHandler::checkWifiStatus(unsigned long currentSeconds)
