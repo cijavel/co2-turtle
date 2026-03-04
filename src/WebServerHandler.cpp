@@ -280,11 +280,12 @@ void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *requ
 		return;
 	}
 	request->send(200, "text/html",
-    "<html><head>"
-    "<meta http-equiv='refresh' content='6;url=/'>"
-    "</head><body style='font-family:sans-serif;padding:40px'>"
-    "<h2>WLAN Einstellungen gespeichert.</h2>"
-    "<p>Weiterleitung in 6 Sekunden.</p>"
+    "<html><head></head>"
+    "<body style='font-family:sans-serif;padding:40px'>"
+    "<h2>WLAN credentials saved.</h2>"
+    "<p>The ESP32 is restarting and connecting to your network.</p>"
+    "<p>Please connect your device to the same WiFi network and navigate to "
+    "<strong>http://" + configHandler.getConfigDevice("deviceName") + ".local</strong></p>"
     "</body></html>");
 
 	xTaskCreate([](void*) {
