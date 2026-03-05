@@ -144,7 +144,6 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     display.setFont(&BabelSans8pt7b);
     display.setCursor(l.footerNameX, l.footerNameY);
     display.print(DeviceName);
-
     display.display(false);
     display.hibernate();
     display.end();
