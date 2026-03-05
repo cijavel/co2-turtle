@@ -186,10 +186,10 @@ void loop()
 	webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));
 
 	if (configHandler.getConfigSwitch("switchEPD"))
-	{
-		EPDHandler::updateEPDvertical(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
-	}
-
+    {
+        EPDHandler::getInstance().updateEPD(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
+    }
+	
 	if (configHandler.getConfigSwitch("switchLED"))
 	{
 		LEDHandler &ledHandler = LEDHandler::getInstance();
