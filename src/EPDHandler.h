@@ -50,7 +50,6 @@ private:
     EPDHandler(EPDHandler const &);
     void operator=(EPDHandler const &);
 
-
     void printLayout(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, bool bmeOk, const EPDLayout &layout);
     void printValue(char *buff, int16_t x, int16_t y, uint16_t color, float value);
 
