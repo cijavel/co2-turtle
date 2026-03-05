@@ -8,21 +8,29 @@
 class EPDHandler
 {
 public:
-	static EPDHandler &getInstance()
-	{
-		static EPDHandler instance;
-		return instance;
-	}
-	static void updateEPDvertical(DataCO2 co2, Bsec data, const String &epd_date, const String &epd_time, unsigned long currentSeconds);
-	static void updateEPDhorizontal(DataCO2 co2, Bsec data, const String &epd_date, const String &epd_time, unsigned long currentSeconds);
+    static EPDHandler &getInstance()
+    {
+        static EPDHandler instance;
+        return instance;
+    }
+
+    void updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, unsigned long currentSeconds);
+    void forceRefresh();
 
 private:
-	static void printVertically(DataCO2 co2, Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk);
-	static void printHorizontally(DataCO2 co2, Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk);
-	EPDHandler() {};
-	EPDHandler(EPDHandler const &);
-	void operator=(EPDHandler const &);
-	static void PrintEspLine(char *buff, int16_t cursorX, int16_t cursorY, uint16_t color, float toPrint);
-	static unsigned long _lastRunSeconds;
+    EPDHandler() {};
+    EPDHandler(EPDHandler const &);
+    void operator=(EPDHandler const &);
+
+    void printVertically(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, bool bmeOk);
+    void printHorizontally(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, bool bmeOk);
+    void printSensorValues(const DataCO2 &co2, const Bsec &bme_data, bool bmeOk, int16_t col1, int16_t col2, int16_t rowTemp, int16_t rowHum, int16_t rowIaq, int16_t rowCo2);
+    void printValue(char *buff, int16_t x, int16_t y, uint16_t color, float value);
+
+    static uint16_t getAlertColor(float value, float threshold);
+    static uint16_t getAlertColorInt(int value, int threshold);
+
+    unsigned long _lastRunSeconds = 0;
 };
+
 #endif // CO2_TURTLE_EPDHANDLER_H
