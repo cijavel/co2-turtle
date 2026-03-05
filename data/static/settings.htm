@@ -21,8 +21,14 @@
 <input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}}>
 </div>
 <div class="form-row">
-<label for="switchEPD">EPD Display</label>
-<input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}}>
+    <div class="form-row">
+        <label for="switchEPDorientation">EPD Orientation</label>
+        <input type="checkbox" id="switchEPDorientation" name="switchEPDorientation" {{switchEPDorientation_checked}}>
+    </div>
+    <div class="form-row">
+        <label></label>
+        <button type="button" class="btn" id="btnEPDrefresh" style="margin-top:0">Refresh Display</button>
+    </div>
 </div>
 <div class="form-row">
 <label for="switchLED">LED</label>
@@ -107,6 +113,10 @@
 </div>
 <div class="footer">&copy; 2025 SensorTurtle</div>
 <script>
+document.getElementById("btnEPDrefresh").addEventListener("click", function() {
+    fetch("/api/epd/refresh", { method: "POST" })
+    .then(function(r) { showFeedback("feedbackSettings", r.ok); });
+});
 document.addEventListener("DOMContentLoaded",function(){
 function showFeedback(id,ok){
 var el=document.getElementById(id);
