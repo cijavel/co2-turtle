@@ -189,6 +189,10 @@ void loop()
     {
         EPDHandler::getInstance().updateEPD(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
     }
+    else
+    {
+        EPDHandler::getInstance().clearDisplay();
+    }
 	
 	if (configHandler.getConfigSwitch("switchLED"))
 	{

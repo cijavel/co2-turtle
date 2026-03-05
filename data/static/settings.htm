@@ -21,14 +21,16 @@
 <input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}}>
 </div>
 <div class="form-row">
-    <div class="form-row">
-        <label for="switchEPDorientation">EPD Orientation</label>
-        <input type="checkbox" id="switchEPDorientation" name="switchEPDorientation" {{switchEPDorientation_checked}}>
-    </div>
-    <div class="form-row">
-        <label></label>
-        <button type="button" class="btn" id="btnEPDrefresh" style="margin-top:0">Refresh Display</button>
-    </div>
+    <label for="switchEPD">EPD Display</label>
+    <input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}}>
+</div>
+<div class="form-row">
+    <label for="switchEPDorientation">EPD Orientation (horizontal)</label>
+    <input type="checkbox" id="switchEPDorientation" name="switchEPDorientation" {{switchEPDorientation_checked}}>
+</div>
+<div class="form-row">
+    <label></label>
+    <button type="button" class="btn" id="btnEPDrefresh">Refresh Display</button>
 </div>
 <div class="form-row">
 <label for="switchLED">LED</label>
