@@ -200,5 +200,18 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
 
 void EPDHandler::forceRefresh()
 {
-    _lastRunSeconds = 0;
+    // Set to a value that guarantees immediate update on next loop
+    _lastRunSeconds = ULONG_MAX - (unsigned long)configHandler.getConfigInterval("intervalEPD") - 1;
+}
+
+void EPDHandler::clearDisplay()
+{
+    display.init(BAUDRATE);
+    display.fillScreen(GxEPD_WHITE);
+    display.setFullWindow();
+    display.setRotation(2);
+    display.drawInvertedBitmap(0, 248 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
+    display.display(false);
+    display.hibernate();
+    display.end();
 }
