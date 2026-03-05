@@ -9,6 +9,7 @@
 #define switch_EPD 1
 #define switch_LED 1
 #define switch_MQTT 0
+#define switch_EPD_orientation 0 // 0 = vertical, 1 = horizontal
 
 #define interval_MHZ19_in_Seconds 30
 #define interval_BME680_in_Seconds 30
