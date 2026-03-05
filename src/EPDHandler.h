@@ -58,6 +58,33 @@ struct EPDWipeParams
     EPDLayout   l;
 };
 
+struct EPDLayout
+{
+    int rotation;
+
+    // Sensor value columns
+    int colL_icon;
+    int colL_value;
+    int colL_unit;
+    int colR_icon;
+    int colR_value;
+    int colR_unit;
+
+    // Sensor rows
+    int rowTop;
+    int rowBot;
+
+    // Footer
+    int footerTurtleX;
+    int footerTurtleY;
+    int footerDateX;
+    int footerDateY;
+    int footerTimeX;
+    int footerTimeY;
+    int footerNameX;
+    int footerNameY;
+};
+
 class EPDHandler
 {
 public:
