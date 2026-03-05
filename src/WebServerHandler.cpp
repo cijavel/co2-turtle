@@ -7,6 +7,7 @@
 #include "MqttClientHandler.h"
 #include "LEDHandler.h"
 #include "BME680Handler.h"
+#include "EPDHandler.h"
 extern ConfigHandler &configHandler;
 
 WebServerHandler::WebServerHandler()
@@ -43,6 +44,8 @@ void WebServerHandler::start()
 	server.on("/submitMQTTconfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_mqttconfig(request); });
 	server.on("/api/mqtt/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_mqtt_status(request); });
 	server.on("/api/system/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_system_status(request); });
+
+	server.on("/api/epd/refresh", HTTP_POST, [this](AsyncWebServerRequest *request) {EPDHandler::getInstance().forceRefresh(); request->send(200, "text/plain", "ok");});
 
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
@@ -229,6 +232,7 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 
 	content.replace("{{switchWIFI_checked}}", configHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
 	content.replace("{{switchEPD_checked}}", configHandler.getConfigSwitch("switchEPD") ? "checked" : "");
+	content.replace("{{switchEPDorientation_checked}}", configHandler.getConfigSwitch("switchEPDorientation") ? "checked" : "");
 	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
 
 	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
@@ -357,6 +361,7 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	if (request->hasParam("switchEPD"))
 	{
 		configHandler.setConfigSwitch("switchEPD", atoi(request->getParam("switchEPD")->value().c_str()));
+		configHandler.setConfigSwitch("switchEPDorientation", request->hasParam("switchEPDorientation") ? 1 : 0);
 	}
 	if (request->hasParam("switchLED"))
 	{
