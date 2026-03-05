@@ -58,15 +58,16 @@ EPDLayout EPDHandler::horizontalLayout()
     l.rotation    = 1;
     l.colL_icon   = 0;
     l.colL_value  = 30;
-    l.colL_unit   = 95;
+    l.colL_unit   = 90;
+
     l.colR_icon   = 130;
     l.colR_value  = 160;
-    l.colR_unit   = 200;
+    l.colR_unit   = 225;
     l.rowTop      = 20;
     l.rowBot      = 52;
     l.footerTurtleX = 2;   l.footerTurtleY = 104;
     l.footerDateX   = 2;   l.footerDateY   = 100;
-    l.footerTimeX   = 50;  l.footerTimeY   = 100;
+    l.footerTimeX   = 70;  l.footerTimeY   = 100;
     l.footerNameX   = 22;  l.footerNameY   = 118;
     return l;
 }
@@ -121,6 +122,7 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     snprintf(buffer, sizeof(buffer), "%d", co2.getRegular());
     display.print(buffer);
     display.drawInvertedBitmap(l.colR_unit, l.rowTop - 16, bitmap_ppm18, 18, 18, color_co2);
+    display.drawInvertedBitmap(l.colR_unit, l.rowBot - 16, bitmap_iaq, 18, 18, color_aiq);
 
     if (bmeOk)
         printValue(buffer, l.colR_value, l.rowBot, color_aiq, bme_data.staticIaq);
