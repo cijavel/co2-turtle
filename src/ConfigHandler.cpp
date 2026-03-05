@@ -15,6 +15,7 @@ void ConfigHandler::loadAllPersistedSettings()
 	preferences.begin("config", true);
 		configMapforSwitch["switchWIFI"] = preferences.getBool("switchWIFI", switch_WIFI);
 		configMapforSwitch["switchEPD"] = preferences.getBool("switchEPD", switch_EPD);
+		configMapforSwitch["switchEPDorientation"] = preferences.getBool("switchEPDori", switch_EPD_orientation);
 		configMapforSwitch["switchLED"] = preferences.getBool("switchLED", switch_LED);
 		configMapforSwitch["switchMQTT"] = preferences.getBool("switchMQTT", switch_MQTT);
 
@@ -45,7 +46,7 @@ void ConfigHandler::loadAllPersistedSettings()
 
 void ConfigHandler::validateConfigMaps()
 {
-    for (const auto& key : {"switchWIFI", "switchEPD", "switchLED", "switchMQTT"})
+    for (const auto& key : {"switchWIFI", "switchEPD", "switchEPDorientation", "switchLED", "switchMQTT"})
     {
         if (configMapforSwitch.find(key) == configMapforSwitch.end())
         {
@@ -89,6 +90,7 @@ void ConfigHandler::persistAllSettings()
 	preferences.begin("config", false);
 	preferences.putBool("switchWIFI", configMapforSwitch["switchWIFI"]);
 	preferences.putBool("switchEPD", configMapforSwitch["switchEPD"]);
+	preferences.putBool("switchEPDori", configMapforSwitch["switchEPDorientation"]);
 	preferences.putBool("switchLED", configMapforSwitch["switchLED"]);
 	preferences.putBool("switchMQTT", configMapforSwitch["switchMQTT"]);
 
@@ -125,6 +127,7 @@ void ConfigHandler::restoreDefaultConfiguration()
 
 	preferences.putBool("switchWIFI", switch_WIFI);
 	preferences.putBool("switchEPD", switch_EPD);
+	preferences.putBool("switchEPDori", switch_EPD_orientation);
 	preferences.putBool("switchLED", switch_LED);
 	preferences.putBool("switchMQTT", switch_MQTT);
 
