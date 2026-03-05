@@ -5,277 +5,200 @@
 #include "../font/BabelSans8pt7b.h"
 #include "../font/BabelSans9pt7b.h"
 #include "../font/BabelSans10pt7b.h"
-#include "../font/Inter_Regular12pt7b.h"
-#include "../font/Inter_Regular11pt7b.h"
 #include "../font/Inter_Regular10pt7b.h"
 #include "../font/Inter_Regular8pt7b.h"
-#include "../font/Inter_Regular7pt7b.h"
-
 #include "../font/Inter_Bold12pt7b.h"
-#include "../font/Inter_Bold10pt7b.h"
-
 #include "Configuration.h"
-#include "symbol.h" // own symbol
+#include "symbol.h"
 
 extern ConfigHandler &configHandler;
-unsigned long EPDHandler::_lastRunSeconds = 0;
-#define EPDPrintFormatBufferSize 5
 
-void EPDHandler::printVertically(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk)
+#define EPD_FLOAT_BUFFER_SIZE 8  // enough for "-123.4\0"
+
+// Returns GxEPD_RED if value exceeds threshold, otherwise GxEPD_BLACK
+uint16_t EPDHandler::getAlertColor(float value, float threshold)
 {
-	display.init(BAUDRATE);
+    return (value >= threshold) ? GxEPD_RED : GxEPD_BLACK;
+}
 
-	uint16_t color_temp = GxEPD_BLACK;
-	uint16_t color_hum = GxEPD_BLACK;
-	uint16_t color_aiq = GxEPD_BLACK;
-	uint16_t color_co2 = GxEPD_BLACK;
+uint16_t EPDHandler::getAlertColorInt(int value, int threshold)
+{
+    return (value >= threshold) ? GxEPD_RED : GxEPD_BLACK;
+}
 
-	// Lines
-	int16_t line0 = 0;
-	int16_t line1 = 32;
-	int16_t line2 = 104;
+// Prints a single float value at the given position with color
+void EPDHandler::printValue(char *buff, int16_t x, int16_t y, uint16_t color, float value)
+{
+    display.setTextColor(color);
+    display.setCursor(x, y);
+    snprintf(buff, EPD_FLOAT_BUFFER_SIZE, "%.1f", value);
+    display.print(buff);
+}
 
-	// Abstand
-	int16_t ab_temp = 35;
-	int16_t ab_hum = 35 + 45;
-	int16_t ab_iaq = 35 + 45 + 45;
-	int16_t ab_co2 = 35 + 45 + 45 + 45;
+void EPDHandler::printVertically(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, bool bmeOk)
+{
+    display.init(BAUDRATE);
+    display.fillScreen(GxEPD_WHITE);
+    display.setFullWindow();
+    display.setRotation(2);
 
+    const int16_t col0 = 0;
+    const int16_t col1 = 32;
+    const int16_t col2 = 104;
+    const int16_t rowTemp = 35;
+    const int16_t rowHum  = 35 + 45;
+    const int16_t rowIaq  = 35 + 90;
+    const int16_t rowCo2  = 35 + 135;
 
-	if (bme_data.temperature < 26)
-	{
-		color_temp = GxEPD_BLACK;
-	}
-	else
-	{
-		color_temp = GxEPD_RED;
-	}
-	if (bme_data.humidity < 70)
-	{
-		color_hum = GxEPD_BLACK;
-	}
-	else
-	{
-		color_hum = GxEPD_RED;
-	}
-	if (bme_data.iaq < 300)
-	{
-		color_aiq = GxEPD_BLACK;
-	}
-	else
-	{
-		color_aiq = GxEPD_RED;
-	}
-	if (co2.getRegular() < 1500)
-	{
-		color_co2 = GxEPD_BLACK;
-	}
-	else
-	{
-		color_co2 = GxEPD_RED;
-	}
+    uint16_t color_temp = getAlertColor(bme_data.temperature, 26);
+    uint16_t color_hum  = getAlertColor(bme_data.humidity, 70);
+    uint16_t color_aiq  = getAlertColorInt((int)bme_data.iaq, 300);
+    uint16_t color_co2  = getAlertColorInt(co2.getRegular(), 1500);
 
-	display.fillScreen(GxEPD_WHITE); // set the background to white (fill the buffer with value for white)
-	display.setFullWindow();
-	display.setCursor(0, 0);
+    char buffer[EPD_FLOAT_BUFFER_SIZE];
+    display.setFont(&Inter_Bold12pt7b);
 
-	display.setRotation(2); // 0-3
-	char buffer[EPDPrintFormatBufferSize];
-	display.setFont(&Inter_Bold12pt7b);
-
-	if (bmeOk)
+    if (bmeOk)
     {
-        PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
-        display.drawInvertedBitmap(line2 - 1, ab_temp - 10, bitmap_grad18, 18, 18, color_temp);
-        PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
-        PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.iaq);
+        printValue(buffer, col1, rowTemp, color_temp, bme_data.temperature);
+        display.drawInvertedBitmap(col2 - 1, rowTemp - 10, bitmap_grad18, 18, 18, color_temp);
+        printValue(buffer, col1, rowHum, color_hum, bme_data.humidity);
+        printValue(buffer, col1, rowIaq, color_aiq, bme_data.iaq);
     }
     else
     {
         display.setTextColor(GxEPD_BLACK);
-        display.setCursor(line1, ab_temp); display.print("--");
-        display.setCursor(line1, ab_hum);  display.print("--");
-        display.setCursor(line1, ab_iaq);  display.print("--");
+        display.setCursor(col1, rowTemp); display.print("--");
+        display.setCursor(col1, rowHum);  display.print("--");
+        display.setCursor(col1, rowIaq);  display.print("--");
     }
 
-	display.setFont(&Inter_Bold12pt7b);
-	display.setTextColor(color_co2);
-	display.setCursor(line1, ab_co2 + 5);
-	snprintf(buffer, sizeof buffer, "%d", co2.getRegular());
-	display.print(buffer);
+    display.setFont(&Inter_Bold12pt7b);
+    display.setTextColor(color_co2);
+    display.setCursor(col1, rowCo2 + 5);
+    snprintf(buffer, sizeof(buffer), "%d", co2.getRegular());
+    display.print(buffer);
 
-	display.setFont(&Inter_Regular8pt7b);
-	display.setTextColor(color_hum);
-	display.setCursor(line2, ab_hum);
-	display.print("%");
+    display.setFont(&Inter_Regular8pt7b);
+    display.setTextColor(color_hum);
+    display.setCursor(col2, rowHum);
+    display.print("%");
 
-	display.setTextColor(color_aiq);
-	display.setCursor(line2, ab_iaq);
-	display.drawInvertedBitmap(line2, ab_iaq - 10, bitmap_iaq, 18, 18, color_aiq);
-	display.drawInvertedBitmap(line2, ab_co2 - 10, bitmap_ppm18, 18, 18, color_co2);
-	display.drawInvertedBitmap(line0, ab_temp - 20, bitmap_temp, 24, 24, color_temp);
-	display.drawInvertedBitmap(line0, ab_hum - 20, bitmap_hum, 24, 24, color_hum);
-	display.drawInvertedBitmap(line0, ab_iaq - 20, bitmap_aiq, 24, 24, color_aiq);
-	display.drawInvertedBitmap(line0, ab_co2 - 14, bitmap_CO2, 24, 24, color_co2);
+    display.drawInvertedBitmap(col2,  rowIaq - 10,  bitmap_iaq,   18, 18, color_aiq);
+    display.drawInvertedBitmap(col2,  rowCo2 - 10,  bitmap_ppm18, 18, 18, color_co2);
+    display.drawInvertedBitmap(col0,  rowTemp - 20, bitmap_temp,  24, 24, color_temp);
+    display.drawInvertedBitmap(col0,  rowHum - 20,  bitmap_hum,   24, 24, color_hum);
+    display.drawInvertedBitmap(col0,  rowIaq - 20,  bitmap_aiq,   24, 24, color_aiq);
+    display.drawInvertedBitmap(col0,  rowCo2 - 14,  bitmap_CO2,   24, 24, color_co2);
 
-	display.setRotation(2); // 0-3
-	display.setTextColor(GxEPD_BLACK);
+    display.setRotation(2);
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(&BabelSans8pt7b);
+    display.setCursor(col0, 228);
+    display.print(epd_date);
 
-	display.setFont(&BabelSans8pt7b);
-	display.setCursor(line0, 228);
-	display.print(epd_date);
+    display.setFont(&BabelSans10pt7b);
+    display.setCursor(col0 + 80, 228);
+    display.print(epd_time);
 
-	display.setFont(&BabelSans10pt7b);
-	display.setCursor(line0 + 80, 228);
-	display.print(epd_time);
+    display.setFont(&BabelSans8pt7b);
+    display.setCursor(col0 + 20, 248);
+    display.print(DeviceName);
+    display.drawInvertedBitmap(col0, 248 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
 
-	display.setFont(&BabelSans8pt7b);
-	display.setCursor(line0 + 20, 248);
-	display.print(DeviceName);
-	display.drawInvertedBitmap(line0, 248 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
-
-	display.hibernate();
-	display.display(false);
-	display.end();
+    display.display(false);
+    display.hibernate();
+    display.end();
 }
 
-void EPDHandler::printHorizontally(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, bool bmeOk)
+void EPDHandler::printHorizontally(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, bool bmeOk)
 {
-	display.init(BAUDRATE);
+    display.init(BAUDRATE);
+    display.fillScreen(GxEPD_WHITE);
+    display.setFullWindow();
+    display.setRotation(1);
 
-	uint16_t color_temp = GxEPD_BLACK;
-	uint16_t color_hum = GxEPD_BLACK;
-	uint16_t color_aiq = GxEPD_BLACK;
-	uint16_t color_co2 = GxEPD_BLACK;
+    const int col1 = 30;
+    const int col2 = 90;
+    const int rowTemp = 20;
+    const int rowHum  = 52;
+    const int rowIaq  = 86;
+    const int rowCo2  = 115;
 
-	// Lines
-	int line1 = 30;
-	int line2 = 90;
+    uint16_t color_temp = getAlertColor(bme_data.temperature, 26);
+    uint16_t color_hum  = getAlertColor(bme_data.humidity, 70);
+    uint16_t color_aiq  = getAlertColorInt((int)bme_data.iaq, 300);
+    uint16_t color_co2  = getAlertColorInt(co2.getRegular(), 1500);
 
-	// Abstand
-	int ab_temp = 20;
-	int ab_hum = 52;
-	int ab_iaq = 86;
-	int ab_co2 = 115;
+    char buffer[EPD_FLOAT_BUFFER_SIZE];
+    display.setFont(&Inter_Bold12pt7b);
 
-	// Limit
-	if (bme_data.temperature < 26)
-	{
-		color_temp = GxEPD_BLACK;
-	}
-	else
-	{
-		color_temp = GxEPD_RED;
-	}
-	if (bme_data.humidity < 70)
-	{
-		color_hum = GxEPD_BLACK;
-	}
-	else
-	{
-		color_hum = GxEPD_RED;
-	}
-	if (bme_data.iaq < 300)
-	{
-		color_aiq = GxEPD_BLACK;
-	}
-	else
-	{
-		color_aiq = GxEPD_RED;
-	}
-	if (co2.getRegular() < 1500)
-	{
-		color_co2 = GxEPD_BLACK;
-	}
-	else
-	{
-		color_co2 = GxEPD_RED;
-	}
-
-	display.fillScreen(GxEPD_WHITE); // set the background to white (fill the buffer with value for white)
-	display.setFullWindow();
-	display.setCursor(0, 0);
-
-	display.setRotation(1); // 0-3
-	char buffer[EPDPrintFormatBufferSize];
-	display.setFont(&Inter_Bold12pt7b);
-
-	if (bmeOk)
+    if (bmeOk)
     {
-        PrintEspLine(buffer, line1, ab_temp, color_temp, bme_data.temperature);
-        PrintEspLine(buffer, line1, ab_hum, color_hum, bme_data.humidity);
-        PrintEspLine(buffer, line1, ab_iaq, color_aiq, bme_data.staticIaq);
+        printValue(buffer, col1, rowTemp, color_temp, bme_data.temperature);
+        printValue(buffer, col1, rowHum,  color_hum,  bme_data.humidity);
+        printValue(buffer, col1, rowIaq,  color_aiq,  bme_data.staticIaq);
     }
     else
     {
         display.setTextColor(GxEPD_BLACK);
-        display.setCursor(line1, ab_temp); display.print("--");
-        display.setCursor(line1, ab_hum);  display.print("--");
-        display.setCursor(line1, ab_iaq);  display.print("--");
+        display.setCursor(col1, rowTemp); display.print("--");
+        display.setCursor(col1, rowHum);  display.print("--");
+        display.setCursor(col1, rowIaq);  display.print("--");
     }
 
-	display.setFont(&Inter_Bold12pt7b);
-	display.setTextColor(color_co2);
-	display.setCursor(line1, ab_co2 + 5);
-	snprintf(buffer, sizeof buffer, "%d", co2.getRegular());
-	display.print(buffer);
+    display.setFont(&Inter_Bold12pt7b);
+    display.setTextColor(color_co2);
+    display.setCursor(col1, rowCo2 + 5);
+    snprintf(buffer, sizeof(buffer), "%d", co2.getRegular());
+    display.print(buffer);
 
-	display.setFont(&Inter_Regular10pt7b);
+    display.setFont(&Inter_Regular10pt7b);
+    display.setTextColor(color_hum);
+    display.setCursor(col2, rowHum);
+    display.print(" %");
 
-	display.setTextColor(color_hum);
-	display.setCursor(line2, ab_hum);
-	display.print(" %");
+    display.drawInvertedBitmap(col2 + 5, rowIaq  - 10, bitmap_iaq,   18, 18, color_aiq);
+    display.drawInvertedBitmap(col2 + 5, rowCo2  - 10, bitmap_ppm18, 18, 18, color_co2);
+    display.drawInvertedBitmap(col2 + 5, rowTemp - 20, bitmap_grad,  24, 24, color_temp);
+    display.drawInvertedBitmap(0, rowTemp - 20, bitmap_temp, 24, 24, color_temp);
+    display.drawInvertedBitmap(0, rowHum  - 20, bitmap_hum,  24, 24, color_hum);
+    display.drawInvertedBitmap(0, rowIaq  - 20, bitmap_aiq,  24, 24, color_aiq);
+    display.drawInvertedBitmap(0, rowCo2  - 14, bitmap_CO2,  24, 24, color_co2);
 
-	display.drawInvertedBitmap(line2 + 5, ab_iaq - 10, bitmap_iaq, 18, 18, color_aiq);
-	display.drawInvertedBitmap(line2 + 5, ab_co2 - 10, bitmap_ppm18, 18, 18, color_co2);
-	display.drawInvertedBitmap(line2 + 5, ab_temp - 20, bitmap_grad, 24, 24, color_temp);
-	display.drawInvertedBitmap(0, ab_temp - 20, bitmap_temp, 24, 24, color_temp);
-	display.drawInvertedBitmap(0, ab_hum - 20, bitmap_hum, 24, 24, color_hum);
-	display.drawInvertedBitmap(0, ab_iaq - 20, bitmap_aiq, 24, 24, color_aiq);
-	display.drawInvertedBitmap(0, ab_co2 - 14, bitmap_CO2, 24, 24, color_co2);
+    display.setRotation(1);
+    display.setFont(&BabelSans9pt7b);
+    display.setTextColor(GxEPD_BLACK);
+    display.setCursor(140, 14);
+    display.print(epd_time);
+    display.setCursor(200, 14);
+    display.print(epd_date);
+    display.setCursor(140 + 20, 32);
+    display.setFont(&BabelSans8pt7b);
+    display.print(DeviceName);
+    display.drawInvertedBitmap(140, 32 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
 
-	display.setRotation(1); // 0-3
-	display.setFont(&BabelSans9pt7b);
-	display.setTextColor(GxEPD_BLACK);
-	display.setCursor(140, 14);
-	display.print(epd_time);
-
-	display.setFont(&BabelSans9pt7b);
-	display.setTextColor(GxEPD_BLACK);
-	display.setCursor(200, 14);
-	display.print(epd_date);
-
-	display.setCursor(140 + 20, 32);
-	display.setFont(&BabelSans8pt7b);
-	display.print(DeviceName);
-	display.drawInvertedBitmap(140, 32 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
-
-	display.display(false);
-	display.hibernate();
+    display.display(false);
+    display.hibernate();
+    display.end();
 }
 
-void EPDHandler::updateEPDvertical(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, const unsigned long currentSeconds)
+void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, unsigned long currentSeconds)
 {
-	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalEPD"))
-	{
-		_lastRunSeconds = currentSeconds;
-		printVertically(co2, bme_data, epd_date, epd_time, BME680Handler::getInstance().isSensorOk());
-	}
+    if (currentSeconds - _lastRunSeconds < (unsigned long)configHandler.getConfigInterval("intervalEPD"))
+        return;
+
+    _lastRunSeconds = currentSeconds;
+    bool bmeOk = BME680Handler::getInstance().isSensorOk();
+    bool horizontal = configHandler.getConfigSwitch("switchEPDorientation");
+
+    if (horizontal)
+        printHorizontally(co2, bme_data, epd_date, epd_time, bmeOk);
+    else
+        printVertically(co2, bme_data, epd_date, epd_time, bmeOk);
 }
 
-void EPDHandler::updateEPDhorizontal(const DataCO2 co2, const Bsec bme_data, const String &epd_date, const String &epd_time, const unsigned long currentSeconds)
+void EPDHandler::forceRefresh()
 {
-	if (currentSeconds - _lastRunSeconds >= (unsigned long)configHandler.getConfigInterval("intervalEPD"))
-	{
-		_lastRunSeconds = currentSeconds;
-		printHorizontally(co2, bme_data, epd_date, epd_time, BME680Handler::getInstance().isSensorOk());
-	}
-}
-
-void EPDHandler::PrintEspLine(char *buff, int16_t cursorX, int16_t cursorY, uint16_t color, float toPrint)
-{
-	display.setTextColor(color);
-	display.setCursor(cursorX, cursorY);
-	snprintf(buff, EPDPrintFormatBufferSize, "%f", toPrint);
-	display.print(buff);
+    _lastRunSeconds = 0;
 }
