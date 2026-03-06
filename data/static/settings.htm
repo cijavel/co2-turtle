@@ -34,14 +34,13 @@
     </select>
 </div>
 <div class="form-row">
-    <label></label>
+    <label for="switchLED">LED</label>
+    <input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}}>
+</div>
+<div style="display:flex;gap:8px;align-items:center;">
+    <button type="submit" class="btn">Save Settings</button>
     <button type="button" class="btn" id="btnEPDrefresh">Refresh Display</button>
 </div>
-<div class="form-row">
-<label for="switchLED">LED</label>
-<input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}}>
-</div>
-<button type="submit" class="btn">Save Settings</button>
 <div class="form-feedback" id="feedbackSwitch"></div>
 </form>
 
@@ -121,8 +120,13 @@
 <div class="footer">&copy; 2025 SensorTurtle</div>
 <script>
 document.getElementById("btnEPDrefresh").addEventListener("click", function() {
-    fetch("/api/epd/refresh", { method: "POST" })
-    .then(function(r) { showFeedback("feedbackSettings", r.ok); });
+    var form = document.getElementById("moduleSwitchForm");
+    var data = new FormData(form);
+    fetch("/submitmodulswitch", { method: "POST", body: data })
+    .then(function() {
+        return fetch("/api/epd/refresh", { method: "POST" });
+    })
+    .then(function(r) { showFeedback("feedbackSwitch", r.ok); });
 });
 document.addEventListener("DOMContentLoaded",function(){
 function showFeedback(id,ok){
