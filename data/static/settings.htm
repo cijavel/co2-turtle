@@ -121,8 +121,12 @@
 <script>
 document.getElementById("btnEPDrefresh").addEventListener("click", function() {
     var form = document.getElementById("moduleSwitchForm");
-    var data = new FormData(form);
-    fetch("/submitmodulswitch", { method: "POST", body: data })
+    var data = new URLSearchParams(new FormData(form)).toString();
+    fetch("/submitmodulswitch", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: data
+    })
     .then(function() {
         return fetch("/api/epd/refresh", { method: "POST" });
     })
