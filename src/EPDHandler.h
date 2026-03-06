@@ -73,6 +73,8 @@ struct EPDLayout
     // Sensor rows
     int rowTop;
     int rowBot;
+    int rowTop2;
+    int rowBot2;
 
     // Footer
     int footerTurtleX;
