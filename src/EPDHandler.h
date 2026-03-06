@@ -45,7 +45,7 @@ public:
 
     void updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, unsigned long currentSeconds);
     void forceRefresh();
-    void clearDisplay();
+    void wipeDisplay();
 
 private:
     EPDHandler() {};
