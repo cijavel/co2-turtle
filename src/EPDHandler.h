@@ -61,6 +61,7 @@ private:
     static uint16_t getAlertColorInt(int value, int threshold);
 
     unsigned long _lastRunSeconds = 0;
+    bool _wiped = false;
 };
 
 #endif // CO2_TURTLE_EPDHANDLER_H
