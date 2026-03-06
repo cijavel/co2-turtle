@@ -232,8 +232,13 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 
 	content.replace("{{switchWIFI_checked}}", configHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
 	content.replace("{{switchEPD_checked}}", configHandler.getConfigSwitch("switchEPD") ? "checked" : "");
-	content.replace("{{switchEPDorientation_checked}}", configHandler.getConfigSwitch("switchEPDorientation") ? "checked" : "");
 	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
+
+	int epdOri = configHandler.getConfigSwitch("switchEPDorientation");
+	content.replace("{{epdOrientation_0}}", epdOri == 0 ? "selected" : "");
+	content.replace("{{epdOrientation_1}}", epdOri == 1 ? "selected" : "");
+	content.replace("{{epdOrientation_2}}", epdOri == 2 ? "selected" : "");
+	content.replace("{{epdOrientation_3}}", epdOri == 3 ? "selected" : "");
 
 	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
 	content.replace("{{SEALEVELPRESSURE_HPA}}", String(configHandler.getConfigSensor("pressure")));
@@ -361,7 +366,10 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	if (request->hasParam("switchEPD"))
 	{
 		configHandler.setConfigSwitch("switchEPD", atoi(request->getParam("switchEPD")->value().c_str()));
-		configHandler.setConfigSwitch("switchEPDorientation", request->hasParam("switchEPDorientation") ? 1 : 0);
+		if (request->hasParam("switchEPDorientation", true))
+		{
+    		configHandler.setConfigSwitch("switchEPDorientation", request->getParam("switchEPDorientation", true)->value().toInt());
+		}
 	}
 	if (request->hasParam("switchLED"))
 	{
