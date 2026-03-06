@@ -246,7 +246,6 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 
 	content.replace("{{switchWIFI_checked}}", configHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
 	content.replace("{{switchEPD_checked}}", configHandler.getConfigSwitch("switchEPD") ? "checked" : "");
-	content.replace("{{switchEPDorientation_checked}}", configHandler.getConfigSwitch("switchEPDorientation") ? "checked" : "");
 	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
 
 	int epdOri = configHandler.getConfigSwitch("switchEPDorientation");
