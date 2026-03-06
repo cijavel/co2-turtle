@@ -36,42 +36,97 @@ void EPDHandler::printValue(char *buff, int16_t x, int16_t y, uint16_t color, fl
 EPDLayout EPDHandler::verticalLayout(int rotation)
 {
     EPDLayout l;
-    l.rotation    = rotation;
-    l.colL_icon   = 0;
-    l.colL_value  = 32;
-    l.colL_unit   = 104;
-    l.colR_icon   = 0;
-    l.colR_value  = 32;
-    l.colR_unit   = 104;
-    l.rowTop      = 35;
-    l.rowBot      = 80;
-    l.rowTop2     = 125;
-    l.rowBot2     = 170;
-    l.footerTurtleX = 0;  l.footerTurtleY = 234;
-    l.footerDateX   = 0;  l.footerDateY   = 228;
-    l.footerTimeX   = 80; l.footerTimeY   = 228;
-    l.footerNameX   = 20; l.footerNameY   = 248;
+    l.rotation = rotation;
+
+    if (rotation == 2) // vertical 90° – origin top-left
+    {
+        l.colL_icon   = 0;
+        l.colL_value  = 32;
+        l.colL_unit   = 104;
+        l.colR_icon   = 0;
+        l.colR_value  = 32;
+        l.colR_unit   = 104;
+        l.rowTop      = 35;
+        l.rowBot      = 80;
+        l.rowTop2     = 125;
+        l.rowBot2     = 170;
+        l.footerTurtleX = 0;  l.footerTurtleY = 234;
+        l.footerDateX   = 0;  l.footerDateY   = 228;
+        l.footerTimeX   = 80; l.footerTimeY   = 228;
+        l.footerNameX   = 20; l.footerNameY   = 248;
+    }
+    else // rotation == 0, vertical 270° – origin bottom-right, mirror all coords
+    // Display is 122wide x 250high. Mirrored: x = 122-x-w, y = 250-y-h
+    {
+        l.colL_icon   = 122 - 0   - 24; // 98
+        l.colL_value  = 122 - 32  - 30; // 60  (approx text width 30)
+        l.colL_unit   = 122 - 104 - 18; // 0
+        l.colR_icon   = 122 - 0   - 24; // 98
+        l.colR_value  = 122 - 32  - 30; // 60
+        l.colR_unit   = 122 - 104 - 18; // 0
+        l.rowTop      = 250 - 35  - 20; // 195
+        l.rowBot      = 250 - 80  - 20; // 150
+        l.rowTop2     = 250 - 125 - 20; // 105
+        l.rowBot2     = 250 - 170 - 20; // 60
+        l.footerTurtleX = 122 - 0  - 18; // 104
+        l.footerTurtleY = 250 - 234 - 18; // -2 → use 0
+        l.footerTurtleY = 2;
+        l.footerDateX   = 122 - 0  - 50; // 72  (approx date text width 50)
+        l.footerDateY   = 250 - 228 - 12; // 10
+        l.footerTimeX   = 122 - 80 - 40; // 2
+        l.footerTimeY   = 250 - 228 - 12; // 10
+        l.footerNameX   = 122 - 20 - 60; // 42
+        l.footerNameY   = 250 - 248 - 10; // -8 → use 2
+        l.footerNameY   = 12;
+    }
     return l;
 }
 
 EPDLayout EPDHandler::horizontalLayout(int rotation)
 {
     EPDLayout l;
-    l.rotation    = rotation;
-    l.colL_icon   = 0;
-    l.colL_value  = 30;
-    l.colL_unit   = 90;
-    l.colR_icon   = 130;
-    l.colR_value  = 160;
-    l.colR_unit   = 225;
-    l.rowTop      = 20;
-    l.rowBot      = 52;
-    l.rowTop2     = l.rowTop;
-    l.rowBot2     = l.rowBot;
-    l.footerTurtleX = 2;  l.footerTurtleY = 104;
-    l.footerDateX   = 2;  l.footerDateY   = 100;
-    l.footerTimeX   = 70; l.footerTimeY   = 100;
-    l.footerNameX   = 22; l.footerNameY   = 118;
+    l.rotation = rotation;
+
+    if (rotation == 1) // horizontal 90° – origin top-left
+    {
+        l.colL_icon   = 0;
+        l.colL_value  = 30;
+        l.colL_unit   = 90;
+        l.colR_icon   = 130;
+        l.colR_value  = 160;
+        l.colR_unit   = 225;
+        l.rowTop      = 20;
+        l.rowBot      = 52;
+        l.rowTop2     = l.rowTop;
+        l.rowBot2     = l.rowBot;
+        l.footerTurtleX = 2;  l.footerTurtleY = 104;
+        l.footerDateX   = 2;  l.footerDateY   = 100;
+        l.footerTimeX   = 70; l.footerTimeY   = 100;
+        l.footerNameX   = 22; l.footerNameY   = 118;
+    }
+    else // rotation == 3, horizontal 270° – origin bottom-right
+    // Display is 250wide x 122high in landscape. Mirrored: x = 250-x-w, y = 122-y-h
+    {
+        l.colL_icon   = 250 - 0   - 24; // 226
+        l.colL_value  = 250 - 30  - 30; // 190
+        l.colL_unit   = 250 - 90  - 18; // 142
+        l.colR_icon   = 250 - 130 - 24; // 96
+        l.colR_value  = 250 - 160 - 30; // 60
+        l.colR_unit   = 250 - 225 - 18; // 7
+        l.rowTop      = 122 - 20  - 20; // 82
+        l.rowBot      = 122 - 52  - 20; // 50
+        l.rowTop2     = l.rowTop;
+        l.rowBot2     = l.rowBot;
+        l.footerTurtleX = 250 - 2  - 18; // 230
+        l.footerTurtleY = 122 - 104 - 18; // 0
+        l.footerDateX   = 250 - 2  - 50; // 198
+        l.footerDateY   = 122 - 100 - 12; // 10
+        l.footerTimeX   = 250 - 70 - 40; // 140
+        l.footerTimeY   = 122 - 100 - 12; // 10
+        l.footerNameX   = 250 - 22 - 60; // 168
+        l.footerNameY   = 122 - 118 - 10; // -6 → use 4
+        l.footerNameY   = 4;
+    }
     return l;
 }
 
