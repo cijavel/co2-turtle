@@ -81,8 +81,8 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
 
     uint16_t color_temp = getAlertColor(bme_data.temperature, 26);
     uint16_t color_hum  = getAlertColor(bme_data.humidity, 70);
-    uint16_t color_aiq  = getAlertColorInt((int)bme_data.iaq, 300);
-    uint16_t color_co2  = getAlertColorInt(co2.getRegular(), 1500);
+    uint16_t color_iaq = getAlertColor(bme_data.iaq, 300);
+    uint16_t color_co2 = getAlertColor(co2.getRegular(), 1500);
 
     char buffer[EPD_FLOAT_BUFFER_SIZE];
     display.setFont(&Inter_Bold12pt7b);
@@ -113,7 +113,7 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
 
     // Right column icons
     display.drawInvertedBitmap(l.colR_icon, l.rowTop - 20, bitmap_CO2, 24, 24, color_co2);
-    display.drawInvertedBitmap(l.colR_icon, l.rowBot - 20, bitmap_aiq, 24, 24, color_aiq);
+    display.drawInvertedBitmap(l.colR_icon, l.rowBot - 20, bitmap_aiq, 24, 24, color_iaq);
 
     // Right column values: CO2 (top), IAQ (bottom)
     display.setFont(&Inter_Bold12pt7b);
@@ -122,10 +122,10 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     snprintf(buffer, sizeof(buffer), "%d", co2.getRegular());
     display.print(buffer);
     display.drawInvertedBitmap(l.colR_unit, l.rowTop - 16, bitmap_ppm18, 18, 18, color_co2);
-    display.drawInvertedBitmap(l.colR_unit, l.rowBot - 16, bitmap_iaq, 18, 18, color_aiq);
+    display.drawInvertedBitmap(l.colR_unit, l.rowBot - 16, bitmap_iaq, 18, 18, color_iaq);
 
     if (bmeOk)
-        printValue(buffer, l.colR_value, l.rowBot, color_aiq, bme_data.staticIaq);
+        printValue(buffer, l.colR_value, l.rowBot, color_iaq, bme_data.staticIaq);
     else
     {
         display.setTextColor(GxEPD_BLACK);
