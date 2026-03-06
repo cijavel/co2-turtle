@@ -191,7 +191,7 @@ void loop()
     }
     else
     {
-        EPDHandler::getInstance().clearDisplay();
+        EPDHandler::getInstance().wipeDisplay();
     }
 	
 	if (configHandler.getConfigSwitch("switchLED"))
