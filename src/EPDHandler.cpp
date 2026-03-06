@@ -172,20 +172,21 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
     printLayout(co2, bme_data, epd_date, epd_time, bmeOk, layout);
 }
 
-void EPDHandler::forceRefresh()
+void EPDHandler::wipeDisplay()
 {
-    // Set to a value that guarantees immediate update on next loop
-    _lastRunSeconds = ULONG_MAX - (unsigned long)configHandler.getConfigInterval("intervalEPD") - 1;
-}
-
-void EPDHandler::clearDisplay()
-{
+    if (_wiped) return;  // only wipe once
     display.init(BAUDRATE);
     display.fillScreen(GxEPD_WHITE);
     display.setFullWindow();
-    display.setRotation(2);
     display.drawInvertedBitmap(0, 248 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
     display.display(false);
     display.hibernate();
     display.end();
+    _wiped = true;
+}
+
+void EPDHandler::forceRefresh()
+{
+    _lastRunSeconds = ULONG_MAX - (unsigned long)configHandler.getConfigInterval("intervalEPD") - 1;
+    _wiped = false;  // allow update even if EPD was wiped
 }
