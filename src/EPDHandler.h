@@ -20,6 +20,8 @@ struct EPDLayout
     // Sensor rows
     int rowTop;
     int rowBot;
+    int rowTop2;
+    int rowBot2;
 
     // Footer
     int footerTurtleX;
@@ -53,8 +55,8 @@ private:
     void printLayout(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, bool bmeOk, const EPDLayout &layout);
     void printValue(char *buff, int16_t x, int16_t y, uint16_t color, float value);
 
-    static EPDLayout verticalLayout();
-    static EPDLayout horizontalLayout();
+    static EPDLayout verticalLayout(int rotation);
+    static EPDLayout horizontalLayout(int rotation);
     static uint16_t getAlertColor(float value, float threshold);
     static uint16_t getAlertColorInt(int value, int threshold);
 

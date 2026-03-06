@@ -33,10 +33,10 @@ void EPDHandler::printValue(char *buff, int16_t x, int16_t y, uint16_t color, fl
     display.print(buff);
 }
 
-EPDLayout EPDHandler::verticalLayout()
+EPDLayout EPDHandler::verticalLayout(int rotation)
 {
     EPDLayout l;
-    l.rotation    = 2;
+    l.rotation    = rotation;
     l.colL_icon   = 0;
     l.colL_value  = 32;
     l.colL_unit   = 104;
@@ -45,30 +45,33 @@ EPDLayout EPDHandler::verticalLayout()
     l.colR_unit   = 104;
     l.rowTop      = 35;
     l.rowBot      = 80;
-    l.footerTurtleX = 0;   l.footerTurtleY = 234;
-    l.footerDateX   = 0;   l.footerDateY   = 228;
-    l.footerTimeX   = 80;  l.footerTimeY   = 228;
-    l.footerNameX   = 20;  l.footerNameY   = 248;
+    l.rowTop2     = 125;
+    l.rowBot2     = 170;
+    l.footerTurtleX = 0;  l.footerTurtleY = 234;
+    l.footerDateX   = 0;  l.footerDateY   = 228;
+    l.footerTimeX   = 80; l.footerTimeY   = 228;
+    l.footerNameX   = 20; l.footerNameY   = 248;
     return l;
 }
 
-EPDLayout EPDHandler::horizontalLayout()
+EPDLayout EPDHandler::horizontalLayout(int rotation)
 {
     EPDLayout l;
-    l.rotation    = 1;
+    l.rotation    = rotation;
     l.colL_icon   = 0;
     l.colL_value  = 30;
     l.colL_unit   = 90;
-
     l.colR_icon   = 130;
     l.colR_value  = 160;
     l.colR_unit   = 225;
     l.rowTop      = 20;
     l.rowBot      = 52;
-    l.footerTurtleX = 2;   l.footerTurtleY = 104;
-    l.footerDateX   = 2;   l.footerDateY   = 100;
-    l.footerTimeX   = 70;  l.footerTimeY   = 100;
-    l.footerNameX   = 22;  l.footerNameY   = 118;
+    l.rowTop2     = l.rowTop;
+    l.rowBot2     = l.rowBot;
+    l.footerTurtleX = 2;  l.footerTurtleY = 104;
+    l.footerDateX   = 2;  l.footerDateY   = 100;
+    l.footerTimeX   = 70; l.footerTimeY   = 100;
+    l.footerNameX   = 22; l.footerNameY   = 118;
     return l;
 }
 
@@ -112,24 +115,23 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     display.print("%");
 
     // Right column icons
-    display.drawInvertedBitmap(l.colR_icon, l.rowTop - 20, bitmap_CO2, 24, 24, color_co2);
-    display.drawInvertedBitmap(l.colR_icon, l.rowBot - 20, bitmap_aiq, 24, 24, color_iaq);
+    display.drawInvertedBitmap(l.colR_icon, l.rowTop2 - 20, bitmap_CO2, 24, 24, color_co2);
+    display.drawInvertedBitmap(l.colR_icon, l.rowBot2 - 20, bitmap_aiq, 24, 24, color_iaq);
 
     // Right column values: CO2 (top), IAQ (bottom)
     display.setFont(&Inter_Bold12pt7b);
     display.setTextColor(color_co2);
-    display.setCursor(l.colR_value, l.rowTop);
+    display.setCursor(l.colR_value, l.rowTop2);
     snprintf(buffer, sizeof(buffer), "%d", co2.getRegular());
     display.print(buffer);
-    display.drawInvertedBitmap(l.colR_unit, l.rowTop - 16, bitmap_ppm18, 18, 18, color_co2);
-    display.drawInvertedBitmap(l.colR_unit, l.rowBot - 16, bitmap_iaq, 18, 18, color_iaq);
-
+    display.drawInvertedBitmap(l.colR_unit, l.rowTop2 - 16, bitmap_ppm18, 18, 18, color_co2);
+    display.drawInvertedBitmap(l.colR_unit, l.rowBot2 - 16, bitmap_iaq,   18, 18, color_iaq);
     if (bmeOk)
-        printValue(buffer, l.colR_value, l.rowBot, color_iaq, bme_data.staticIaq);
+        printValue(buffer, l.colR_value, l.rowBot2, color_iaq, bme_data.staticIaq);
     else
     {
         display.setTextColor(GxEPD_BLACK);
-        display.setCursor(l.colR_value, l.rowBot); display.print("--");
+        display.setCursor(l.colR_value, l.rowBot2); display.print("--");
     }
 
     // Footer
@@ -156,9 +158,16 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
 
     _lastRunSeconds = currentSeconds;
     bool bmeOk = BME680Handler::getInstance().isSensorOk();
-    EPDLayout layout = configHandler.getConfigSwitch("switchEPDorientation")
-        ? horizontalLayout()
-        : verticalLayout();
+
+    int orientation = configHandler.getConfigSwitch("switchEPDorientation");
+    EPDLayout layout;
+    switch (orientation)
+    {
+        case 1:  layout = verticalLayout(0);    break; // vertical 270°
+        case 2:  layout = horizontalLayout(1);  break; // horizontal 90°
+        case 3:  layout = horizontalLayout(3);  break; // horizontal 270°
+        default: layout = verticalLayout(2);    break; // vertical 90°
+    }
 
     printLayout(co2, bme_data, epd_date, epd_time, bmeOk, layout);
 }
