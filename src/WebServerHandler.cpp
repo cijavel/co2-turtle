@@ -45,7 +45,11 @@ void WebServerHandler::start()
 	server.on("/api/mqtt/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_mqtt_status(request); });
 	server.on("/api/system/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_system_status(request); });
 
-	server.on("/api/epd/refresh", HTTP_POST, [this](AsyncWebServerRequest *request) {EPDHandler::getInstance().forceRefresh(); request->send(200, "text/plain", "ok");});
+	server.on("/api/epd/refresh", HTTP_POST, [this](AsyncWebServerRequest *request) {
+		EPDHandler &epd = EPDHandler::getInstance();
+		epd.forceRefresh();  // resets _wiped and _lastRunSeconds
+		request->send(200, "text/plain", "ok");
+	});
 
 	server.onNotFound(handle_page_NotFound);
 	server.begin();
