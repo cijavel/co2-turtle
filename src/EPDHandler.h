@@ -26,10 +26,12 @@ struct EPDLayout
     // Footer
     int footerTurtleX;
     int footerTurtleY;
+    int footerWlanX;
+    int footerWlanY;
+    int footerIpX;
+    int footerIpY;
     int footerDateX;
     int footerDateY;
-    int footerTimeX;
-    int footerTimeY;
     int footerNameX;
     int footerNameY;
 };
@@ -43,7 +45,7 @@ public:
         return instance;
     }
 
-    void updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, unsigned long currentSeconds);
+    void updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, const String &wlan_ssid, const String &ip_address, unsigned long currentSeconds);
     void forceRefresh();
     void wipeDisplay();
 
