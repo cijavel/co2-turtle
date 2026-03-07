@@ -41,6 +41,7 @@
 #include "Configuration.h"
 #include "Credentials.h"
 #include "WiFiHandler.h"
+#include <WiFi.h>
 #include "bsec.h"
 #include <ctime>
 #include "EPDHandler.h"
@@ -187,7 +188,9 @@ void loop()
 
 	if (configHandler.getConfigSwitch("switchEPD"))
     {
-        EPDHandler::getInstance().updateEPD(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), currentSeconds);
+        String wlan_ssid = WiFi.SSID();
+        String ip_address = WiFi.localIP().toString();
+        EPDHandler::getInstance().updateEPD(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), wlan_ssid, ip_address, currentSeconds);
     }
     else
     {
