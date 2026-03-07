@@ -48,6 +48,8 @@ public:
     void updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, const String &wlan_ssid, const String &ip_address, unsigned long currentSeconds);
     void forceRefresh();
     void wipeDisplay();
+    bool isPendingRefresh() const { return _pendingRefresh; }
+    void clearPendingRefresh()    { _pendingRefresh = false; }
 
 private:
     EPDHandler() {};
@@ -64,6 +66,7 @@ private:
 
     unsigned long _lastRunSeconds = 0;
     bool _wiped = false;
+    bool _pendingRefresh = false;
 };
 
 #endif // CO2_TURTLE_EPDHANDLER_H
