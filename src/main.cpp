@@ -195,7 +195,11 @@ void loop()
     }
     else
     {
-        epdHandler.wipeDisplay();
+        if (epdHandler.isPendingRefresh())
+        {
+            epdHandler.clearPendingRefresh();
+            epdHandler.wipeDisplay();
+        }
     }
 	
 	if (configHandler.getConfigSwitch("switchLED"))
