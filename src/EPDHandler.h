@@ -79,10 +79,12 @@ struct EPDLayout
     // Footer
     int footerTurtleX;
     int footerTurtleY;
+    int footerWlanX;
+    int footerWlanY;
+    int footerIpX;
+    int footerIpY;
     int footerDateX;
     int footerDateY;
-    int footerTimeX;
-    int footerTimeY;
     int footerNameX;
     int footerNameY;
 };
