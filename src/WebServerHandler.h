@@ -4,6 +4,7 @@
 #include "ESPAsyncWebServer.h"
 #include "DataCO2.h"
 #include "bsec.h"
+#include <WiFi.h>
 
 class WebServerHandler
 {
