@@ -48,9 +48,13 @@ void WebServerHandler::start()
 	server.on("/api/epd/refresh", HTTP_POST, [this](AsyncWebServerRequest *request) {
 		EPDHandler &epd = EPDHandler::getInstance();
 		epd.forceRefresh();
-		// Immediately render if EPD is currently switched off (wipe with turtle)
-		// so the button gives visual feedback in both states
-		if (!configHandler.getConfigSwitch("switchEPD"))
+		if (configHandler.getConfigSwitch("switchEPD"))
+		{
+			String wlan_ssid = WiFi.SSID();
+			String ip_address = WiFi.localIP().toString();
+			epd.updateEPD(co2data, bmedata, acDate.substring(0, 10), acDate.substring(11, 16), wlan_ssid, ip_address, ULONG_MAX);
+		}
+		else
 		{
 			epd.wipeDisplay();
 		}
