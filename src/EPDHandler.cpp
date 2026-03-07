@@ -241,6 +241,6 @@ void EPDHandler::wipeDisplay()
 
 void EPDHandler::forceRefresh()
 {
-    _lastRunSeconds = ULONG_MAX - (unsigned long)configHandler.getConfigInterval("intervalEPD") - 1;
-    _wiped = false;  // allow update even if EPD was wiped
+    _lastRunSeconds = 0;
+    _wiped = false;
 }
