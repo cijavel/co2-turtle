@@ -50,34 +50,30 @@ EPDLayout EPDHandler::verticalLayout(int rotation)
         l.rowBot      = 80;
         l.rowTop2     = 125;
         l.rowBot2     = 170;
-        l.footerTurtleX = 0;  l.footerTurtleY = 234;
-        l.footerDateX   = 0;  l.footerDateY   = 228;
-        l.footerTimeX   = 80; l.footerTimeY   = 228;
+        l.footerTurtleX = 0;  l.footerTurtleY = 242;
+        l.footerWlanX   = 0;  l.footerWlanY   = 206;
+        l.footerIpX     = 0;  l.footerIpY     = 218;
+        l.footerDateX   = 0;  l.footerDateY   = 230;
         l.footerNameX   = 20; l.footerNameY   = 248;
     }
     else // rotation == 0, vertical 270° – origin bottom-right, mirror all coords
     // Display is 122wide x 250high. Mirrored: x = 122-x-w, y = 250-y-h
     {
-        l.colL_icon   = 122 - 0   - 24; // 98
-        l.colL_value  = 122 - 32  - 30; // 60  (approx text width 30)
-        l.colL_unit   = 122 - 104 - 18; // 0
-        l.colR_icon   = 122 - 0   - 24; // 98
-        l.colR_value  = 122 - 32  - 30; // 60
-        l.colR_unit   = 122 - 104 - 18; // 0
-        l.rowTop      = 250 - 35  - 20; // 195
-        l.rowBot      = 250 - 80  - 20; // 150
-        l.rowTop2     = 250 - 125 - 20; // 105
-        l.rowBot2     = 250 - 170 - 20; // 60
-        l.footerTurtleX = 122 - 0  - 18; // 104
-        l.footerTurtleY = 250 - 234 - 18; // -2 → use 0
-        l.footerTurtleY = 2;
-        l.footerDateX   = 122 - 0  - 50; // 72  (approx date text width 50)
-        l.footerDateY   = 250 - 228 - 12; // 10
-        l.footerTimeX   = 122 - 80 - 40; // 2
-        l.footerTimeY   = 250 - 228 - 12; // 10
-        l.footerNameX   = 122 - 20 - 60; // 42
-        l.footerNameY   = 250 - 248 - 10; // -8 → use 2
-        l.footerNameY   = 12;
+        l.colL_icon   = 122 - 0   - 24; 
+        l.colL_value  = 122 - 32  - 30; 
+        l.colL_unit   = 122 - 104 - 18; 
+        l.colR_icon   = 122 - 0   - 24; 
+        l.colR_value  = 122 - 32  - 30; 
+        l.colR_unit   = 122 - 104 - 18; 
+        l.rowTop      = 250 - 35  - 20; 
+        l.rowBot      = 250 - 80  - 20; 
+        l.rowTop2     = 250 - 125 - 20; 
+        l.rowBot2     = 250 - 170 - 20;         
+        l.footerTurtleX = 104; l.footerTurtleY = 2;
+        l.footerWlanX   = 0;   l.footerWlanY   = 26;
+        l.footerIpX     = 0;   l.footerIpY     = 14;
+        l.footerDateX   = 0;   l.footerDateY   = 2;
+        l.footerNameX   = 20;  l.footerNameY   = 38;
     }
     return l;
 }
@@ -99,38 +95,35 @@ EPDLayout EPDHandler::horizontalLayout(int rotation)
         l.rowBot      = 52;
         l.rowTop2     = l.rowTop;
         l.rowBot2     = l.rowBot;
-        l.footerTurtleX = 2;  l.footerTurtleY = 104;
-        l.footerDateX   = 2;  l.footerDateY   = 100;
-        l.footerTimeX   = 70; l.footerTimeY   = 100;
-        l.footerNameX   = 22; l.footerNameY   = 118;
+        l.footerTurtleX = 2;   l.footerTurtleY = 118;
+        l.footerWlanX   = 2;   l.footerWlanY   = 82;
+        l.footerIpX     = 2;   l.footerIpY     = 94;
+        l.footerDateX   = 2;   l.footerDateY   = 106;
+        l.footerNameX   = 22;  l.footerNameY   = 118;
     }
     else // rotation == 3, horizontal 270° – origin bottom-right
     // Display is 250wide x 122high in landscape. Mirrored: x = 250-x-w, y = 122-y-h
     {
-        l.colL_icon   = 250 - 0   - 24; // 226
-        l.colL_value  = 250 - 30  - 30; // 190
-        l.colL_unit   = 250 - 90  - 18; // 142
-        l.colR_icon   = 250 - 130 - 24; // 96
-        l.colR_value  = 250 - 160 - 30; // 60
-        l.colR_unit   = 250 - 225 - 18; // 7
-        l.rowTop      = 122 - 20  - 20; // 82
-        l.rowBot      = 122 - 52  - 20; // 50
+        l.colL_icon   = 250 - 0   - 24;
+        l.colL_value  = 250 - 30  - 30;
+        l.colL_unit   = 250 - 90  - 18;
+        l.colR_icon   = 250 - 130 - 24;
+        l.colR_value  = 250 - 160 - 30;
+        l.colR_unit   = 250 - 225 - 18;
+        l.rowTop      = 122 - 20  - 20;
+        l.rowBot      = 122 - 52  - 20;
         l.rowTop2     = l.rowTop;
         l.rowBot2     = l.rowBot;
-        l.footerTurtleX = 250 - 2  - 18; // 230
-        l.footerTurtleY = 122 - 104 - 18; // 0
-        l.footerDateX   = 250 - 2  - 50; // 198
-        l.footerDateY   = 122 - 100 - 12; // 10
-        l.footerTimeX   = 250 - 70 - 40; // 140
-        l.footerTimeY   = 122 - 100 - 12; // 10
-        l.footerNameX   = 250 - 22 - 60; // 168
-        l.footerNameY   = 122 - 118 - 10; // -6 → use 4
-        l.footerNameY   = 4;
+        l.footerTurtleX = 230; l.footerTurtleY = 2;
+        l.footerWlanX   = 2;   l.footerWlanY   = 30;
+        l.footerIpX     = 2;   l.footerIpY     = 18;
+        l.footerDateX   = 2;   l.footerDateY   = 6;
+        l.footerNameX   = 22;  l.footerNameY   = 4;
     }
     return l;
 }
 
-void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, bool bmeOk, const EPDLayout &l)
+void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, const String &wlan_ssid, const String &ip_address, bool bmeOk, const EPDLayout &l)
 {
     display.init(BAUDRATE);
     display.fillScreen(GxEPD_WHITE);
@@ -190,15 +183,15 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     }
 
     // Footer
-    display.drawInvertedBitmap(l.footerTurtleX, l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
     display.setFont(&BabelSans8pt7b);
     display.setTextColor(GxEPD_BLACK);
+    display.setCursor(l.footerWlanX, l.footerWlanY);
+    display.print("WLAN: " + wlan_ssid);
+    display.setCursor(l.footerIpX, l.footerIpY);
+    display.print("IP: " + ip_address);
     display.setCursor(l.footerDateX, l.footerDateY);
-    display.print(epd_date);
-    display.setFont(&BabelSans9pt7b);
-    display.setCursor(l.footerTimeX, l.footerTimeY);
-    display.print(epd_time);
-    display.setFont(&BabelSans8pt7b);
+    display.print(epd_date + " " + epd_time);
+    display.drawInvertedBitmap(l.footerTurtleX, l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
     display.setCursor(l.footerNameX, l.footerNameY);
     display.print(DeviceName);
     display.display(false);
@@ -206,7 +199,7 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     display.end();
 }
 
-void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, unsigned long currentSeconds)
+void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, const String &wlan_ssid, const String &ip_address, unsigned long currentSeconds)
 {
     if (currentSeconds - _lastRunSeconds < (unsigned long)configHandler.getConfigInterval("intervalEPD"))
         return;
@@ -224,7 +217,7 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
         default: layout = verticalLayout(2);    break; // vertical 90°
     }
 
-    printLayout(co2, bme_data, epd_date, epd_time, bmeOk, layout);
+    printLayout(co2, bme_data, epd_date, epd_time, wlan_ssid, ip_address, bmeOk, layout);
 }
 
 void EPDHandler::wipeDisplay()
