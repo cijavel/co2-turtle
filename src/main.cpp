@@ -29,11 +29,11 @@
 // Bosch BME680
 // ---------------
 // GND -> GND
-// VCC -> 5V
+// VCC -> 3,3-5V
 // SCL -> 22
 // SDA -> 21
 // SD0 -> -
-// CS  -> -
+// CS  -> 3,3V
 
 // OOP
 #include "BME680Handler.h"
