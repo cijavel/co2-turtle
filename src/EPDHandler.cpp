@@ -223,10 +223,16 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
 void EPDHandler::wipeDisplay()
 {
     if (_wiped) return;  // only wipe once
+    const EPDLayout l =
+        (configHandler.getConfigSwitch("switchEPDorientation") == 1) ? verticalLayout(0)   :
+        (configHandler.getConfigSwitch("switchEPDorientation") == 2) ? horizontalLayout(1) :
+        (configHandler.getConfigSwitch("switchEPDorientation") == 3) ? horizontalLayout(3) :
+                                                                        verticalLayout(2);
     display.init(BAUDRATE);
     display.fillScreen(GxEPD_WHITE);
     display.setFullWindow();
-    display.drawInvertedBitmap(0, 248 - 14, bitmap_turtle, 18, 18, GxEPD_RED);
+    display.setRotation(l.rotation);
+    display.drawInvertedBitmap(l.footerTurtleX, l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
     display.display(false);
     display.hibernate();
     display.end();
