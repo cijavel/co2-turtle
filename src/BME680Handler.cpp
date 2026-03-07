@@ -34,27 +34,8 @@ BME680Handler::BME680Handler()
 	delay(500);
 	pinMode(LED_BUILTIN, OUTPUT);
 
-	// IMPORTANT Retry mechanism
-	uint8_t retries = 0;
-    // Try address 0x76 first, then 0x77. On the board SDO is not connected and i do not want to solder to GND. So the adress could be 0x77 or 0x76
-	uint8_t addresses[2] = {BME68X_I2C_ADDR_LOW, BME68X_I2C_ADDR_HIGH};
-    do {
-        uint8_t addr = addresses[retries % 2];
-        Serial.println("[BME680] Trying address 0x" + String(addr, HEX) +
-                       ", attempt " + String(retries + 1) + "/4");
-        bmeSensor.begin(addr, Wire);
-        if (bmeSensor.bme68xStatus == BME68X_OK)
-        {
-            Serial.println("[BME680] Found at address 0x" + String(addr, HEX));
-            break;
-        }
-        Wire.end();
-        delay(500);
-        Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
-        Wire.setClock(100000);
-        delay(500);
-        retries++;
-    } while (retries < 4);
+	Serial.println("[BME680] Initializing at fixed address 0x77 (CS hardwired HIGH)");
+    bmeSensor.begin(BME68X_I2C_ADDR_HIGH, Wire);
 
 	if (bmeSensor.bme68xStatus == BME68X_OK) {
         _sensorOk = true;
