@@ -186,15 +186,16 @@ void loop()
 	WebServerHandler &webServer = WebServerHandler::getInstance();
 	webServer.setInputDataforBody(mhz19Readout, bme_data, localTime("%Y.%m.%d %H:%M:%S"));
 
-	if (configHandler.getConfigSwitch("switchEPD"))
+	EPDHandler &epdHandler = EPDHandler::getInstance();
+    if (configHandler.getConfigSwitch("switchEPD"))
     {
         String wlan_ssid = WiFi.SSID();
         String ip_address = WiFi.localIP().toString();
-        EPDHandler::getInstance().updateEPD(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), wlan_ssid, ip_address, currentSeconds);
+        epdHandler.updateEPD(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), wlan_ssid, ip_address, currentSeconds);
     }
     else
     {
-        EPDHandler::getInstance().wipeDisplay();
+        epdHandler.wipeDisplay();
     }
 	
 	if (configHandler.getConfigSwitch("switchLED"))

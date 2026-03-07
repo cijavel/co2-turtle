@@ -47,7 +47,13 @@ void WebServerHandler::start()
 
 	server.on("/api/epd/refresh", HTTP_POST, [this](AsyncWebServerRequest *request) {
 		EPDHandler &epd = EPDHandler::getInstance();
-		epd.forceRefresh();  // resets _wiped and _lastRunSeconds
+		epd.forceRefresh();
+		// Immediately render if EPD is currently switched off (wipe with turtle)
+		// so the button gives visual feedback in both states
+		if (!configHandler.getConfigSwitch("switchEPD"))
+		{
+			epd.wipeDisplay();
+		}
 		request->send(200, "text/plain", "ok");
 	});
 
