@@ -134,13 +134,18 @@ bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
         _bme68xError = bmeSensor.bme68xStatus;
         Serial.println("[BME680] Runtime error: " + String(_bme68xError) +
                        " (" + String(_consecutiveErrors) + " consecutive)");
+        checkSensorStatus();
         if (_consecutiveErrors >= 5)
         {
             _sensorOk = false;
             Serial.println("[BME680] Too many errors, triggering recovery.");
         }
     }
-    checkSensorStatus();
+    else
+    {
+        _bme68xError = 0;
+        _consecutiveErrors = 0; // Reset on healthy status
+    }
     return false;
 }
 
