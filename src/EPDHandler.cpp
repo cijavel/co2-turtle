@@ -44,10 +44,10 @@ EPDLayout EPDHandler::layout_V90()
     l.rowTop2       = 106;
     l.rowBot2       = 144;
     // Footer zone Y 160–250, 5 elements, spacing 15px
-    l.footerWlanX   = 1;    l.footerWlanY   = 190;
-    l.footerIpX     = 1;    l.footerIpY     = 205;
-    l.footerDateX   = 1;    l.footerDateY   = 220;
-    l.footerTurtleX = 1;    l.footerTurtleY = 240;
+    l.footerWlanX   = 1;    l.footerWlanY   = 191;
+    l.footerIpX     = 1;    l.footerIpY     = 209;
+    l.footerDateX   = 1;    l.footerDateY   = 227;
+    l.footerTurtleX = 1;    l.footerTurtleY = 245;
     l.footerNameX   = 20;   l.footerNameY   = 245;
     l.footerMaxChars = 18;
     return l;
@@ -254,7 +254,7 @@ void EPDHandler::epdWipeTask(void *pvParameters)
     display.fillScreen(GxEPD_WHITE);
     display.setFullWindow();
     display.setRotation(p->l.rotation);
-    display.drawInvertedBitmap(p->l.footerTurtleX, p->l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
+    display.drawInvertedBitmap(p->l.footerTurtleX, p->l.footerTurtleY, bitmap_turtlesleep, 18, 18, GxEPD_RED);
     display.display(false);
     display.hibernate();
     display.end();
