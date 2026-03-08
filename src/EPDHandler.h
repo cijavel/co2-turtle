@@ -88,10 +88,8 @@ private:
     static void epdRenderTask(void *pvParameters);
     static void epdWipeTask(void *pvParameters);
 
-    static EPDLayout layout_V90();   // Vertikal 90°  (rotation=2)
-    static EPDLayout layout_V270();  // Vertikal 270° (rotation=0)
-    static EPDLayout layout_H90();   // Horizontal 90°  (rotation=1)
-    static EPDLayout layout_H270();  // Horizontal 270° (rotation=3)
+    static EPDLayout layout_vertical(int rotation);
+    static EPDLayout layout_horizontal(int rotation);
 
     static uint16_t getAlertColor(float value, float threshold);
     static uint16_t getAlertColorInt(int value, int threshold);
