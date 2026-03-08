@@ -44,11 +44,11 @@ EPDLayout EPDHandler::layout_V90()
     l.rowTop2       = 106;
     l.rowBot2       = 144;
     // Footer zone Y 160–250, 5 elements, spacing 15px
-    l.footerWlanX   = 2;    l.footerWlanY   = 163;
-    l.footerIpX     = 2;    l.footerIpY     = 178;
-    l.footerDateX   = 2;    l.footerDateY   = 193;
-    l.footerTurtleX = 2;    l.footerTurtleY = 206;
-    l.footerNameX   = 24;   l.footerNameY   = 221;
+    l.footerWlanX   = 1;    l.footerWlanY   = 190;
+    l.footerIpX     = 1;    l.footerIpY     = 205;
+    l.footerDateX   = 1;    l.footerDateY   = 220;
+    l.footerTurtleX = 1;    l.footerTurtleY = 240;
+    l.footerNameX   = 20;   l.footerNameY   = 245;
     l.footerMaxChars = 18;
     return l;
 }
