@@ -123,6 +123,15 @@ EPDLayout EPDHandler::horizontalLayout(int rotation)
     return l;
 }
 
+void EPDHandler::epdRenderTask(void *pvParameters)
+{
+    EPDTaskParams *p = static_cast<EPDTaskParams *>(pvParameters);
+    p->handler->printLayout(p->co2, p->bme_data, p->epd_date, p->epd_time, p->wlan_ssid, p->ip_address, p->bmeOk, p->layout);
+    p->handler->_taskRunning = false;
+    delete p;
+    vTaskDelete(nullptr);
+}
+
 void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, const String &wlan_ssid, const String &ip_address, bool bmeOk, const EPDLayout &l)
 {
     display.init(BAUDRATE);
@@ -217,26 +226,43 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
         default: layout = verticalLayout(2);    break; // vertical 90°
     }
 
-    printLayout(co2, bme_data, epd_date, epd_time, wlan_ssid, ip_address, bmeOk, layout);
+    if (_taskRunning) return;  // previous render still in progress
+    _taskRunning = true;
+
+    EPDTaskParams *params = new EPDTaskParams{
+        this, co2, bme_data, epd_date, epd_time, wlan_ssid, ip_address, bmeOk, layout
+    };
+    xTaskCreate(EPDHandler::epdRenderTask, "epd_render", 4096, params, 1, nullptr);
 }
 
 void EPDHandler::wipeDisplay()
 {
-    if (_wiped) return;  // only wipe once
-    const EPDLayout l =
+    if (_wiped || _taskRunning) return;
+    _wiped = true;
+    _taskRunning = true;
+
+    EPDWipeParams *wp = new EPDWipeParams{this,
         (configHandler.getConfigSwitch("switchEPDorientation") == 1) ? verticalLayout(0)   :
         (configHandler.getConfigSwitch("switchEPDorientation") == 2) ? horizontalLayout(1) :
         (configHandler.getConfigSwitch("switchEPDorientation") == 3) ? horizontalLayout(3) :
-                                                                        verticalLayout(2);
+                                                                        verticalLayout(2)};
+    xTaskCreate(epdWipeTask, "epd_wipe", 4096, wp, 1, nullptr);
+}
+
+void EPDHandler::epdWipeTask(void *pvParameters)
+{
+    EPDWipeParams *p = static_cast<EPDWipeParams *>(pvParameters);
     display.init(BAUDRATE);
     display.fillScreen(GxEPD_WHITE);
     display.setFullWindow();
-    display.setRotation(l.rotation);
-    display.drawInvertedBitmap(l.footerTurtleX, l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
+    display.setRotation(p->l.rotation);
+    display.drawInvertedBitmap(p->l.footerTurtleX, p->l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
     display.display(false);
     display.hibernate();
     display.end();
-    _wiped = true;
+    p->h->_taskRunning = false;
+    delete p;
+    vTaskDelete(nullptr);
 }
 
 void EPDHandler::forceRefresh()
