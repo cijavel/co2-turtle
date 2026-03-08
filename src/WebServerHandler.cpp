@@ -377,12 +377,12 @@ void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
 	{
 		configHandler.setConfigSwitch("switchWIFI", atoi(request->getParam("switchWIFI")->value().c_str()));
 	}
-	configHandler.setConfigSwitch("switchEPD", request->hasParam("switchEPD") ? 1 : 0);
+	configHandler.setConfigSwitch("switchEPD", request->hasParam("switchEPD", true) ? 1 : 0);
 
-    if (request->hasParam("switchEPDorientation", true))
-    {
-        configHandler.setConfigSwitch("switchEPDorientation", request->getParam("switchEPDorientation", true)->value().toInt());
-    }
+	if (request->hasParam("switchEPDorientation", true))
+	{
+		configHandler.setConfigSwitch("switchEPDorientation", request->getParam("switchEPDorientation", true)->value().toInt());
+	}
 
 
 	if (request->hasParam("switchLED"))
