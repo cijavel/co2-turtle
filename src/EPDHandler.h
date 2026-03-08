@@ -29,6 +29,8 @@ struct EPDLayout
     // Footer
     int footerTurtleX;
     int footerTurtleY;
+    int footerWlanIconX;
+    int footerWlanIconY;
     int footerWlanX;
     int footerWlanY;
     int footerIpX;

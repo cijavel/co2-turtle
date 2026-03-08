@@ -44,10 +44,11 @@ EPDLayout EPDHandler::layout_V90()
     l.rowTop2       = 106;
     l.rowBot2       = 144;
     // Footer zone Y 160–250, 5 elements, spacing 15px
+    l.footerWlanIconX = 2;  l.footerWlanIconY = 149;
     l.footerWlanX   = 1;    l.footerWlanY   = 191;
     l.footerIpX     = 1;    l.footerIpY     = 209;
     l.footerDateX   = 1;    l.footerDateY   = 227;
-    l.footerTurtleX = 1;    l.footerTurtleY = 245;
+    l.footerTurtleX = 1;    l.footerTurtleY = 238;
     l.footerNameX   = 20;   l.footerNameY   = 245;
     l.footerMaxChars = 18;
     return l;
@@ -193,8 +194,8 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
 
     display.setFont(&BabelSans8pt7b);
     display.setTextColor(GxEPD_BLACK);
-    display.drawInvertedBitmap(l.footerWlanX, l.footerWlanY - 11, bitmap_wlan, 18, 18, GxEPD_BLACK);
-    display.setCursor(l.footerWlanX + 20, l.footerWlanY);
+    display.drawInvertedBitmap(l.footerWlanIconX, l.footerWlanIconY, bitmap_wlan, 18, 18, GxEPD_BLACK);
+    display.setCursor(l.footerWlanX, l.footerWlanY);
     display.print(footerStr(wlan_ssid));
     display.setCursor(l.footerIpX, l.footerIpY);
     display.print(footerStr("IP: " + ip_address));
