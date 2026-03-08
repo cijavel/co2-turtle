@@ -33,93 +33,86 @@ void EPDHandler::printValue(char *buff, int16_t x, int16_t y, uint16_t color, fl
     display.print(buff);
 }
 
-EPDLayout EPDHandler::verticalLayout(int rotation)
+EPDLayout EPDHandler::layout_V90()
 {
     EPDLayout l;
-    l.rotation = rotation;
-
-    if (rotation == 2) // vertical 90° – origin top-left
-    {
-        l.colL_icon   = 0;
-        l.colL_value  = 32;
-        l.colL_unit   = 104;
-        l.colR_icon   = 0;
-        l.colR_value  = 32;
-        l.colR_unit   = 104;
-        l.rowTop      = 35;
-        l.rowBot      = 80;
-        l.rowTop2     = 125;
-        l.rowBot2     = 170;
-        l.footerTurtleX = 0;  l.footerTurtleY = 242;
-        l.footerWlanX   = 0;  l.footerWlanY   = 206;
-        l.footerIpX     = 0;  l.footerIpY     = 218;
-        l.footerDateX   = 0;  l.footerDateY   = 230;
-        l.footerNameX   = 20; l.footerNameY   = 248;
-    }
-    else // rotation == 0, vertical 270° – origin bottom-right, mirror all coords
-    // Display is 122wide x 250high. Mirrored: x = 122-x-w, y = 250-y-h
-    {
-        l.colL_icon   = 122 - 0   - 24; 
-        l.colL_value  = 122 - 32  - 30; 
-        l.colL_unit   = 122 - 104 - 18; 
-        l.colR_icon   = 122 - 0   - 24; 
-        l.colR_value  = 122 - 32  - 30; 
-        l.colR_unit   = 122 - 104 - 18; 
-        l.rowTop      = 250 - 35  - 20; 
-        l.rowBot      = 250 - 80  - 20; 
-        l.rowTop2     = 250 - 125 - 20; 
-        l.rowBot2     = 250 - 170 - 20;         
-        l.footerTurtleX = 104; l.footerTurtleY = 2;
-        l.footerWlanX   = 0;   l.footerWlanY   = 26;
-        l.footerIpX     = 0;   l.footerIpY     = 14;
-        l.footerDateX   = 0;   l.footerDateY   = 2;
-        l.footerNameX   = 20;  l.footerNameY   = 38;
-    }
+    l.rotation      = 2;
+    // Sensor columns – single column, left-aligned
+    l.colL_icon     = 0;    l.colL_value = 32;   l.colL_unit = 104;
+    l.colR_icon     = 0;    l.colR_value = 32;   l.colR_unit = 104;
+    // 4 sensor rows (icon baseline = row - 20)
+    l.rowTop        = 35;   // Temp
+    l.rowBot        = 80;   // Hum
+    l.rowTop2       = 125;  // CO2
+    l.rowBot2       = 170;  // IAQ
+    // Footer zone Y 188–250
+    l.footerWlanX   = 0;    l.footerWlanY   = 200;
+    l.footerIpX     = 0;    l.footerIpY     = 212;
+    l.footerDateX   = 0;    l.footerDateY   = 224;
+    l.footerTurtleX = 0;    l.footerTurtleY = 232;
+    l.footerNameX   = 20;   l.footerNameY   = 248;
     return l;
 }
 
-EPDLayout EPDHandler::horizontalLayout(int rotation)
+EPDLayout EPDHandler::layout_V270()
 {
     EPDLayout l;
-    l.rotation = rotation;
+    l.rotation      = 0;
+    // Mirrored: X = 122 - orig_x - width, Y = 250 - orig_y
+    l.colL_icon     = 98;   l.colL_value = 65;   l.colL_unit = 0;
+    l.colR_icon     = 98;   l.colR_value = 65;   l.colR_unit = 0;
+    // Rows mirrored (text baseline moves down by font height ~20)
+    l.rowTop        = 215;  // Temp  (250-35)
+    l.rowBot        = 170;  // Hum   (250-80)
+    l.rowTop2       = 125;  // CO2   (250-125)
+    l.rowBot2       = 80;   // IAQ   (250-170)
+    // Footer zone – visually at bottom = small Y values
+    l.footerTurtleX = 104;  l.footerTurtleY = 2;
+    l.footerNameX   = 20;   l.footerNameY   = 14;
+    l.footerDateX   = 0;    l.footerDateY   = 28;
+    l.footerIpX     = 0;    l.footerIpY     = 42;
+    l.footerWlanX   = 0;    l.footerWlanY   = 54;
+    return l;
+}
 
-    if (rotation == 1) // horizontal 90° – origin top-left
-    {
-        l.colL_icon   = 0;
-        l.colL_value  = 30;
-        l.colL_unit   = 90;
-        l.colR_icon   = 130;
-        l.colR_value  = 160;
-        l.colR_unit   = 225;
-        l.rowTop      = 20;
-        l.rowBot      = 52;
-        l.rowTop2     = l.rowTop;
-        l.rowBot2     = l.rowBot;
-        l.footerTurtleX = 2;   l.footerTurtleY = 118;
-        l.footerWlanX   = 2;   l.footerWlanY   = 82;
-        l.footerIpX     = 2;   l.footerIpY     = 94;
-        l.footerDateX   = 2;   l.footerDateY   = 106;
-        l.footerNameX   = 22;  l.footerNameY   = 118;
-    }
-    else // rotation == 3, horizontal 270° – origin bottom-right
-    // Display is 250wide x 122high in landscape. Mirrored: x = 250-x-w, y = 122-y-h
-    {
-        l.colL_icon   = 250 - 0   - 24;
-        l.colL_value  = 250 - 30  - 30;
-        l.colL_unit   = 250 - 90  - 18;
-        l.colR_icon   = 250 - 130 - 24;
-        l.colR_value  = 250 - 160 - 30;
-        l.colR_unit   = 250 - 225 - 18;
-        l.rowTop      = 122 - 20  - 20;
-        l.rowBot      = 122 - 52  - 20;
-        l.rowTop2     = l.rowTop;
-        l.rowBot2     = l.rowBot;
-        l.footerTurtleX = 230; l.footerTurtleY = 2;
-        l.footerWlanX   = 2;   l.footerWlanY   = 30;
-        l.footerIpX     = 2;   l.footerIpY     = 18;
-        l.footerDateX   = 2;   l.footerDateY   = 6;
-        l.footerNameX   = 22;  l.footerNameY   = 4;
-    }
+EPDLayout EPDHandler::layout_H90()
+{
+    EPDLayout l;
+    l.rotation      = 1;
+    // Left column: Temp + Hum
+    l.colL_icon     = 0;    l.colL_value = 30;   l.colL_unit = 90;
+    // Right column: CO2 + IAQ
+    l.colR_icon     = 130;  l.colR_value = 160;  l.colR_unit = 220;
+    // 2 shared rows for both columns
+    l.rowTop        = 38;   l.rowTop2 = 38;
+    l.rowBot        = 75;   l.rowBot2 = 75;
+    // Footer zone Y 85–122
+    l.footerWlanX   = 0;    l.footerWlanY   = 95;
+    l.footerIpX     = 0;    l.footerIpY     = 107;
+    l.footerDateX   = 0;    l.footerDateY   = 119;
+    l.footerTurtleX = 232;  l.footerTurtleY = 103;
+    l.footerNameX   = 20;   l.footerNameY   = 119;
+    return l;
+}
+
+EPDLayout EPDHandler::layout_H270()
+{
+    EPDLayout l;
+    l.rotation      = 3;
+    // Mirrored: X = 250 - orig_x - width, Y = 122 - orig_y
+    // Left column mirrored (was right in H90)
+    l.colL_icon     = 96;   l.colL_value = 65;   l.colL_unit = 12;
+    // Right column mirrored (was left in H90)
+    l.colR_icon     = 226;  l.colR_value = 195;  l.colR_unit = 142;
+    // Rows mirrored
+    l.rowTop        = 84;   l.rowTop2 = 84;   // 122-38
+    l.rowBot        = 47;   l.rowBot2 = 47;   // 122-75
+    // Footer zone – visually at bottom = small Y values
+    l.footerWlanX   = 0;    l.footerWlanY   = 8;
+    l.footerIpX     = 0;    l.footerIpY     = 20;
+    l.footerDateX   = 0;    l.footerDateY   = 32;
+    l.footerTurtleX = 232;  l.footerTurtleY = 103;
+    l.footerNameX   = 20;   l.footerNameY   = 118;
     return l;
 }
 
@@ -217,14 +210,11 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
     bool bmeOk = BME680Handler::getInstance().isSensorOk();
 
     int orientation = configHandler.getConfigSwitch("switchEPDorientation");
-    EPDLayout layout;
-    switch (orientation)
-    {
-        case 1:  layout = verticalLayout(0);    break; // vertical 270°
-        case 2:  layout = horizontalLayout(1);  break; // horizontal 90°
-        case 3:  layout = horizontalLayout(3);  break; // horizontal 270°
-        default: layout = verticalLayout(2);    break; // vertical 90°
-    }
+    const EPDLayout layout =
+        (orientation == 1) ? layout_V270() :
+        (orientation == 2) ? layout_H90()  :
+        (orientation == 3) ? layout_H270() :
+                             layout_V90();
 
     if (_taskRunning) return;  // previous render still in progress
     _taskRunning = true;
@@ -241,11 +231,12 @@ void EPDHandler::wipeDisplay()
     _wiped = true;
     _taskRunning = true;
 
+    int ori = configHandler.getConfigSwitch("switchEPDorientation");
     EPDWipeParams *wp = new EPDWipeParams{this,
-        (configHandler.getConfigSwitch("switchEPDorientation") == 1) ? verticalLayout(0)   :
-        (configHandler.getConfigSwitch("switchEPDorientation") == 2) ? horizontalLayout(1) :
-        (configHandler.getConfigSwitch("switchEPDorientation") == 3) ? horizontalLayout(3) :
-                                                                        verticalLayout(2)};
+        (ori == 1) ? layout_V270() :
+        (ori == 2) ? layout_H90()  :
+        (ori == 3) ? layout_H270() :
+                     layout_V90()};
     xTaskCreate(epdWipeTask, "epd_wipe", 4096, wp, 1, nullptr);
 }
 
