@@ -140,9 +140,9 @@ var switchForm=document.getElementById("moduleSwitchForm");
 switchForm.addEventListener("submit",function(e){
 e.preventDefault();
 var params=Array.from(switchForm.querySelectorAll("input[type=checkbox],select")).map(function(c){
-return encodeURIComponent(c.name)+"="+(c.checked?1:0);
+return encodeURIComponent(c.name)+"="+(c.tagName==="SELECT"?encodeURIComponent(c.value):(c.checked?1:0));
 }).join("&");
-submitForm("/submitmodulswitch?"+params,"","feedbackSwitch");
+submitForm("/submitmodulswitch",params,"feedbackSwitch");
 });
 var intervalForm=document.getElementById("moduleIntervalForm");
 intervalForm.addEventListener("submit",function(e){
