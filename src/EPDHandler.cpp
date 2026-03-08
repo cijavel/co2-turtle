@@ -21,10 +21,6 @@ uint16_t EPDHandler::getAlertColor(float value, float threshold)
     return (value >= threshold) ? GxEPD_RED : GxEPD_BLACK;
 }
 
-uint16_t EPDHandler::getAlertColorInt(int value, int threshold)
-{
-    return (value >= threshold) ? GxEPD_RED : GxEPD_BLACK;
-}
 
 void EPDHandler::printValue(char *buff, int16_t x, int16_t y, uint16_t color, float value)
 {
