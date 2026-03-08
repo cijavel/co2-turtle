@@ -34,11 +34,11 @@ void EPDHandler::printValue(char *buff, int16_t x, int16_t y, uint16_t color, fl
     display.print(buff);
 }
 
-EPDLayout EPDHandler::layout_V90()
+EPDLayout EPDHandler::layout_vertical(int rotation)
 {
     EPDLayout l;
-    l.rotation  = 2;
-    
+    l.rotation  = rotation;  // 2 = V90, 0 = V270
+
     l.colL_icon = 2;           l.colL_value = 30;           l.colL_unit = 101;
     l.colR_icon = l.colL_icon; l.colR_value = l.colL_value; l.colR_unit = l.colL_unit;
 
@@ -48,81 +48,35 @@ EPDLayout EPDHandler::layout_V90()
     l.rowBot2   = 144;
 
     l.footerWlanIconX = 1;  l.footerWlanIconY = 176;
-    l.footerWlanX     = 20;    l.footerWlanY  = 191;
-    l.footerIpX       = 1;    l.footerIpY     = 209;
-    l.footerDateX     = 1;    l.footerDateY   = 227;
-    l.footerTurtleX   = 1;    l.footerTurtleY = 230;
-    l.footerNameX     = 20;   l.footerNameY   = 245;
+    l.footerWlanX     = 20; l.footerWlanY     = 191;
+    l.footerIpX       = 1;  l.footerIpY       = 209;
+    l.footerDateX     = 1;  l.footerDateY     = 227;
+    l.footerTurtleX   = 1;  l.footerTurtleY   = 230;
+    l.footerNameX     = 20; l.footerNameY     = 245;
 
     l.footerMaxChars  = 16;
     return l;
 }
 
-EPDLayout EPDHandler::layout_V270()
+EPDLayout EPDHandler::layout_horizontal(int rotation)
 {
     EPDLayout l;
-    l.rotation  = 0;
+    l.rotation  = rotation;  // 1 = H90, 3 = H270
 
-    l.colL_icon = 2;           l.colL_value = 30;           l.colL_unit = 101; 
-    l.colR_icon = l.colL_icon; l.colR_value = l.colL_value; l.colR_unit = l.colL_unit;
+    l.colL_icon = 0;   l.colL_value = 30;  l.colL_unit = 90;
+    l.colR_icon = 130; l.colR_value = 160; l.colR_unit = 230;
 
-    l.rowTop    = 30;  // Temp  (visually bottom)
-    l.rowBot    = 68;  // Hum
-    l.rowTop2   = 104;  // CO2
-    l.rowBot2   = 144;  // IAQ   (visually top of sensor zone)
+    l.rowTop  = 20; l.rowTop2 = 20;
+    l.rowBot  = 54; l.rowBot2 = 54;
 
-    l.footerWlanIconX = 1; l.footerWlanIconY  = 176;
-    l.footerWlanX     = 20;  l.footerWlanY    = 191;
-    l.footerIpX       = 1;  l.footerIpY       = 209;
-    l.footerDateX     = 1;  l.footerDateY     = 227;
-    l.footerTurtleX   = 1; l.footerTurtleY    = 230;
-    l.footerNameX     = 20;  l.footerNameY    = 245;
-    
-    l.footerMaxChars = 16;
-    return l;
-}
+    l.footerWlanIconX = 2;   l.footerWlanIconY = 70;
+    l.footerWlanX     = 20;  l.footerWlanY     = 88;
+    l.footerIpX       = 120; l.footerIpY       = 102;
+    l.footerDateX     = 2;   l.footerDateY     = 102;
+    l.footerTurtleX   = 2;   l.footerTurtleY   = 104;
+    l.footerNameX     = 20;  l.footerNameY     = 120;
 
-EPDLayout EPDHandler::layout_H90()
-{
-    EPDLayout l;
-    l.rotation      = 1;
-
-    l.colL_icon     = 0;    l.colL_value = 30;   l.colL_unit = 90;
-    l.colR_icon     = 130;  l.colR_value = 160;  l.colR_unit = 230;
-
-    l.rowTop        = 20;   l.rowTop2 = 20;
-    l.rowBot        = 54;   l.rowBot2 = 54;
-
-    l.footerWlanX     = 20;  l.footerWlanY      = 84;
-    l.footerWlanIconX = 2;   l.footerWlanIconY  = 66;
-    l.footerIpX       = 120; l.footerIpY        = 100;
-    l.footerDateX     = 2;   l.footerDateY      = 100;
-    l.footerTurtleX   = 2;   l.footerTurtleY    = 104;
-    l.footerNameX     = 20;  l.footerNameY      = 120;
-
-    l.footerMaxChars = 30;
-    return l;
-}
-
-EPDLayout EPDHandler::layout_H270()
-{
-    EPDLayout l;
-    l.rotation      = 3;
-
-    l.colL_icon     = 0;    l.colL_value = 30;   l.colL_unit = 90;
-    l.colR_icon     = 130;  l.colR_value = 160;  l.colR_unit = 230;
-
-    l.rowTop        = 20;   l.rowTop2 = 20;
-    l.rowBot        = 54;   l.rowBot2 = 54;
-
-    l.footerWlanX     = 20;  l.footerWlanY      = 88;
-    l.footerWlanIconX = 2;   l.footerWlanIconY  = 70;
-    l.footerIpX       = 120; l.footerIpY        = 102;
-    l.footerDateX     = 2;   l.footerDateY      = 102;
-    l.footerTurtleX   = 2;   l.footerTurtleY    = 104;
-    l.footerNameX     = 20;  l.footerNameY      = 120;
-
-    l.footerMaxChars = 30;
+    l.footerMaxChars  = 30;
     return l;
 }
 
@@ -233,10 +187,10 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
 
     int orientation = configHandler.getConfigSwitch("switchEPDorientation");
     const EPDLayout layout =
-        (orientation == 1) ? layout_V270() :
-        (orientation == 2) ? layout_H90()  :
-        (orientation == 3) ? layout_H270() :
-                             layout_V90();
+        (orientation == 1) ? layout_vertical(0)   :
+        (orientation == 2) ? layout_horizontal(1) :
+        (orientation == 3) ? layout_horizontal(3) :
+                             layout_vertical(2);
 
     if (_taskRunning) return;  // previous render still in progress
     _taskRunning = true;
@@ -253,10 +207,10 @@ void EPDHandler::wipeDisplay()
 
     int ori = configHandler.getConfigSwitch("switchEPDorientation");
     EPDWipeParams *wp = new EPDWipeParams{this,
-        (ori == 1) ? layout_V270() :
-        (ori == 2) ? layout_H90()  :
-        (ori == 3) ? layout_H270() :
-                     layout_V90()};
+        (ori == 1) ? layout_vertical(0)   :
+        (ori == 2) ? layout_horizontal(1) :
+        (ori == 3) ? layout_horizontal(3) :
+                     layout_vertical(2)};
     xTaskCreate(epdWipeTask, "epd_wipe", 4096, wp, 1, nullptr);
 }
 
@@ -267,7 +221,7 @@ void EPDHandler::epdWipeTask(void *pvParameters)
     display.fillScreen(GxEPD_WHITE);
     display.setFullWindow();
     display.setRotation(p->l.rotation);
-    display.drawInvertedBitmap(p->l.footerTurtleX, p->l.footerTurtleY, bitmap_turtlesleep, 18, 18, GxEPD_RED);
+    display.drawInvertedBitmap(p->l.footerTurtleX,   p->l.footerTurtleY,   bitmap_turtlesleep, 18, 18, GxEPD_RED);
     display.display(false);
     display.hibernate();
     display.end();
