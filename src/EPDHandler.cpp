@@ -193,8 +193,9 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
 
     display.setFont(&BabelSans8pt7b);
     display.setTextColor(GxEPD_BLACK);
-    display.setCursor(l.footerWlanX, l.footerWlanY);
-    display.print(footerStr("WLAN: " + wlan_ssid));
+    display.drawInvertedBitmap(l.footerWlanX, l.footerWlanY - 11, bitmap_wlan, 18, 18, GxEPD_BLACK);
+    display.setCursor(l.footerWlanX + 20, l.footerWlanY);
+    display.print(footerStr(wlan_ssid));
     display.setCursor(l.footerIpX, l.footerIpY);
     display.print(footerStr("IP: " + ip_address));
     display.setCursor(l.footerDateX, l.footerDateY);
