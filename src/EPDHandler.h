@@ -89,6 +89,25 @@ struct EPDLayout
     int footerNameY;
 };
 
+struct EPDTaskParams
+{
+    EPDHandler *handler;
+    DataCO2     co2;
+    Bsec        bme_data;
+    String      epd_date;
+    String      epd_time;
+    String      wlan_ssid;
+    String      ip_address;
+    bool        bmeOk;
+    EPDLayout   layout;
+};
+
+struct EPDWipeParams
+{
+    EPDHandler *h;
+    EPDLayout   l;
+};
+
 class EPDHandler
 {
 public:
