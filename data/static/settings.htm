@@ -139,7 +139,7 @@ fetch(url,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlenco
 var switchForm=document.getElementById("moduleSwitchForm");
 switchForm.addEventListener("submit",function(e){
 e.preventDefault();
-var params=Array.from(switchForm.querySelectorAll("input[type=checkbox]")).map(function(c){
+var params=Array.from(switchForm.querySelectorAll("input[type=checkbox],select")).map(function(c){
 return encodeURIComponent(c.name)+"="+(c.checked?1:0);
 }).join("&");
 submitForm("/submitmodulswitch?"+params,"","feedbackSwitch");
