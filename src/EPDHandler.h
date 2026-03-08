@@ -92,7 +92,6 @@ private:
     static EPDLayout layout_horizontal(int rotation);
 
     static uint16_t getAlertColor(float value, float threshold);
-    static uint16_t getAlertColorInt(int value, int threshold);
 
     std::atomic<bool> _taskRunning{false};
     unsigned long _lastRunSeconds = 0;
