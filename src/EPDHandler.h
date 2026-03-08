@@ -58,56 +58,6 @@ struct EPDWipeParams
     EPDLayout   l;
 };
 
-struct EPDLayout
-{
-    int rotation;
-
-    // Sensor value columns
-    int colL_icon;
-    int colL_value;
-    int colL_unit;
-    int colR_icon;
-    int colR_value;
-    int colR_unit;
-
-    // Sensor rows
-    int rowTop;
-    int rowBot;
-    int rowTop2;
-    int rowBot2;
-
-    // Footer
-    int footerTurtleX;
-    int footerTurtleY;
-    int footerWlanX;
-    int footerWlanY;
-    int footerIpX;
-    int footerIpY;
-    int footerDateX;
-    int footerDateY;
-    int footerNameX;
-    int footerNameY;
-};
-
-struct EPDTaskParams
-{
-    EPDHandler *handler;
-    DataCO2     co2;
-    Bsec        bme_data;
-    String      epd_date;
-    String      epd_time;
-    String      wlan_ssid;
-    String      ip_address;
-    bool        bmeOk;
-    EPDLayout   layout;
-};
-
-struct EPDWipeParams
-{
-    EPDHandler *h;
-    EPDLayout   l;
-};
-
 class EPDHandler
 {
 public:
