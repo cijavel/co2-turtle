@@ -44,13 +44,13 @@ EPDLayout EPDHandler::layout_V90()
     l.rowTop2       = 106;
     l.rowBot2       = 144;
     // Footer zone Y 160–250, 5 elements, spacing 15px
-    l.footerWlanIconX = 2;  l.footerWlanIconY = 149;
-    l.footerWlanX   = 1;    l.footerWlanY   = 191;
+    l.footerWlanIconX = 1;  l.footerWlanIconY = 176;
+    l.footerWlanX   = 20;    l.footerWlanY   = 191;
     l.footerIpX     = 1;    l.footerIpY     = 209;
     l.footerDateX   = 1;    l.footerDateY   = 227;
-    l.footerTurtleX = 1;    l.footerTurtleY = 238;
+    l.footerTurtleX = 1;    l.footerTurtleY = 230;
     l.footerNameX   = 20;   l.footerNameY   = 245;
-    l.footerMaxChars = 18;
+    l.footerMaxChars = 17;
     return l;
 }
 
