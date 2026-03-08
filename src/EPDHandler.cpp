@@ -37,20 +37,19 @@ EPDLayout EPDHandler::layout_V90()
 {
     EPDLayout l;
     l.rotation      = 2;
-    // Sensor columns – single column, left-aligned
-    l.colL_icon     = 0;    l.colL_value = 32;   l.colL_unit = 104;
-    l.colR_icon     = 0;    l.colR_value = 32;   l.colR_unit = 104;
-    // 4 sensor rows (icon baseline = row - 20)
-    l.rowTop        = 35;   // Temp
-    l.rowBot        = 80;   // Hum
-    l.rowTop2       = 125;  // CO2
-    l.rowBot2       = 170;  // IAQ
-    // Footer zone Y 188–250
-    l.footerWlanX   = 0;    l.footerWlanY   = 200;
-    l.footerIpX     = 0;    l.footerIpY     = 212;
-    l.footerDateX   = 0;    l.footerDateY   = 224;
-    l.footerTurtleX = 0;    l.footerTurtleY = 232;
-    l.footerNameX   = 20;   l.footerNameY   = 248;
+    l.colL_icon     = 2;    l.colL_value = 30;   l.colL_unit = 101;
+    l.colR_icon     = 2;    l.colR_value = 30;   l.colR_unit = 101;
+    l.rowTop        = 30;
+    l.rowBot        = 68;
+    l.rowTop2       = 106;
+    l.rowBot2       = 144;
+    // Footer zone Y 160–250, 5 elements, spacing 15px
+    l.footerWlanX   = 2;    l.footerWlanY   = 163;
+    l.footerIpX     = 2;    l.footerIpY     = 178;
+    l.footerDateX   = 2;    l.footerDateY   = 193;
+    l.footerTurtleX = 2;    l.footerTurtleY = 206;
+    l.footerNameX   = 24;   l.footerNameY   = 221;
+    l.footerMaxChars = 18;
     return l;
 }
 
@@ -72,6 +71,7 @@ EPDLayout EPDHandler::layout_V270()
     l.footerDateX   = 0;    l.footerDateY   = 28;
     l.footerIpX     = 0;    l.footerIpY     = 42;
     l.footerWlanX   = 0;    l.footerWlanY   = 54;
+    l.footerMaxChars = 18;
     return l;
 }
 
@@ -185,17 +185,23 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     }
 
     // Footer
+    auto footerStr = [&](const String &s) -> String {
+        return (l.footerMaxChars > 0 && s.length() > (unsigned)l.footerMaxChars)
+            ? s.substring(0, l.footerMaxChars)
+            : s;
+    };
+
     display.setFont(&BabelSans8pt7b);
     display.setTextColor(GxEPD_BLACK);
     display.setCursor(l.footerWlanX, l.footerWlanY);
-    display.print("WLAN: " + wlan_ssid);
+    display.print(footerStr("WLAN: " + wlan_ssid));
     display.setCursor(l.footerIpX, l.footerIpY);
-    display.print("IP: " + ip_address);
+    display.print(footerStr("IP: " + ip_address));
     display.setCursor(l.footerDateX, l.footerDateY);
-    display.print(epd_date + " " + epd_time);
+    display.print(footerStr(epd_date + " " + epd_time));
     display.drawInvertedBitmap(l.footerTurtleX, l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
     display.setCursor(l.footerNameX, l.footerNameY);
-    display.print(DeviceName);
+    display.print(footerStr(String(DeviceName)));
     display.display(false);
     display.hibernate();
     display.end();
