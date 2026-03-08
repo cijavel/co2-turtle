@@ -37,6 +37,7 @@ struct EPDLayout
     int footerDateY;
     int footerNameX;
     int footerNameY;
+    int footerMaxChars; 
 };
 
 struct EPDTaskParams
@@ -89,7 +90,7 @@ private:
     static EPDLayout layout_V270();  // Vertikal 270° (rotation=0)
     static EPDLayout layout_H90();   // Horizontal 90°  (rotation=1)
     static EPDLayout layout_H270();  // Horizontal 270° (rotation=3)
-    
+
     static uint16_t getAlertColor(float value, float threshold);
     static uint16_t getAlertColorInt(int value, int threshold);
 
