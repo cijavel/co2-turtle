@@ -201,10 +201,6 @@ void loop()
             epdHandler.wipeDisplay();
         }
     }
-    else
-    {
-        epdHandler.wipeDisplay();
-    }
 	
 	if (configHandler.getConfigSwitch("switchLED"))
 	{
