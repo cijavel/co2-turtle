@@ -10,6 +10,7 @@
 #include "../font/Inter_Bold12pt7b.h"
 #include "Configuration.h"
 #include "symbol.h"
+#include <WiFi.h>
 
 extern ConfigHandler &configHandler;
 
@@ -36,59 +37,48 @@ void EPDHandler::printValue(char *buff, int16_t x, int16_t y, uint16_t color, fl
 EPDLayout EPDHandler::layout_V90()
 {
     EPDLayout l;
-    l.rotation      = 2;
-    l.colL_icon     = 2;    l.colL_value = 30;   l.colL_unit = 101;
-    l.colR_icon     = 2;    l.colR_value = 30;   l.colR_unit = 101;
-    l.rowTop        = 30;
-    l.rowBot        = 68;
-    l.rowTop2       = 106;
-    l.rowBot2       = 144;
-    // Footer zone Y 160–250, 5 elements, spacing 15px
+    l.rotation  = 2;
+    
+    l.colL_icon = 2;           l.colL_value = 30;           l.colL_unit = 101;
+    l.colR_icon = l.colL_icon; l.colR_value = l.colL_value; l.colR_unit = l.colL_unit;
+
+    l.rowTop    = 30;
+    l.rowBot    = 68;
+    l.rowTop2   = 106;
+    l.rowBot2   = 144;
+
     l.footerWlanIconX = 1;  l.footerWlanIconY = 176;
-    l.footerWlanX   = 20;    l.footerWlanY   = 191;
-    l.footerIpX     = 1;    l.footerIpY     = 209;
-    l.footerDateX   = 1;    l.footerDateY   = 227;
-    l.footerTurtleX = 1;    l.footerTurtleY = 230;
-    l.footerNameX   = 20;   l.footerNameY   = 245;
-    l.footerMaxChars = 17;
+    l.footerWlanX     = 20;    l.footerWlanY  = 191;
+    l.footerIpX       = 1;    l.footerIpY     = 209;
+    l.footerDateX     = 1;    l.footerDateY   = 227;
+    l.footerTurtleX   = 1;    l.footerTurtleY = 230;
+    l.footerNameX     = 20;   l.footerNameY   = 245;
+
+    l.footerMaxChars  = 16;
     return l;
 }
 
 EPDLayout EPDHandler::layout_V270()
 {
     EPDLayout l;
-    l.rotation      = 0;
-    // Mirror of V90: X = 122 - x_90 - elemW, Y = 250 - y_90 - elemH
+    l.rotation  = 0;
 
-    // Sensor columns (icon 24px wide, value ~30px, unit 18px)
-    l.colL_icon     = 122 - 2   - 24;  // 96
-    l.colL_value    = 122 - 30  - 30;  // 62
-    l.colL_unit     = 122 - 101 - 18;  // 3
-    l.colR_icon     = l.colL_icon;
-    l.colR_value    = l.colL_value;
-    l.colR_unit     = l.colL_unit;
+    l.colL_icon = 2;           l.colL_value = 30;           l.colL_unit = 101; 
+    l.colR_icon = l.colL_icon; l.colR_value = l.colL_value; l.colR_unit = l.colL_unit;
 
-    // Sensor rows (font baseline, mirrored: 250 - y_90 - fontH(~20))
-    l.rowTop        = 250 - 30  - 20;  // 200  Temp
-    l.rowBot        = 250 - 68  - 20;  // 162  Hum
-    l.rowTop2       = 250 - 106 - 20;  // 124  CO2
-    l.rowBot2       = 250 - 144 - 20;  // 86   IAQ
+    l.rowTop    = 30;  // Temp  (visually bottom)
+    l.rowBot    = 68;  // Hum
+    l.rowTop2   = 104;  // CO2
+    l.rowBot2   = 144;  // IAQ   (visually top of sensor zone)
 
-    // Footer zone – visually at bottom = small Y values (250 - y_90 - elemH)
-    // Order reversed: Name at top (small Y), WLAN at bottom (larger Y)
-    l.footerTurtleX = 122 - 1   - 18;  // 103
-    l.footerTurtleY = 250 - 245 - 18;  // 5    (mirrors nameY=245)
-    l.footerNameX   = 122 - 20  - 60;  // 42   (approx name text width 60)
-    l.footerNameY   = 250 - 245 - 12;  // 5
-    l.footerDateX   = 122 - 1   - 70;  // 51   (date+time ~70px wide)
-    l.footerDateY   = 250 - 227 - 12;  // 11
-    l.footerIpX     = 122 - 1   - 80;  // 41
-    l.footerIpY     = 250 - 209 - 12;  // 29
-    l.footerWlanIconX = 122 - 1  - 18; // 103
-    l.footerWlanIconY = 250 - 194 - 18;// 38   (mirrors wlanIconY=176+18)
-    l.footerWlanX   = 122 - 20  - 70;  // 32
-    l.footerWlanY   = 250 - 191 - 12;  // 47
-    l.footerMaxChars = 17;
+    l.footerWlanIconX = 1; l.footerWlanIconY  = 176;
+    l.footerWlanX     = 20;  l.footerWlanY    = 191;
+    l.footerIpX       = 1;  l.footerIpY       = 209;
+    l.footerDateX     = 1;  l.footerDateY     = 227;
+    l.footerTurtleX   = 1; l.footerTurtleY    = 230;
+    l.footerNameX     = 20;  l.footerNameY    = 245;
+    
+    l.footerMaxChars = 16;
     return l;
 }
 
@@ -96,19 +86,21 @@ EPDLayout EPDHandler::layout_H90()
 {
     EPDLayout l;
     l.rotation      = 1;
-    // Left column: Temp + Hum
+
     l.colL_icon     = 0;    l.colL_value = 30;   l.colL_unit = 90;
-    // Right column: CO2 + IAQ
-    l.colR_icon     = 130;  l.colR_value = 160;  l.colR_unit = 220;
-    // 2 shared rows for both columns
-    l.rowTop        = 38;   l.rowTop2 = 38;
-    l.rowBot        = 75;   l.rowBot2 = 75;
-    // Footer zone Y 85–122
-    l.footerWlanX   = 0;    l.footerWlanY   = 95;
-    l.footerIpX     = 0;    l.footerIpY     = 107;
-    l.footerDateX   = 0;    l.footerDateY   = 119;
-    l.footerTurtleX = 232;  l.footerTurtleY = 103;
-    l.footerNameX   = 20;   l.footerNameY   = 119;
+    l.colR_icon     = 130;  l.colR_value = 160;  l.colR_unit = 230;
+
+    l.rowTop        = 20;   l.rowTop2 = 20;
+    l.rowBot        = 54;   l.rowBot2 = 54;
+
+    l.footerWlanX     = 20;  l.footerWlanY      = 84;
+    l.footerWlanIconX = 2;   l.footerWlanIconY  = 66;
+    l.footerIpX       = 120; l.footerIpY        = 100;
+    l.footerDateX     = 2;   l.footerDateY      = 100;
+    l.footerTurtleX   = 2;   l.footerTurtleY    = 104;
+    l.footerNameX     = 20;  l.footerNameY      = 120;
+
+    l.footerMaxChars = 30;
     return l;
 }
 
@@ -116,20 +108,21 @@ EPDLayout EPDHandler::layout_H270()
 {
     EPDLayout l;
     l.rotation      = 3;
-    // Mirrored: X = 250 - orig_x - width, Y = 122 - orig_y
-    // Left column mirrored (was right in H90)
-    l.colL_icon     = 96;   l.colL_value = 65;   l.colL_unit = 12;
-    // Right column mirrored (was left in H90)
-    l.colR_icon     = 226;  l.colR_value = 195;  l.colR_unit = 142;
-    // Rows mirrored
-    l.rowTop        = 84;   l.rowTop2 = 84;   // 122-38
-    l.rowBot        = 47;   l.rowBot2 = 47;   // 122-75
-    // Footer zone – visually at bottom = small Y values
-    l.footerWlanX   = 0;    l.footerWlanY   = 8;
-    l.footerIpX     = 0;    l.footerIpY     = 20;
-    l.footerDateX   = 0;    l.footerDateY   = 32;
-    l.footerTurtleX = 232;  l.footerTurtleY = 103;
-    l.footerNameX   = 20;   l.footerNameY   = 118;
+
+    l.colL_icon     = 0;    l.colL_value = 30;   l.colL_unit = 90;
+    l.colR_icon     = 130;  l.colR_value = 160;  l.colR_unit = 230;
+
+    l.rowTop        = 20;   l.rowTop2 = 20;
+    l.rowBot        = 54;   l.rowBot2 = 54;
+
+    l.footerWlanX     = 20;  l.footerWlanY      = 88;
+    l.footerWlanIconX = 2;   l.footerWlanIconY  = 70;
+    l.footerIpX       = 120; l.footerIpY        = 102;
+    l.footerDateX     = 2;   l.footerDateY      = 102;
+    l.footerTurtleX   = 2;   l.footerTurtleY    = 104;
+    l.footerNameX     = 20;  l.footerNameY      = 120;
+
+    l.footerMaxChars = 30;
     return l;
 }
 
@@ -231,7 +224,12 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
         return;
 
     _lastRunSeconds = currentSeconds;
-    bool bmeOk = BME680Handler::getInstance().isSensorOk();
+    bool bmeOk  = BME680Handler::getInstance().isSensorOk();
+    bool wifiOk = (WiFi.status() == WL_CONNECTED);
+    String ssid    = wifiOk ? wlan_ssid            : "no WLAN";
+    String ip      = wifiOk ? ip_address           : "---";
+    String date    = wifiOk ? epd_date             : "---";
+    String time    = wifiOk ? epd_time             : "--:--";
 
     int orientation = configHandler.getConfigSwitch("switchEPDorientation");
     const EPDLayout layout =
@@ -243,9 +241,7 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
     if (_taskRunning) return;  // previous render still in progress
     _taskRunning = true;
 
-    EPDTaskParams *params = new EPDTaskParams{
-        this, co2, bme_data, epd_date, epd_time, wlan_ssid, ip_address, bmeOk, layout
-    };
+    EPDTaskParams *params = new EPDTaskParams{this, co2, bme_data, date, time, ssid, ip, bmeOk, layout};
     xTaskCreate(EPDHandler::epdRenderTask, "epd_render", 4096, params, 1, nullptr);
 }
 
