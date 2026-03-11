@@ -9,12 +9,17 @@
 <body>
 <div class="container">
     <h1>{{deviceName}}</h1>
-    <div class="nav">
-        <a href="/status" class="button">Status</a>
-        <a href="/json" class="button">JSON</a>
-        <a href="/sensorsettings" class="button">Sensor Settings</a>
-        <a href="/WLAN" class="button">WLAN Settings</a>
-        <a href="/mqtt" class="button">MQTT Settings</a>
+    <div class="nav-group">
+        <div class="nav">
+            <a href="/status" class="button">Status</a>
+            <a href="/json" class="button">JSON</a>
+        </div>
+        <div class="nav-label">Settings</div>
+        <div class="nav">
+            <a href="/sensorsettings" class="button">Sensor</a>
+            <a href="/WLAN" class="button">WLAN</a>
+            <a href="/mqtt" class="button">MQTT</a>
+        </div>
     </div>
     <div class="content">
         <div id="warningBanner" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:15px;margin-top:20px;">
