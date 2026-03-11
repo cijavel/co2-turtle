@@ -109,6 +109,8 @@ void ConfigHandler::persistAllSettings()
 	preferences.putString("mqttUSER",     configMapforDevice["mqttUSER"]);
 	preferences.putString("mqttPASSWORD", configMapforDevice["mqttPASSWORD"]);
 	preferences.putString("mqttHOST",     configMapforDevice["mqttHOST"]);
+	preferences.putInt(   "mqttPORT",     configMapforDevice["mqttPORT"].toInt());
+	preferences.putBool(  "mqttUSERen",   configMapforDevice["mqttUSERen"] == "1");
 
 	preferences.putInt("LEDbrightness", configMapforLED["LEDbrightness"]);
 
