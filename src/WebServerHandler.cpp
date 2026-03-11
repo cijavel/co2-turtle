@@ -46,18 +46,7 @@ void WebServerHandler::start()
 	server.on("/api/system/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_api_system_status(request); });
 
 	server.on("/api/epd/refresh", HTTP_POST, [this](AsyncWebServerRequest *request) {
-		EPDHandler &epd = EPDHandler::getInstance();
-		epd.forceRefresh();
-		if (configHandler.getConfigSwitch("switchEPD"))
-		{
-			String wlan_ssid = WiFi.SSID();
-			String ip_address = WiFi.localIP().toString();
-			epd.updateEPD(co2data, bmedata, acDate.substring(0, 10), acDate.substring(11, 16), wlan_ssid, ip_address, ULONG_MAX);
-		}
-		else
-		{
-			epd.wipeDisplay();
-		}
+		EPDHandler::getInstance().forceRefresh();
 		request->send(200, "text/plain", "ok");
 	});
 
