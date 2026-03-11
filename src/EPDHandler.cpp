@@ -179,9 +179,10 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
 
 void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const String &epd_date, const String &epd_time, const String &wlan_ssid, const String &ip_address, unsigned long currentSeconds)
 {
-    if (currentSeconds - _lastRunSeconds < (unsigned long)configHandler.getConfigInterval("intervalEPD"))
+    if (!_forceRender && currentSeconds - _lastRunSeconds < (unsigned long)configHandler.getConfigInterval("intervalEPD"))
         return;
 
+    _forceRender = false;
     _lastRunSeconds = currentSeconds;
     bool bmeOk  = BME680Handler::getInstance().isSensorOk();
     bool wifiOk = (WiFi.status() == WL_CONNECTED);
@@ -260,8 +261,7 @@ void EPDHandler::epdWipeTask(void *pvParameters)
 
 void EPDHandler::forceRefresh()
 {
-    _lastRunSeconds = 0;
+    _forceRender = true;
     _wiped = false;
-    _pendingRefresh = true;
     _taskRunning = false;
 }
