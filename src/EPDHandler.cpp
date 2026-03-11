@@ -92,7 +92,9 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     display.setFullWindow();
     display.setRotation(l.rotation);
 
-    uint16_t color_temp = getAlertColor(bme_data.temperature, 26);
+    float temperature = bme_data.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f;
+
+    uint16_t color_temp = getAlertColor(temperature, 26);
     uint16_t color_hum  = getAlertColor(bme_data.humidity, 70);
     uint16_t color_iaq = getAlertColor(bme_data.iaq, 300);
     uint16_t color_co2 = getAlertColor(co2.getRegular(), 1500);
@@ -103,6 +105,13 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     // Left column icons
     display.drawInvertedBitmap(l.colL_icon, l.rowTop - 20, bitmap_temp, 24, 24, color_temp);
     display.drawInvertedBitmap(l.colL_icon, l.rowBot - 20, bitmap_hum,  24, 24, color_hum);
+
+    // Left column values: Temperature (top), Humidity (bottom)
+    if (bmeOk)
+    {
+        printValue(buffer, l.colL_value, l.rowTop, color_temp, temperature);
+        display.drawInvertedBitmap(l.colL_icon, l.rowBot - 20, bitmap_hum,  24, 24, color_hum);
+    }
 
     // Left column values: Temperature (top), Humidity (bottom)
     if (bmeOk)
