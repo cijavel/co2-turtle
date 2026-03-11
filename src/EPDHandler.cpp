@@ -263,4 +263,5 @@ void EPDHandler::forceRefresh()
     _lastRunSeconds = 0;
     _wiped = false;
     _pendingRefresh = true;
+    _taskRunning = false;
 }

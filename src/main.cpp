@@ -192,6 +192,7 @@ void loop()
         String wlan_ssid = WiFi.SSID();
         String ip_address = WiFi.localIP().toString();
         epdHandler.updateEPD(mhz19Readout, bme_data, localTime("%Y.%m.%d"), localTime("%H:%M"), wlan_ssid, ip_address, currentSeconds);
+        epdHandler.clearPendingRefresh();
     }
     else
     {
