@@ -520,6 +520,7 @@ void WebServerHandler::handle_submit_mqttconfig(AsyncWebServerRequest *request)
     if (request->hasParam("switchMQTT", true)) {
         configHandler.setConfigSwitch("switchMQTT",
             atoi(request->getParam("switchMQTT", true)->value().c_str()));
+        updated = true;
     }
 
     if (updated) {
