@@ -118,11 +118,16 @@ The display supports 4 orientations selectable via `switchEPDorientation`:
 **Layout:** Two sensor columns (Temp/Hum left, CO2/IAQ right) with a footer showing
 WiFi icon + SSID, IP address, date/time, and device name with turtle icon.
 Alert coloring (red/black) applies per sensor value against configurable thresholds.
+The displayed temperature includes the runtime-configurable `tempOffset` from NVS.
 
 **Rendering:** With BUSY pin wired (`EPD_PIN_BUSY >= 0`), `printLayout()` and
 `wipeDisplay()` are called directly – GxEPD2 uses the real BUSY signal (~500ms wait).
 Without BUSY pin, both operations run in dedicated one-shot FreeRTOS tasks (4096 byte
 stack each) to prevent blocking the async TCP stack during the ~2–3s busy-wait delay.
+
+**Manual refresh:** A forced re-render can be triggered via the web UI ("Refresh Display"
+button in Sensor Settings). This bypasses the update interval and renders immediately
+on the next main loop cycle.
 
 **Standby:** When the EPD is disabled, a sleeping turtle is shown
 before the display hibernates.
@@ -204,3 +209,14 @@ ALT/NEU + commit message blocks – one per commit.
 
 - The user decides which changes to apply. Do not assume a suggested
   change was implemented unless the user explicitly confirms it.
+
+## How I Want Merge Request Descriptions Delivered
+
+Merge request descriptions must always be written in **English** and targeted at a
+general audience – including non-developers. Keep the following guidelines in mind:
+
+- Describe **what changed and why**, not how it was implemented.
+- Use **plain language**. Avoid or minimize code references, function names, and
+  technical identifiers unless they are essential for clarity.
+- Structure the description by **feature or fix area**, not by file.
+- Each section should be understandable without reading the source code.
