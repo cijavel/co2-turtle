@@ -21,6 +21,9 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#f0f0f
 .status-item .status-indicator{width:20px;height:20px;border-radius:30%;margin-right:6px;flex-shrink:0}
 .status-item .description{font-size:.9em;color:#666;line-height:1.4;min-width:0}
 .show-password-button{background:none;border:1px solid #ccc;border-radius:4px;cursor:pointer;padding:3px 6px;margin-left:5px;vertical-align:middle}
+.nav-group{display:flex;flex-direction:column;gap:8px}
+.nav-label{font-size:13px;color:#666;margin-top:4px}
+.nav .button{flex:1 1 0;text-align:center}
 @media(max-width:480px){
 .container{margin:8px;padding:14px;border-radius:6px}
 .nav .button{padding:10px 8px;font-size:14px}
