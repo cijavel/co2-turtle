@@ -5,7 +5,7 @@
 enum SectionName
 {
 	//LED_TEMP,
-	LED_HUM,
+	LED_TEMP,
 	LED_WLANCONNECT,
 	LED_SENSORSTATE,
 	LED_CO2,
