@@ -97,6 +97,7 @@ private:
     unsigned long _lastRunSeconds = 0;
     bool _wiped = false;
     bool _pendingRefresh = false;
+    bool _forceRender = false;
     
 };
 
