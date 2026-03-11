@@ -188,12 +188,20 @@ void EPDHandler::updateEPD(const DataCO2 &co2, const Bsec &bme_data, const Strin
         (orientation == 3) ? layout_horizontal(3) :
                              layout_vertical(2);
 
-    if (_taskRunning) return;  // previous render still in progress
-    _taskRunning = true;
-
-    EPDTaskParams *params = new EPDTaskParams{this, co2, bme_data, date, time, ssid, ip, bmeOk, layout};
-    xTaskCreate(EPDHandler::epdRenderTask, "epd_render", 4096, params, 1, nullptr);
-}
+    #if EPD_PIN_BUSY >= 0
+        // BUSY pin wired: display.display() uses real busy signal, short wait
+        if (_taskRunning) return;
+        _taskRunning = true;
+        printLayout(co2, bme_data, date, time, ssid, ip, bmeOk, layout);
+        _taskRunning = false;
+    #else
+        // BUSY pin not wired: blocking delay ~2-3s, must run in FreeRTOS task
+        if (_taskRunning) return;
+        _taskRunning = true;
+        EPDTaskParams *params = new EPDTaskParams{this, co2, bme_data, date, time, ssid, ip, bmeOk, layout};
+        xTaskCreate(EPDHandler::epdRenderTask, "epd_render", 4096, params, 1, nullptr);
+    #endif
+    }
 
 void EPDHandler::wipeDisplay()
 {
@@ -202,12 +210,27 @@ void EPDHandler::wipeDisplay()
     _taskRunning = true;
 
     int ori = configHandler.getConfigSwitch("switchEPDorientation");
-    EPDWipeParams *wp = new EPDWipeParams{this,
+    EPDLayout l =
         (ori == 1) ? layout_vertical(0)   :
         (ori == 2) ? layout_horizontal(1) :
         (ori == 3) ? layout_horizontal(3) :
-                     layout_vertical(2)};
-    xTaskCreate(epdWipeTask, "epd_wipe", 4096, wp, 1, nullptr);
+                     layout_vertical(2);
+
+    #if EPD_PIN_BUSY >= 0
+        display.init(BAUDRATE);
+        display.fillScreen(GxEPD_WHITE);
+        display.setFullWindow();
+        display.setRotation(l.rotation);
+        display.drawInvertedBitmap(l.footerTurtleX,   l.footerTurtleY,   bitmap_turtlesleep, 18, 18, GxEPD_RED);
+        display.drawInvertedBitmap(l.footerWlanIconX, l.footerWlanIconY, bitmap_wlan,        18, 18, GxEPD_BLACK);
+        display.display(false);
+        display.hibernate();
+        display.end();
+        _taskRunning = false;
+    #else
+        EPDWipeParams *wp = new EPDWipeParams{this, l};
+        xTaskCreate(epdWipeTask, "epd_wipe", 4096, wp, 1, nullptr);
+    #endif
 }
 
 void EPDHandler::epdWipeTask(void *pvParameters)
