@@ -486,6 +486,7 @@ void WebServerHandler::handle_page_mqtt(AsyncWebServerRequest *request)
     file.close();
 
     content.replace("{{deviceName}}", DeviceName);
+    content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
     content.replace("{{mqttHOST}}", configHandler.getConfigDevice("mqttHOST"));
     content.replace("{{mqttPORT}}", configHandler.getConfigDevice("mqttPORT"));
     content.replace("{{mqttUSERen_checked}}", configHandler.getConfigDevice("mqttUSERen") == "1" ? "checked" : "");
