@@ -47,4 +47,10 @@
 
 extern const char* DeviceNameConf;
 
-#endif //CO2_TURTLE_CONFIGURATION_H
+// EPD hardware pins – set to -1 if not wired
+#define EPD_PIN_RST  26
+#define EPD_PIN_BUSY 25
+#define EPD_PIN_DC 27
+#define EPD_PIN_CS 5
+
+#endif 

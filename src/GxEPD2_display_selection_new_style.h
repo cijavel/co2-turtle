@@ -1,3 +1,4 @@
+#include "Configuration.h"
 // Display Library example for SPI e-paper panels from Dalian Good Display and boards from Waveshare.
 // Requires HW SPI and Adafruit_GFX. Caution: the e-paper panels require 3.3V supply AND data lines!
 //
@@ -71,7 +72,8 @@
 #else
 
 
-GxEPD2_DISPLAY_CLASS<GxEPD2_DRIVER_CLASS, MAX_HEIGHT(GxEPD2_DRIVER_CLASS)> display(GxEPD2_DRIVER_CLASS(/*CS=5*/ 5, /*DC=TX2*/ 27, /*RST=*/ -1, /*BUSY=*/ -1)); // my suggested wiring and proto board
+GxEPD2_DISPLAY_CLASS<GxEPD2_DRIVER_CLASS, MAX_HEIGHT(GxEPD2_DRIVER_CLASS)> display(GxEPD2_DRIVER_CLASS(/*CS=*/ EPD_PIN_CS, /*DC=*/ EPD_PIN_DC, /*RST=*/ EPD_PIN_RST, /*BUSY=*/ EPD_PIN_BUSY));
+
 
 #endif
 #else // GxEPD2_1248 or GxEPD2_1248c
