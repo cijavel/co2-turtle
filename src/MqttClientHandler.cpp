@@ -65,6 +65,8 @@ void MqttClientHandler::setup_Mqtt()
 		);
 	}
 	Serial.println("[MQTT] setup done, server: " + host + ":" + String(port));
+	_isSetup = true;
+	connectToMqtt();
 }
 
 void MqttClientHandler::publishDiscovery()
