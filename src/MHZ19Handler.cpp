@@ -68,9 +68,7 @@ void MHZ19Handler::printoutCurrentValues()
 	}
 	else
 	{
-		Serial.println("[MHZ19] Failed to recieve CO2 value - Error");
-		Serial.print("[MHZ19] Response Code: ");
-		Serial.println(myMHZ19.errorCode); // Get the Error Code value
+		Serial.printf("[MHZ19] Read failed – errorCode=%d (%d consecutive)\n", myMHZ19.errorCode, _consecutiveErrors);
 	}
 }
 
@@ -110,12 +108,11 @@ bool MHZ19Handler::updateLastReadout()
 	else
 	{
 		_consecutiveErrors++;
-		Serial.printf("[MHZ19] Fehler %d: Response Code %d\n",
-			_consecutiveErrors, myMHZ19.errorCode);
+		Serial.printf("[MHZ19] Error count %d, response code %d\n", _consecutiveErrors, myMHZ19.errorCode);
 
 		if (_consecutiveErrors >= 3)
 		{
-			Serial.println("[MHZ19] Recovery: Serial neu initialisieren...");
+			Serial.println("[MHZ19] Recovery: reinitializing Serial2...");
 			Serial_MHZ19->end();
 			vTaskDelay(500 / portTICK_PERIOD_MS);
 			Serial2.begin(BAUDRATE, SERIAL_8N1, PIN_MHZ19_RX, PIN_MHZ19_TX);

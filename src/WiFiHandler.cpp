@@ -14,7 +14,7 @@ void WiFiHandler::loadWiFiCredentials()
 {
     _ssid     = configHandler.getConfigDevice("wlanSSID");
     _password = configHandler.getConfigDevice("wlanPASSWORD");
-	Serial.println("[WIFI] get credentails");
+	Serial.printf("[WIFI] Credentials loaded: SSID='%s' (%s)\n", _ssid.c_str(), _ssid.isEmpty() ? "empty" : "set");
 }
 
 static bool connectToWifi()
@@ -49,9 +49,7 @@ void WiFiHandler::setupAPMode()
     const char *apPassword = AP_PASSWORD;
 
 	WiFi.softAP(apSSID, apPassword);
-	Serial.println("[AP MODE] no known wifi credentials found, starting AP mode");
-	Serial.print("[AP MODE] IP address: ");
-	Serial.println(WiFi.softAPIP());
+	Serial.printf("[AP MODE] Starting access point '%s', IP: %s\n", AP_SSID, WiFi.softAPIP().toString().c_str());
 }
 
 static void setupMDNS()
@@ -104,6 +102,8 @@ bool WiFiHandler::StatusCheck()
     {
         Serial.println("[WIFI] Connection lost, reconnecting...");
         ReStart();
+        bool reconnected = (WiFiClass::status() == WL_CONNECTED);
+        Serial.printf("[WIFI] Reconnect %s%s\n", reconnected ? "OK – IP: " : "FAILED", reconnected ? WiFi.localIP().toString().c_str() : "");
         connected = (WiFiClass::status() == WL_CONNECTED);
     }
     return connected;

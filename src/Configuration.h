@@ -2,7 +2,7 @@
 #define CO2_TURTLE_CONFIGURATION_H
 
 //uncomment to get debug in serial
-#define DEBUG 1
+#define DEBUG 0
 
 #define switch_WIFI  1
 #define switch_Webserver 1
