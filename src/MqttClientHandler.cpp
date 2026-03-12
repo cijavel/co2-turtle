@@ -42,20 +42,27 @@ void MqttClientHandler::WiFiEvent(WiFiEvent_t event)
 	}
 }
 
+void MqttClientHandler::onMqttConnect(bool sessionPresent)
+{
+	Serial.println("[MQTT] Connected, publishing discovery...");
+	publishDiscovery();
+}
+
 void MqttClientHandler::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
-	Serial.println("[MQTT] Disconnected");
+	Serial.println("[MQTT] Disconnected, reason: " + String((int)reason));
 }
 
 void MqttClientHandler::setup_Mqtt()
 {
 	WiFi.onEvent(WiFiEvent);
 
+	mqttClient.onConnect(onMqttConnect);
 	mqttClient.onDisconnect(onMqttDisconnect);
 
-	String host = configHandler.getConfigDevice("mqttHOST");
+	_mqttHost = configHandler.getConfigDevice("mqttHOST");
 	int port = configHandler.getConfigDevice("mqttPORT").toInt();
-	mqttClient.setServer(host.c_str(), port);
+	mqttClient.setServer(_mqttHost.c_str(), port);
 
 	if (configHandler.getConfigDevice("mqttUSERen") == "1")
 	{
@@ -64,9 +71,14 @@ void MqttClientHandler::setup_Mqtt()
 			configHandler.getConfigDevice("mqttPASSWORD").c_str()
 		);
 	}
-	Serial.println("[MQTT] setup done, server: " + host + ":" + String(port));
+	Serial.println("[MQTT] setup done, server: " + _mqttHost + ":" + String(port));
 	_isSetup = true;
-	connectToMqtt();
+
+	// Only connect if WiFi is already up; otherwise WiFiEvent will trigger connect
+	if (WiFi.status() == WL_CONNECTED)
+	{
+		connectToMqtt();
+	}
 }
 
 void MqttClientHandler::publishDiscovery()

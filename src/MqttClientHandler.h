@@ -25,8 +25,10 @@ public:
 private:
     static void WiFiEvent(WiFiEvent_t event);
     static void connectToMqtt();
+    static void onMqttConnect(bool sessionPresent);
     static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
     bool _isSetup = false;
+    String _mqttHost;
     static unsigned long _lastRunSeconds;
 };
 #endif // CO2_TURTLE_MQTTCLIENTHANDLER_H
