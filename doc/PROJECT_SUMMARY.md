@@ -181,7 +181,7 @@ before the display hibernates.
 ## Important Notes
 
 - `Credentials.h` is **not in the repository**. Copy `Credentials_example.h` and fill in
-  WiFi/MQTT credentials before building.
+  WiFi/MQTT credentials before building. This includes `MQTT_HOST`, `MQTT_USER`, and `MQTT_PASS`.
 - If WiFi credentials are missing or connection fails, the device falls back to AP mode.
 - `DEBUG 1` in `Configuration.h` enables verbose Serial output and RAM usage reporting.
 - The MH-Z19B is powered by 5V directly from the PSU, not from the ESP.
