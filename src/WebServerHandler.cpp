@@ -286,75 +286,67 @@ void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *requ
 
 void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *request)
 {
-
 	if (request->hasParam("intervalMHZ19"))
 	{
 		configHandler.setConfigInterval("intervalMHZ19", request->getParam("intervalMHZ19")->value().toInt());
 	}
 	else
 	{
-		Serial.println("MHZ19 Interval not set. Using default value.");
+		Serial.printf("[WebServer] intervalMHZ19 missing, using default: %ds\n", interval_MHZ19_in_Seconds);
 		configHandler.setConfigInterval("intervalMHZ19", interval_MHZ19_in_Seconds);
 	}
-
 	if (request->hasParam("intervalBME680"))
 	{
 		configHandler.setConfigInterval("intervalBME680", request->getParam("intervalBME680")->value().toInt());
 	}
 	else
 	{
-		Serial.println("BME680 Interval not set. Using default value.");
+		Serial.printf("[WebServer] intervalBME680 missing, using default: %ds\n", interval_BME680_in_Seconds);
 		configHandler.setConfigInterval("intervalBME680", interval_BME680_in_Seconds);
 	}
-
 	if (request->hasParam("intervalWiFi"))
 	{
 		configHandler.setConfigInterval("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
 	}
 	else
-	{	
-		Serial.println("WiFi Interval not set. Using default value.");
+	{
+		Serial.printf("[WebServer] intervalWiFi missing, using default: %ds\n", interval_WiFiCheck_in_Seconds);
 		configHandler.setConfigInterval("intervalWiFi", interval_WiFiCheck_in_Seconds);
 	}
-
 	if (request->hasParam("intervalPRINT"))
 	{
 		configHandler.setConfigInterval("intervalPRINT", request->getParam("intervalPRINT")->value().toInt());
 	}
 	else
 	{
-		Serial.println("RAM Printout Interval not set. Using default value.");
+		Serial.printf("[WebServer] intervalPRINT missing, using default: %ds\n", interval_RAMPrintout_in_Seconds);
 		configHandler.setConfigInterval("intervalPRINT", interval_RAMPrintout_in_Seconds);
 	}
-
 	if (request->hasParam("intervalEPD"))
 	{
 		configHandler.setConfigInterval("intervalEPD", request->getParam("intervalEPD")->value().toInt());
 	}
 	else
 	{
-		Serial.println("EPD Interval not set. Using default value.");
+		Serial.printf("[WebServer] intervalEPD missing, using default: %ds\n", interval_EPD_in_Seconds);
 		configHandler.setConfigInterval("intervalEPD", interval_EPD_in_Seconds);
 	}
-
 	if (request->hasParam("intervalLED"))
 	{
 		configHandler.setConfigInterval("intervalLED", request->getParam("intervalLED")->value().toInt());
 	}
 	else
 	{
-		Serial.println("LED Interval not set. Using default value.");
+		Serial.printf("[WebServer] intervalLED missing, using default: %ds\n", interval_LED_in_Seconds);
 		configHandler.setConfigInterval("intervalLED", interval_LED_in_Seconds);
 	}
-
 	if (request->hasParam("intervalMQTT"))
 	{
-
 		configHandler.setConfigInterval("intervalMQTT", request->getParam("intervalMQTT")->value().toInt());
 	}
 	else
 	{
-		Serial.println("MQTT Interval not set. Using default value.");
+		Serial.printf("[WebServer] intervalMQTT missing, using default: %ds\n", interval_mqtt_in_Seconds);
 		configHandler.setConfigInterval("intervalMQTT", interval_mqtt_in_Seconds);
 	}
 	configHandler.persistAllSettings();

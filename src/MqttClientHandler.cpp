@@ -29,17 +29,18 @@ bool MqttClientHandler::isConnected()
 
 void MqttClientHandler::WiFiEvent(WiFiEvent_t event)
 {
-	Serial.printf("[MQTT] event: %d\n", event);
-	wl_status_t status = WiFiClass::status();
-	if (status != WL_CONNECTED)
-	{
-		Serial.println("[MQTT] lost connection");
-	}
-	else
-	{
-		Serial.println("[MQTT] reconnection");
-		connectToMqtt();
-	}
+	#ifdef DEBUG
+		Serial.printf("[MQTT] WiFiEvent %d, status=%d\n", event, (int)WiFiClass::status());
+	#endif
+    if (WiFiClass::status() != WL_CONNECTED)
+    {
+        Serial.println("[MQTT] WiFi lost – skipping reconnect");
+    }
+    else
+    {
+        Serial.println("[MQTT] WiFi up, connecting to MQTT...");
+        connectToMqtt();
+    }
 }
 
 void MqttClientHandler::onMqttConnect(bool sessionPresent)
@@ -50,7 +51,17 @@ void MqttClientHandler::onMqttConnect(bool sessionPresent)
 
 void MqttClientHandler::onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
-	Serial.println("[MQTT] Disconnected, reason: " + String((int)reason));
+    const char* reasonStr = "unknown";
+    switch (reason) {
+        case AsyncMqttClientDisconnectReason::TCP_DISCONNECTED:                   reasonStr = "TCP disconnected"; break;
+        case AsyncMqttClientDisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION: reasonStr = "bad protocol version"; break;
+        case AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED:           reasonStr = "client ID rejected"; break;
+        case AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE:            reasonStr = "server unavailable"; break;
+        case AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS:         reasonStr = "bad credentials"; break;
+        case AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED:                reasonStr = "not authorized"; break;
+        default: break;
+    }
+    Serial.printf("[MQTT] Disconnected: %s (code %d)\n", reasonStr, (int)reason);
 }
 
 void MqttClientHandler::setup_Mqtt()
@@ -131,10 +142,8 @@ void MqttClientHandler::publishDiscovery()
         payload += "\"unique_id\":\"sensorturtle_" + String(s.uniqueId) + "\",";
         payload += "\"name\":\"" + String(s.name) + "\",";
         payload += "\"state_topic\":\"" + String(s.stateTopic) + "\",";
-        if (strlen(s.unit) > 0)
-            payload += "\"unit_of_measurement\":\"" + String(s.unit) + "\",";
-        if (strlen(s.deviceClass) > 0)
-            payload += "\"device_class\":\"" + String(s.deviceClass) + "\",";
+        if (strlen(s.unit) > 0) payload += "\"unit_of_measurement\":\"" + String(s.unit) + "\",";
+        if (strlen(s.deviceClass) > 0) payload += "\"device_class\":\"" + String(s.deviceClass) + "\",";
         payload += "\"state_class\":\"" + String(s.stateClass) + "\",";
         payload += (s.isBME ? deviceBME : deviceMHZ);
         payload += "}";
@@ -176,15 +185,15 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_temp_adjustment/state", 1, true, String(data_co2.getTempAdjustment()).c_str());
 			mqttClient.publish("homeassistant/sensor/sensorturtle/co2_temperature/state",     1, true, String(data_co2.getTemperature()).c_str());
 
-#ifdef DEBUG
-			Serial.println("[MQTT] Send data");
-#endif
+			#ifdef DEBUG
+						Serial.println("[MQTT] Send data");
+			#endif
 		}
 		else
 		{
-#ifdef DEBUG
-			Serial.println("[MQTT] No data send");
-#endif
+			#ifdef DEBUG
+				Serial.printf("[MQTT] Publish skipped – not connected (state: %s)\n", mqttClient.connected() ? "connected" : "disconnected");
+			#endif
 		}
 	}
 }

@@ -45,7 +45,7 @@ BME680Handler::BME680Handler()
     } else {
         _sensorOk = false;
         _bme68xError = bmeSensor.bme68xStatus;
-        Serial.println("[BME680] Init failed after 3 retries! Error: " + String(_bme68xError));
+        Serial.printf("[BME680] Init failed (bme68xStatus=%d, I2C addr=0x77)\n", _bme68xError);
     }
 
 
@@ -84,7 +84,7 @@ bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
         if (currentSeconds - _lastRecoverySeconds >= 60)
         {
             _lastRecoverySeconds = currentSeconds;
-            Serial.println("[BME680] Attempting recovery...");
+            Serial.printf("[BME680] Recovery attempt (uptime %lus)...\n", currentSeconds);
             Wire.end();
             delay(100);
             Wire.begin(PIN_BME680_SDA, PIN_BME680_SCL);
@@ -107,7 +107,7 @@ bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
             else
             {
                 _bme68xError = bmeSensor.bme68xStatus;
-                Serial.println("[BME680] Recovery failed, error: " + String(_bme68xError));
+                Serial.printf("[BME680] Recovery failed (bme68xStatus=%d) – retry in 60s\n", _bme68xError);
             }
         }
         return false;
@@ -132,8 +132,7 @@ bool BME680Handler::updateSensorData(const unsigned long currentSeconds)
     {
         _consecutiveErrors++;
         _bme68xError = bmeSensor.bme68xStatus;
-        Serial.println("[BME680] Runtime error: " + String(_bme68xError) +
-                       " (" + String(_consecutiveErrors) + " consecutive)");
+        Serial.printf("[BME680] Error %d (%d/5 consecutive)%s\n", _bme68xError, _consecutiveErrors, (_consecutiveErrors >= 4 ? " – recovery imminent!" : ""));
         checkSensorStatus();
         if (_consecutiveErrors >= 5)
         {
@@ -274,7 +273,10 @@ void BME680Handler::updateState(void)
 
         if (dataChanged)
         {
-            Serial.println("[BME680] Writing state to EEPROM");
+            Serial.printf("[BME680] Writing BSEC state to EEPROM (%d bytes), first=0x%02X last=0x%02X\n",
+                BSEC_MAX_STATE_BLOB_SIZE,
+                bsecState[0],
+                bsecState[BSEC_MAX_STATE_BLOB_SIZE - 1]);
             for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
             {
                 EEPROM.write(i + 1, bsecState[i]);
