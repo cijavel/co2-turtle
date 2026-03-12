@@ -29,3 +29,4 @@ general audience – including non-developers. Keep the following guidelines in 
   technical identifiers unless they are essential for clarity.
 - Structure the description by **feature or fix area**, not by file.
 - Each section should be understandable without reading the source code.
+- Deliver the description in **Markdown format**.
