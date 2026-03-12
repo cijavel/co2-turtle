@@ -218,6 +218,10 @@ void loop()
 	if (configHandler.getConfigSwitch("switchMQTT"))
 	{
 		MqttClientHandler &MqttHandler = MqttClientHandler::getInstance();
+		if (!MqttHandler.isSetup())
+		{
+			MqttHandler.setup_Mqtt();
+		}
 		MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
 	}
 	if (DEBUG)

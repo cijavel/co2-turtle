@@ -20,6 +20,8 @@
 <div class="status-indicator" id="statusIndicator"></div>
 <div class="description" id="statusText">Loading...</div>
 </div>
+<button type="button" class="btn" id="btnCheckMqtt" style="margin-top:10px;">Check Connection</button>
+<div class="form-feedback" id="feedbackMqtt"></div>
 <h2>Module Switch</h2>
 <form id="mqttSwitchForm">
 <div class="form-row">
@@ -72,15 +74,21 @@ fetch(url,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlenco
 .then(function(r){showFeedback(id,r.ok);})
 .catch(function(){showFeedback(id,false);});
 }
+function checkMqttStatus(){
+var fb=document.getElementById("feedbackMqtt");
+fb.textContent="Checking...";fb.className="form-feedback";
 fetch("/api/mqtt/status").then(function(r){return r.json();}).then(function(data){
 var host=document.getElementById("mqttHOST").value||"–";
 document.getElementById("statusHost").textContent=host;
 var ind=document.getElementById("statusIndicator");
 var txt=document.getElementById("statusText");
-if(data.connected){ind.style.backgroundColor="#28a745";txt.textContent="Connected";}
-else if(data.hasCredentials){ind.style.backgroundColor="#ffc107";txt.textContent="Not connected – broker configured but unreachable";}
-else{ind.style.backgroundColor="#dc3545";txt.textContent="Not connected – no broker configured";}
-}).catch(function(){document.getElementById("statusText").textContent="Status unavailable";});
+if(data.connected){ind.style.backgroundColor="#28a745";txt.textContent="Connected";fb.textContent="Connected";fb.className="form-feedback success";}
+else if(data.hasCredentials){ind.style.backgroundColor="#ffc107";txt.textContent="Not connected – broker configured but unreachable";fb.textContent="Broker unreachable";fb.className="form-feedback error";}
+else{ind.style.backgroundColor="#dc3545";txt.textContent="Not connected – no broker configured";fb.textContent="No broker configured";fb.className="form-feedback error";}
+setTimeout(function(){fb.textContent="";fb.className="form-feedback";},4000);
+}).catch(function(){document.getElementById("statusText").textContent="Status unavailable";fb.textContent="Status unavailable";fb.className="form-feedback error";});}
+checkMqttStatus();
+document.getElementById("btnCheckMqtt").addEventListener("click", checkMqttStatus);
 var mqttUSERen=document.getElementById("mqttUSERen");
 var credFields=document.getElementById("credentialsFields");
 function toggleCred(){credFields.style.display=mqttUSERen.checked?"block":"none";}

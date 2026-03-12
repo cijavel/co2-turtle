@@ -11,20 +11,22 @@
 class MqttClientHandler
 {
 public:
-	static MqttClientHandler &getInstance()
-	{
-		static MqttClientHandler instance; // Guaranteed to be destroyed.
-		return instance;				   // Instantiated on first use.
-	}
-	static void publishData(const DataCO2 co2, const Bsec bme_data, unsigned long currentSeconds);
-	void setup_Mqtt();
-	static bool isConnected();
-	static void publishDiscovery();
+    static MqttClientHandler &getInstance()
+    {
+        static MqttClientHandler instance;
+        return instance;
+    }
+    void setup_Mqtt();
+    bool isSetup() const { return _isSetup; }
+    static bool isConnected();
+    static void publishData(const DataCO2 co2, const Bsec bme_data, unsigned long currentSeconds);
+    static void publishDiscovery();
 
 private:
-	static void WiFiEvent(WiFiEvent_t event);
-	static void connectToMqtt();
-	static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
-	static unsigned long _lastRunSeconds;
+    static void WiFiEvent(WiFiEvent_t event);
+    static void connectToMqtt();
+    static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+    bool _isSetup = false;
+    static unsigned long _lastRunSeconds;
 };
 #endif // CO2_TURTLE_MQTTCLIENTHANDLER_H
