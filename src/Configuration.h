@@ -2,7 +2,7 @@
 #define CO2_TURTLE_CONFIGURATION_H
 
 //uncomment to get debug in serial
-#define DEBUG 0
+#define DEBUG 1
 
 #define switch_WIFI  1
 #define switch_Webserver 1
@@ -39,8 +39,6 @@
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 
-//#define MQTT_HOST "example.com"
-#define MQTT_HOST ""
 #define MQTT_PORT 1883
 #define MQTT_USER_ENABLED 0
 
