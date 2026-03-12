@@ -29,6 +29,8 @@ private:
     static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
     bool _isSetup = false;
     String _mqttHost;
+    String _mqttUser;
+    String _mqttPass;
     static unsigned long _lastRunSeconds;
 };
 #endif // CO2_TURTLE_MQTTCLIENTHANDLER_H

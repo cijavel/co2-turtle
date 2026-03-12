@@ -66,10 +66,9 @@ void MqttClientHandler::setup_Mqtt()
 
 	if (configHandler.getConfigDevice("mqttUSERen") == "1")
 	{
-		mqttClient.setCredentials(
-			configHandler.getConfigDevice("mqttUSER").c_str(),
-			configHandler.getConfigDevice("mqttPASSWORD").c_str()
-		);
+		_mqttUser = configHandler.getConfigDevice("mqttUSER");
+		_mqttPass = configHandler.getConfigDevice("mqttPASSWORD");
+		mqttClient.setCredentials(_mqttUser.c_str(), _mqttPass.c_str());
 	}
 	Serial.println("[MQTT] setup done, server: " + _mqttHost + ":" + String(port));
 	_isSetup = true;

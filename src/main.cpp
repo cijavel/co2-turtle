@@ -137,15 +137,7 @@ void loop()
 {
 
 	unsigned long currentSeconds = millis() / 1000;
-	if (DEBUG)
-	{
-		if (currentSeconds != last)
-		{
-			Serial.print("loop second: ");
-			Serial.println(currentSeconds);
-			last = currentSeconds;
-		}
-	}
+
 	BME680Handler &bmehandler = BME680Handler::getInstance();
 
     if (DEBUG)
