@@ -78,7 +78,7 @@ void LEDHandler::ledStatusWiFi()
 
 void LEDHandler::ledStatusBME()
 {
-	long temperature = bmedata.temperature + TEMPERATUR_OFFSET;
+	long temperature = bmedata.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f;
 	if (temperature)
 	{
 		if (temperature < 12) // colder
