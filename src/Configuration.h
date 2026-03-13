@@ -42,9 +42,6 @@
 #define MQTT_PORT 1883
 #define MQTT_USER_ENABLED 0
 
-
-extern const char* DeviceNameConf;
-
 // EPD hardware pins – set to -1 if not wired
 #define EPD_PIN_RST  26
 #define EPD_PIN_BUSY 25
