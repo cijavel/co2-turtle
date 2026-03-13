@@ -48,7 +48,7 @@ falls back to FreeRTOS tasks to avoid blocking the async TCP stack.
 ```
 src/
 ├── main.cpp                  – Setup and main loop
-├── Configuration.h           – Compile-time pin definitions, defaults, EPD pin config
+├── Configuration.h           – Compile-time pin definitions and NVS defaults
 ├── Credentials.h             – WiFi/MQTT credentials (not in repo, see Credentials_example.h)
 ├── BME680Handler.cpp/.h      – BSEC sensor reading, EEPROM state persistence
 ├── MHZ19Handler.cpp/.h       – CO2 sensor reading with error recovery
@@ -56,7 +56,7 @@ src/
 ├── LEDHandler.cpp/.h         – LED strip status display
 ├── LEDsection.h              – LED section definitions (enum + start/end indices)
 ├── WiFiHandler.cpp/.h        – WiFi init, reconnect, AP fallback mode
-├── WebServerHandler.cpp/.h   – Async web server, all HTTP handlers
+├── WebServerHandler.cpp/.h   – Async web server, all HTTP handlers (always active)
 ├── MqttClientHandler.cpp/.h  – MQTT publishing and Home Assistant discovery
 ├── ConfigHandler.cpp/.h      – Runtime config via NVS (Preferences)
 ├── DataCO2.cpp/.h            – Value object for MH-Z19B readings
@@ -101,6 +101,8 @@ Config is split into 5 maps:
 | Device | deviceName, timezone, wlanSSID, wlanPASSWORD, mqttHOST, mqttPORT, mqttUSER, mqttPASSWORD, mqttUSERen |
 | LED | LEDbrightness (range 2–255) |
 | Sensor | pressure (hPa), tempOffset (stored as int × 10) |
+
+**Note:** The web server is always active and is not controlled by a config switch.
 
 ---
 
@@ -175,18 +177,34 @@ before the display hibernates.
 - Publishes all sensor values at `intervalMQTT`
 - Optional user/password authentication (`mqttUSERen`)
 - Host, port, credentials fully configurable via web UI without recompiling
+- MQTT client-ID, discovery identifiers, and all state topics are derived from
+  `deviceName` (NVS) – multiple devices with identical firmware can share one broker
+  without conflict
+- Topic structure: `homeassistant/sensor/<deviceId>/<measurement>/state`
+
+---
+
+## Device Identity & Multi-Device Support
+
+On first boot, if `deviceName` in NVS still matches the compiled-in default
+(`DEVICE_NAME` in `Configuration.h`), a unique name is automatically generated
+from the default plus the last 3 bytes of the WiFi MAC address
+(e.g. `sensor-turtle-579cc0`). This name is persisted to NVS and used from
+then on as the WiFi hostname, mDNS name, and MQTT client-ID.
+
+This allows flashing identical firmware to multiple devices while still getting
+a unique identity per device in the router, mDNS, and Home Assistant – without
+any manual configuration step. The name can be changed freely via the web interface.
 
 ---
 
 ## Important Notes
 
 - `Credentials.h` is **not in the repository**. Copy `Credentials_example.h` and fill in
-  WiFi/MQTT credentials before building. This includes `MQTT_HOST`, `MQTT_USER`, and `MQTT_PASS`.
+  WiFi/MQTT credentials before building.
 - If WiFi credentials are missing or connection fails, the device falls back to AP mode.
 - `DEBUG 1` in `Configuration.h` enables verbose Serial output and RAM usage reporting.
 - The MH-Z19B is powered by 5V directly from the PSU, not from the ESP.
 - `switchEPDorientation` is stored as **Int** (not Bool) to support values 0–3.
-
----
-
-
+- All runtime values (timezone, tempOffset, pressure) are read from NVS at runtime;
+  the defines in `Configuration.h` serve only as first-boot defaults.
