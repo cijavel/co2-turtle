@@ -68,8 +68,22 @@ static void setupMDNS()
 void WiFiHandler::initWifi()
 {
     String hostname = configHandler.getConfigDevice("deviceName");
+    if (hostname == String(DeviceName))
+    {
+        uint8_t mac[6];
+        WiFi.macAddress(mac);
+        char suffix[7];
+        snprintf(suffix, sizeof(suffix), "%02x%02x%02x", mac[3], mac[4], mac[5]);
+        String prefix = String(DeviceName);
+        prefix.replace(" ", "-");
+        prefix.toLowerCase();
+        hostname = prefix + "-" + suffix;
+        configHandler.setConfigDevice("deviceName", hostname);
+        Serial.println("[WIFI] Generated unique device name: " + hostname);
+    }
     hostname.replace(" ", "-");
     hostname.toLowerCase();
+    WiFi.mode(WIFI_STA);
     WiFi.setHostname(hostname.c_str());
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
@@ -90,8 +104,12 @@ void WiFiHandler::initWifi()
 void WiFiHandler::ReStart()
 {
     loadWiFiCredentials();
+    String hostname = configHandler.getConfigDevice("deviceName");
+    hostname.replace(" ", "-");
+    hostname.toLowerCase();
     WiFi.disconnect(true);
     delay(100);
+    WiFi.setHostname(hostname.c_str());
     connectToWifi();
 }
 
