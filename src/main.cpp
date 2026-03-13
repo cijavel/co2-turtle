@@ -65,7 +65,8 @@ String localTime(const String &format)
 
 	String time = "";
 	char toutp[60];
-	setenv("TZ", TIMEZONE, 1); //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+	String tz = configHandler.getConfigDevice("timezone");
+	setenv("TZ", tz.c_str(), 1);
 	tzset();
 
 	if (!getLocalTime(&timeinfo))
