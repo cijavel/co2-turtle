@@ -28,9 +28,9 @@ private:
     static void onMqttConnect(bool sessionPresent);
     static void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
     bool _isSetup = false;
-    String _mqttHost;
-    String _mqttUser;
-    String _mqttPass;
+    String _mqttHost;   // lifetime anchor – AsyncMqttClient holds a const char* pointer, not a copy
+    String _mqttUser;   // lifetime anchor – same reason
+    String _mqttPass;   // lifetime anchor – same reason
     static String _deviceId;        // deviceName aus NVS, normalisiert (lowercase, spaces→-)
     static String _topicBase;       // "homeassistant/sensor/<deviceId>"
     static unsigned long _lastRunSeconds;
