@@ -48,43 +48,6 @@ void MHZ19Handler::calibrate()
 }
 
 
-
-
-void MHZ19Handler::printoutCurrentValues()
-{
-	if (myMHZ19.errorCode == RESULT_OK)
-	{
-		Serial.println("[MHZ19] CurrentValues:");
-		//        Serial.println(name_MHZ19_timestamp       + ":     "       + data_MHZ19_timestamp     );
-		//        Serial.println(name_MHZ19_datetime        + ":      "      + data_MHZ19_datetime      );
-        Serial.println(name_MHZ19_co2             + ":          "   + myMHZ19.getCO2()            );
-        Serial.println(name_MHZ19_co2_raw         + ":       "      + myMHZ19.getCO2Raw()         );
-        Serial.println(name_MHZ19_co2_limited     + ":            " + myMHZ19.getCO2(false)       );
-        Serial.println(name_MHZ19_co2_background  + ":         "    + myMHZ19.getBackgroundCO2()  );
-        Serial.println(name_MHZ19_co2_tempAdjust  + ": "            + myMHZ19.getTempAdjustment() );
-        Serial.println(name_MHZ19_co2_temperatur  + ":    "         + myMHZ19.getTemperature()    );
-        Serial.println(name_MHZ19_co2_Accuracy    + ":           "  + myMHZ19.getAccuracy()       );
-		Serial.println();
-	}
-	else
-	{
-		Serial.printf("[MHZ19] Read failed – errorCode=%d (%d consecutive)\n", myMHZ19.errorCode, _consecutiveErrors);
-	}
-}
-
-void MHZ19Handler::printoutLastReadout()
-{
-	Serial.println("[MHZ19] LastReadout:");
-        Serial.println(name_MHZ19_co2             + ":          "   + String(_lastReadout.getRegular()       ));
-        Serial.println(name_MHZ19_co2_raw         + ":      "       + String(_lastReadout.getRaw()           ));
-        Serial.println(name_MHZ19_co2_limited     + ":            " + String(_lastReadout.getLimited()       ));
-        Serial.println(name_MHZ19_co2_background  + ":         "    + String(_lastReadout.getBackground()    ));
-        Serial.println(name_MHZ19_co2_tempAdjust  + ": "            + String(_lastReadout.getTempAdjustment()));
-        Serial.println(name_MHZ19_co2_temperatur  + ":    "         + String(_lastReadout.getTemperature()   ));
-        Serial.println(name_MHZ19_co2_Accuracy    + ":           "  + String(_lastReadout.getAccuracy()      ));
-	Serial.println();
-}
-
 DataCO2 MHZ19Handler::getLastReadout()
 {
 	return _lastReadout;

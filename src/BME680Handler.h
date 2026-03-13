@@ -15,7 +15,6 @@ public:
     }
     Bsec getData();
     bool updateSensorData(const unsigned long currentSeconds);
-    void printout() const;
     bool isSensorOk() const;
     int getSensorError() const;
     bool isRecovering() const;
