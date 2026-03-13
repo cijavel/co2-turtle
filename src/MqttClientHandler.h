@@ -31,6 +31,8 @@ private:
     String _mqttHost;
     String _mqttUser;
     String _mqttPass;
+    static String _deviceId;        // deviceName aus NVS, normalisiert (lowercase, spaces→-)
+    static String _topicBase;       // "homeassistant/sensor/<deviceId>"
     static unsigned long _lastRunSeconds;
 };
 #endif // CO2_TURTLE_MQTTCLIENTHANDLER_H
