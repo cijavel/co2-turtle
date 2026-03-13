@@ -68,13 +68,13 @@ static void setupMDNS()
 void WiFiHandler::initWifi()
 {
     String hostname = configHandler.getConfigDevice("deviceName");
-    if (hostname == String(DeviceName))
+    if (hostname == String(DEVICE_NAME))
     {
         uint8_t mac[6];
         WiFi.macAddress(mac);
         char suffix[7];
         snprintf(suffix, sizeof(suffix), "%02x%02x%02x", mac[3], mac[4], mac[5]);
-        String prefix = String(DeviceName);
+        String prefix = String(DEVICE_NAME);
         prefix.replace(" ", "-");
         prefix.toLowerCase();
         hostname = prefix + "-" + suffix;

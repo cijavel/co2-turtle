@@ -155,7 +155,7 @@ void WebServerHandler::handle_page_status(AsyncWebServerRequest *request)
 	}
 	String header_data = file.readString();
 	file.close();
-	header_data.replace("{{deviceName}}", DeviceName);
+	header_data.replace("{{deviceName}}", DEVICE_NAME);
 	header_data.replace("{{data_gas}}", String(bmedata.gasResistance));
 	header_data.replace("{{data_breahtvoc}}", String(bmedata.breathVocEquivalent));
 	header_data.replace("{{data_pressure}}", String(bmedata.pressure/100));
@@ -209,7 +209,7 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 	String content = file.readString();
 	file.close();
 
-	content.replace("{{deviceName}}", DeviceName);
+	content.replace("{{deviceName}}", DEVICE_NAME);
     content.replace("{{ssid}}", ssid);
     request->send(200, "text/html", content);
 }
@@ -224,7 +224,7 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 	}
 	String content = file.readString();
 	file.close();
-	content.replace("{{deviceName}}", DeviceName);
+	content.replace("{{deviceName}}", DEVICE_NAME);
 
 	content.replace("{{intervalMHZ19}}", String(configHandler.getConfigInterval("intervalMHZ19")));
 	content.replace("{{intervalBME680}}", String(configHandler.getConfigInterval("intervalBME680")));
@@ -477,7 +477,7 @@ void WebServerHandler::handle_page_mqtt(AsyncWebServerRequest *request)
     String content = file.readString();
     file.close();
 
-    content.replace("{{deviceName}}", DeviceName);
+    content.replace("{{deviceName}}", DEVICE_NAME);
     content.replace("{{switchMQTT_checked}}", configHandler.getConfigSwitch("switchMQTT") ? "checked" : "");
     content.replace("{{mqttHOST}}", configHandler.getConfigDevice("mqttHOST"));
     content.replace("{{mqttPORT}}", configHandler.getConfigDevice("mqttPORT"));
