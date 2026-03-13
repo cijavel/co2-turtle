@@ -30,3 +30,8 @@ general audience – including non-developers. Keep the following guidelines in 
 - Structure the description by **feature or fix area**, not by file.
 - Each section should be understandable without reading the source code.
 - Deliver the description in **Markdown format**.
+
+## How I Want Document Updates Delivered
+
+**PROJECT_SUMMARY.md** is always delivered as a complete, updated file for download.
+It is never listed in full in the chat.
