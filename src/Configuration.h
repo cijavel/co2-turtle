@@ -5,7 +5,6 @@
 #define DEBUG 0
 
 #define switch_WIFI  1
-#define switch_Webserver 1
 #define switch_EPD 1
 #define switch_LED 1
 #define switch_MQTT 0
