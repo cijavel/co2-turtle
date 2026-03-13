@@ -103,7 +103,7 @@ bool WiFiHandler::StatusCheck()
         Serial.println("[WIFI] Connection lost, reconnecting...");
         ReStart();
         bool reconnected = (WiFiClass::status() == WL_CONNECTED);
-        Serial.printf("[WIFI] Reconnect %s%s\n", reconnected ? "OK – IP: " : "FAILED", reconnected ? WiFi.localIP().toString().c_str() : "");
+    Serial.printf("[WIFI] Reconnect %s%s\n", reconnected ? "OK – IP: " : "FAILED", reconnected ? WiFi.localIP().toString().c_str() : "");
         connected = (WiFiClass::status() == WL_CONNECTED);
     }
     return connected;
