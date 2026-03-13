@@ -14,8 +14,6 @@ public:
 		static MHZ19Handler instance; // Guaranteed to be destroyed.
 		return instance;			  // Instantiated on first use.
 	}
-	void printoutCurrentValues();
-	void printoutLastReadout();
 	DataCO2 getLastReadout();
 	bool runUpdate(unsigned long currentSeconds);
 	void calibrate();

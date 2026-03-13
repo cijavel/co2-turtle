@@ -80,25 +80,6 @@ String localTime(const String &format)
 	return time;
 }
 
-#ifdef DEBUG
-static void PrintRamUsage(unsigned long currentSeconds)
-{
-	static unsigned long lastPrintSeconds = 0;
-	if (currentSeconds - lastPrintSeconds >= (unsigned long)configHandler.getConfigInterval("intervalPRINT"))
-	{
-		lastPrintSeconds = currentSeconds;
-		Serial.print("Memory Usage: ");
-		uint32_t freeHeap = ESP.getFreeHeap();
-		uint32_t maximumHeap = ESP.getHeapSize();
-		uint32_t usedHeap = maximumHeap - freeHeap;
-		Serial.print(usedHeap);
-		Serial.print("b | ");
-		Serial.print(maximumHeap);
-		Serial.println("b");
-	}
-}
-#endif
-
 void setup()
 {
 	delay(100);
@@ -139,33 +120,12 @@ void loop()
 	unsigned long currentSeconds = millis() / 1000;
 
 	BME680Handler &bmehandler = BME680Handler::getInstance();
-
-    if (DEBUG)
-    {
-        if (bmehandler.updateSensorData(currentSeconds))
-        {
-            bmehandler.printout();
-        }
-    }
-    else
-    {
-        bmehandler.updateSensorData(currentSeconds);
-    }
+    bmehandler.updateSensorData(currentSeconds);
 
     Bsec bme_data = bmehandler.getData(); 
 
 	MHZ19Handler &mhz19Handler = MHZ19Handler::getInstance();
-	if (DEBUG)
-	{
-		if (mhz19Handler.runUpdate(currentSeconds))
-		{
-			mhz19Handler.printoutLastReadout();
-		}
-	}
-	else
-	{
-		mhz19Handler.runUpdate(currentSeconds);
-	}
+	mhz19Handler.runUpdate(currentSeconds);
 
 	DataCO2 mhz19Readout = mhz19Handler.getLastReadout();
 
@@ -214,9 +174,5 @@ void loop()
 			MqttHandler.setup_Mqtt();
 		}
 		MqttHandler.publishData(mhz19Readout, bme_data, currentSeconds);
-	}
-	if (DEBUG)
-	{
-		PrintRamUsage(currentSeconds);
 	}
 }

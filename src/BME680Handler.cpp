@@ -175,30 +175,6 @@ void BME680Handler::checkSensorStatus() const
 	}
 }
 
-
-void BME680Handler::printout() const
-{
-	Serial.println();
-	Serial.println("[BME680] ");
-	Serial.println("[BME680] Timestamp [ms]:               " + String(bmeSensor.outputTimestamp));
-	Serial.println("[BME680] IAQ:                          " + String(bmeSensor.iaq));
-	Serial.println("[BME680] IAQ accuracy:                 " + String(bmeSensor.iaqAccuracy));
-	Serial.println("[BME680] IAQ Static:                   " + String(bmeSensor.staticIaq));
-	Serial.println("[BME680] gas [Ohm]:                    " + String(bmeSensor.gasResistance));
-	Serial.println("[BME680] pressure [hPa]:               " + String(bmeSensor.pressure / 100));
-	Serial.println("[BME680] CO2 equivalent:               " + String(bmeSensor.co2Equivalent));
-	Serial.println("[BME680] Stab Status:                  " + String(bmeSensor.stabStatus));
-	Serial.println("[BME680] run in status:                " + String(bmeSensor.runInStatus));
-	Serial.println("[BME680] gas percentage:               " + String(bmeSensor.gasPercentage));
-	Serial.println("[BME680] temperature [°C]:             " + String(bmeSensor.temperature));
-	Serial.println("[BME680] temperature with offset [°C]: " + String(bmeSensor.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f));
-	Serial.println("[BME680] raw temperature [°C]:         " + String(bmeSensor.rawTemperature));
-	Serial.println("[BME680] relative humidity [%]:        " + String(bmeSensor.humidity));
-	Serial.println("[BME680] raw relative humidity [%]:    " + String(bmeSensor.rawHumidity));
-	Serial.println("[BME680] breath VOC equivalent [ppm]:  " + String(bmeSensor.breathVocEquivalent));
-	Serial.println();
-}
-
 Bsec BME680Handler::getData()
 {
 	return bmeSensor;
@@ -208,12 +184,16 @@ void BME680Handler::loadState(void)
 {
 	if (EEPROM.read(0) == BSEC_MAX_STATE_BLOB_SIZE)
 	{
-		Serial.println("[BME680] Reading state from EEPROM");
-		for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
-		{
-			bsecState[i] = EEPROM.read(i + 1);
-			Serial.println(bsecState[i], HEX);
-		}
+		Serial.printf("[BME680] Reading BSEC state from EEPROM (%d bytes)\n", BSEC_MAX_STATE_BLOB_SIZE);
+    for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
+    {
+        bsecState[i] = EEPROM.read(i + 1);
+    }
+    #ifdef DEBUG
+    Serial.printf("[BME680] EEPROM state loaded, first=0x%02X last=0x%02X\n",
+        bsecState[0],
+        bsecState[BSEC_MAX_STATE_BLOB_SIZE - 1]);
+    #endif
 		bmeSensor.setState(bsecState);
 		checkSensorStatus();
 	}
@@ -280,7 +260,6 @@ void BME680Handler::updateState(void)
             for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++)
             {
                 EEPROM.write(i + 1, bsecState[i]);
-                Serial.println(bsecState[i], HEX);
             }
             EEPROM.write(0, BSEC_MAX_STATE_BLOB_SIZE);
             EEPROM.commit();
