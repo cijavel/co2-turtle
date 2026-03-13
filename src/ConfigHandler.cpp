@@ -27,7 +27,7 @@ void ConfigHandler::loadAllPersistedSettings()
 		configMapforInterval["intervalLED"] = preferences.getInt("intervalLED", interval_LED_in_Seconds);
 		configMapforInterval["intervalMQTT"] = preferences.getInt("intervalMQTT", interval_mqtt_in_Seconds);
 
-		configMapforDevice["deviceName"] = preferences.getString("deviceName", DeviceName);
+		configMapforDevice["deviceName"] = preferences.getString("deviceName", DEVICE_NAME);
 		configMapforDevice["timezone"] = preferences.getString("timezone", TIMEZONE);
 		configMapforDevice["wlanSSID"] = preferences.getString("wlanSSID", WIFI_SSID);
 		configMapforDevice["wlanPASSWORD"] = preferences.getString("wlanPASSWORD", WIFI_PW);
@@ -141,7 +141,7 @@ void ConfigHandler::restoreDefaultConfiguration()
 	preferences.putInt("intervalLED", interval_LED_in_Seconds);
 	preferences.putInt("intervalMQTT", interval_mqtt_in_Seconds);
 
-	preferences.putString("deviceName", DeviceName);
+	preferences.putString("deviceName", DEVICE_NAME);
 	preferences.putString("timezone", TIMEZONE);
 	preferences.putString("wlanSSID", WIFI_SSID);
 	preferences.putString("wlanPASSWORD", WIFI_PW);

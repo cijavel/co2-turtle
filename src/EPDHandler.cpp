@@ -171,7 +171,7 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     display.print(footerStr(epd_date + " " + epd_time));
     display.drawInvertedBitmap(l.footerTurtleX, l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
     display.setCursor(l.footerNameX, l.footerNameY);
-    display.print(footerStr(String(DeviceName)));
+    display.print(footerStr(String(DEVICE_NAME)));
     display.display(false);
     display.hibernate();
     display.end();
