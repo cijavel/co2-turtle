@@ -49,9 +49,9 @@ BME680Handler::BME680Handler()
     }
 
 
-#ifdef DEBUG
-	Serial.println("\n[BME] BSEC library version " + String(bmeSensor.version.major) + "." + String(bmeSensor.version.minor) + "." + String(bmeSensor.version.major_bugfix) + "." + String(bmeSensor.version.minor_bugfix));
-#endif
+    #ifdef DEBUG
+        Serial.println("\n[BME] BSEC library version " + String(bmeSensor.version.major) + "." + String(bmeSensor.version.minor) + "." + String(bmeSensor.version.major_bugfix) + "." + String(bmeSensor.version.minor_bugfix));
+    #endif
 	_sensorList[0]  = BSEC_OUTPUT_IAQ;
     _sensorList[1]  = BSEC_OUTPUT_STATIC_IAQ;
     _sensorList[2]  = BSEC_OUTPUT_CO2_EQUIVALENT;
