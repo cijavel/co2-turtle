@@ -31,7 +31,7 @@ bool MqttClientHandler::isConnected()
 
 void MqttClientHandler::WiFiEvent(WiFiEvent_t event)
 {
-	#ifdef DEBUG
+	#if DEBUG
 		Serial.printf("[MQTT] WiFiEvent %d, status=%d\n", event, (int)WiFiClass::status());
 	#endif
     if (WiFiClass::status() != WL_CONNECTED)
@@ -193,13 +193,13 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 			mqttClient.publish((_topicBase + "/co2_temp_adjustment/state").c_str(), 1, true, String(data_co2.getTempAdjustment()).c_str());
 			mqttClient.publish((_topicBase + "/co2_temperature/state").c_str(),     1, true, String(data_co2.getTemperature()).c_str());
 
-			#ifdef DEBUG
-						Serial.println("[MQTT] Send data");
-			#endif
+			#if DEBUG
+				Serial.println("[MQTT] Send data");
+		    #endif
 		}
 		else
 		{
-			#ifdef DEBUG
+			#if DEBUG
 				Serial.printf("[MQTT] Publish skipped – not connected (state: %s)\n", mqttClient.connected() ? "connected" : "disconnected");
 			#endif
 		}

@@ -49,7 +49,7 @@ BME680Handler::BME680Handler()
     }
 
 
-    #ifdef DEBUG
+    #if DEBUG
         Serial.println("\n[BME] BSEC library version " + String(bmeSensor.version.major) + "." + String(bmeSensor.version.minor) + "." + String(bmeSensor.version.major_bugfix) + "." + String(bmeSensor.version.minor_bugfix));
     #endif
 	_sensorList[0]  = BSEC_OUTPUT_IAQ;
@@ -189,7 +189,7 @@ void BME680Handler::loadState(void)
     {
         bsecState[i] = EEPROM.read(i + 1);
     }
-    #ifdef DEBUG
+    #if DEBUG
     Serial.printf("[BME680] EEPROM state loaded, first=0x%02X last=0x%02X\n",
         bsecState[0],
         bsecState[BSEC_MAX_STATE_BLOB_SIZE - 1]);
