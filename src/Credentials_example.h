@@ -13,5 +13,6 @@
 #define MQTT_USER ""
 #define MQTT_PASS ""
 #define MQTT_HOST ""
+#define MQTT_PORT 1883
 
 #endif
