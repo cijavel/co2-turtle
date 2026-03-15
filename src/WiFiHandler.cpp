@@ -83,10 +83,11 @@ void WiFiHandler::initWifi()
     }
     hostname.replace(" ", "-");
     hostname.toLowerCase();
+    WiFi.persistent(false);
+    WiFi.disconnect(true);
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(hostname.c_str());
     WiFi.setAutoReconnect(true);
-    WiFi.persistent(true);
 
     loadWiFiCredentials();
 
