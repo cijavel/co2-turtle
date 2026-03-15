@@ -17,19 +17,20 @@ public:
 	DataCO2 getLastReadout();
 	bool runUpdate(unsigned long currentSeconds);
 	void calibrate();
-
-
+	String getSensorVariantName() const;
+	enum SensorVariant { VARIANT_AUTO = 0, VARIANT_ORIGINAL = 1, VARIANT_BC = 2 };
 
 private:
 	bool updateLastReadout();
+	SensorVariant detectVariant();
 	DataCO2 _lastReadout;
 	MHZ19 myMHZ19;
 	HardwareSerial *Serial_MHZ19;
 	int _consecutiveErrors = 0;
 	unsigned long _lastRunSeconds = 0;
+	SensorVariant _variant = VARIANT_AUTO;
 	MHZ19Handler();						  // Constructor? (the {} brackets) are needed here.
 	MHZ19Handler(MHZ19Handler const &);	  // Don't Implement
 	void operator=(MHZ19Handler const &); // Don't implement
-
 };
 #endif // CO2_TURTLE_MHZ19HANDLER_H
