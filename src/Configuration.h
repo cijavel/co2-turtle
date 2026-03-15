@@ -19,7 +19,7 @@
 #define interval_mqtt_in_Seconds 30
 
 #define SEALEVELPRESSURE_HPA 1015
-#define TEMPERATUR_OFFSET -3.5
+#define TEMPERATUR_OFFSET -5
 
 #define DEVICE_NAME "SensorTurtle"
 #define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
