@@ -16,31 +16,32 @@ void ConfigHandler::loadAllPersistedSettings()
 		configMapforSwitch["switchWIFI"] = preferences.getBool("switchWIFI", switch_WIFI);
 		configMapforSwitch["switchEPD"] = preferences.getBool("switchEPD", switch_EPD);
 		configMapforSwitch["switchEPDorientation"] = preferences.getInt("switchEPDori", switch_EPD_orientation);
-		configMapforSwitch["switchLED"] = preferences.getBool("switchLED", switch_LED);
+		configMapforSwitch["switchLED"]  = preferences.getBool("switchLED", switch_LED);
 		configMapforSwitch["switchMQTT"] = preferences.getBool("switchMQTT", switch_MQTT);
 
-		configMapforInterval["intervalMHZ19"] = preferences.getInt("intervalMHZ19", interval_MHZ19_in_Seconds);
+		configMapforInterval["intervalMHZ19"]  = preferences.getInt("intervalMHZ19", interval_MHZ19_in_Seconds);
 		configMapforInterval["intervalBME680"] = preferences.getInt("intervalBME680", interval_BME680_in_Seconds);
-		configMapforInterval["intervalWiFi"] = preferences.getInt("intervalWiFi", interval_WiFiCheck_in_Seconds);
-		configMapforInterval["intervalPRINT"] = preferences.getInt("intervalPRINT", interval_RAMPrintout_in_Seconds);
-		configMapforInterval["intervalEPD"] = preferences.getInt("intervalEPD", interval_EPD_in_Seconds);
-		configMapforInterval["intervalLED"] = preferences.getInt("intervalLED", interval_LED_in_Seconds);
-		configMapforInterval["intervalMQTT"] = preferences.getInt("intervalMQTT", interval_mqtt_in_Seconds);
+		configMapforInterval["intervalWiFi"]   = preferences.getInt("intervalWiFi", interval_WiFiCheck_in_Seconds);
+		configMapforInterval["intervalPRINT"]  = preferences.getInt("intervalPRINT", interval_RAMPrintout_in_Seconds);
+		configMapforInterval["intervalEPD"]    = preferences.getInt("intervalEPD", interval_EPD_in_Seconds);
+		configMapforInterval["intervalLED"]    = preferences.getInt("intervalLED", interval_LED_in_Seconds);
+		configMapforInterval["intervalMQTT"]   = preferences.getInt("intervalMQTT", interval_mqtt_in_Seconds);
 
-		configMapforDevice["deviceName"] = preferences.getString("deviceName", DEVICE_NAME);
-		configMapforDevice["timezone"] = preferences.getString("timezone", TIMEZONE);
-		configMapforDevice["wlanSSID"] = preferences.getString("wlanSSID", WIFI_SSID);
+		configMapforDevice["deviceName"]   = preferences.getString("deviceName", DEVICE_NAME);
+		configMapforDevice["timezone"]     = preferences.getString("timezone", TIMEZONE);
+		configMapforDevice["wlanSSID"]     = preferences.getString("wlanSSID", WIFI_SSID);
 		configMapforDevice["wlanPASSWORD"] = preferences.getString("wlanPASSWORD", WIFI_PW);
-		configMapforDevice["mqttUSER"] = preferences.getString("mqttUSER", MQTT_USER);
+		configMapforDevice["mqttUSER"]     = preferences.getString("mqttUSER", MQTT_USER);
 		configMapforDevice["mqttPASSWORD"] = preferences.getString("mqttPASSWORD", MQTT_PASS);
-		configMapforDevice["mqttHOST"] = preferences.getString("mqttHOST", MQTT_HOST);
-		configMapforDevice["mqttPORT"] = String(preferences.getInt("mqttPORT", MQTT_PORT));
-		configMapforDevice["mqttUSERen"] = preferences.getBool("mqttUSERen", MQTT_USER_ENABLED) ? "1" : "0";
+		configMapforDevice["mqttHOST"]     = preferences.getString("mqttHOST", MQTT_HOST);
+		configMapforDevice["mqttPORT"]     = String(preferences.getInt("mqttPORT", MQTT_PORT));
+		configMapforDevice["mqttUSERen"]   = preferences.getBool("mqttUSERen", MQTT_USER_ENABLED) ? "1" : "0";
 
-		configMapforLED["LEDbrightness"] = preferences.getInt("LEDbrightness", BRIGHTNESS_LEDS);
+		configMapforLED["LEDbrightness"]   = preferences.getInt("LEDbrightness", BRIGHTNESS_LEDS);
 
-		configMapforSensor["pressure"] = preferences.getInt("pressure", SEALEVELPRESSURE_HPA);
-		configMapforSensor["tempOffset"] = preferences.getInt("tempOffset", (int)(TEMPERATUR_OFFSET * 10));
+		configMapforSensor["pressure"]           = preferences.getInt("pressure",SEALEVELPRESSURE_HPA);
+		configMapforSensor["tempOffset"]         = preferences.getInt("tempOffset",(int)(TEMPERATUR_OFFSET * 10));
+		configMapforSensor["sensorMHZ19variant"] = preferences.getInt("sensorMHZ19variant", MHZ19_SENSOR_VARIANT);
 	preferences.end();
 }
 
@@ -74,7 +75,7 @@ void ConfigHandler::validateConfigMaps()
             Serial.printf("[Config] Missing key in configMapforLED: %s\n", key);
         }
     }
-    for (const auto& key : {"pressure", "tempOffset"})
+    for (const auto& key : {"pressure", "tempOffset", "sensorMHZ19variant"})
     {
         if (configMapforSensor.find(key) == configMapforSensor.end())
         {
@@ -114,8 +115,9 @@ void ConfigHandler::persistAllSettings()
 
 	preferences.putInt("LEDbrightness", configMapforLED["LEDbrightness"]);
 
-	preferences.putInt("pressure",   configMapforSensor["pressure"]);
-	preferences.putInt("tempOffset", configMapforSensor["tempOffset"]);
+	preferences.putInt("pressure",          configMapforSensor["pressure"]);
+	preferences.putInt("tempOffset",         configMapforSensor["tempOffset"]);
+	preferences.putInt("sensorMHZ19variant", configMapforSensor["sensorMHZ19variant"]);
 
 	preferences.end();
 }
@@ -153,6 +155,7 @@ void ConfigHandler::restoreDefaultConfiguration()
 
 	preferences.putInt("pressure", SEALEVELPRESSURE_HPA);
 	preferences.putInt("tempOffset", (int)(TEMPERATUR_OFFSET * 10));
+	preferences.putInt("sensorMHZ19variant", MHZ19_SENSOR_VARIANT);
 
 
 	preferences.putInt("LEDbrightness", constrain(BRIGHTNESS_LEDS, 2, 255));
