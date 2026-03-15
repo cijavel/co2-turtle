@@ -216,12 +216,12 @@ void BME680Handler::updateState(void)
     bool update = false;
     if (stateUpdateCounter == 0)
     {
-        /* First state update when IAQ accuracy is >= 3 */
-        if (bmeSensor.iaqAccuracy >= 3)
+        /* First state update when IAQ accuracy is >= 1 to preserve partial calibration */
+        if (bmeSensor.iaqAccuracy >= 1)
         {
             update = true;
             stateUpdateCounter++;
-            Serial.println("[BME680] First state update triggered");
+            Serial.println("[BME680] First state update triggered (accuracy=" + String(bmeSensor.iaqAccuracy) + ")");
         }
     }
     else
