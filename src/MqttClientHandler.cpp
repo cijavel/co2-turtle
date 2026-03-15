@@ -3,6 +3,7 @@
 #include "Credentials.h"
 #include <WiFi.h>
 #include "ConfigHandler.h"
+#include "BME680Handler.h"
 #include <AsyncMqttClient.h>
 unsigned long MqttClientHandler::_lastRunSeconds = 0;
 extern ConfigHandler &configHandler;
@@ -170,19 +171,23 @@ void MqttClientHandler::publishData(const DataCO2 data_co2, const Bsec data_bme,
 		connectToMqtt();
 		if (mqttClient.connected() == true)
 		{
-			// BME680
-			mqttClient.publish((_topicBase + "/temperature/state").c_str(),         1, true, String(data_bme.temperature).c_str());
-			mqttClient.publish((_topicBase + "/temperature_offset/state").c_str(),  1, true, String(data_bme.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f).c_str());
-			mqttClient.publish((_topicBase + "/humidity/state").c_str(),            1, true, String(data_bme.humidity).c_str());
-			mqttClient.publish((_topicBase + "/pressure/state").c_str(),            1, true, String(data_bme.pressure / 100.0f).c_str());
-			mqttClient.publish((_topicBase + "/gas/state").c_str(),                 1, true, String(data_bme.gasResistance).c_str());
-			mqttClient.publish((_topicBase + "/iaq/state").c_str(),                 1, true, String(data_bme.iaq).c_str());
-			mqttClient.publish((_topicBase + "/iaq_accuracy/state").c_str(),        1, true, String(data_bme.iaqAccuracy).c_str());
-			mqttClient.publish((_topicBase + "/breath_voc/state").c_str(),          1, true, String(data_bme.breathVocEquivalent).c_str());
-			mqttClient.publish((_topicBase + "/co2_equivalent/state").c_str(),      1, true, String(data_bme.co2Equivalent).c_str());
-			mqttClient.publish((_topicBase + "/static_iaq_accuracy/state").c_str(), 1, true, String(data_bme.staticIaqAccuracy).c_str());
-			mqttClient.publish((_topicBase + "/comp_gas_value/state").c_str(),      1, true, String(data_bme.compGasValue).c_str());
-			mqttClient.publish((_topicBase + "/gas_percentage/state").c_str(),      1, true, String(data_bme.gasPercentage).c_str());
+            bool bmeOk = BME680Handler::getInstance().isSensorOk();
+			if (bmeOk)
+			{
+                // BME680
+                mqttClient.publish((_topicBase + "/temperature/state").c_str(),         1, true, String(data_bme.temperature).c_str());
+                mqttClient.publish((_topicBase + "/temperature_offset/state").c_str(),  1, true, String(data_bme.temperature + configHandler.getConfigSensor("tempOffset") / 10.0f).c_str());
+                mqttClient.publish((_topicBase + "/humidity/state").c_str(),            1, true, String(data_bme.humidity).c_str());
+                mqttClient.publish((_topicBase + "/pressure/state").c_str(),            1, true, String(data_bme.pressure / 100.0f).c_str());
+                mqttClient.publish((_topicBase + "/gas/state").c_str(),                 1, true, String(data_bme.gasResistance).c_str());
+                mqttClient.publish((_topicBase + "/iaq/state").c_str(),                 1, true, String(data_bme.iaq).c_str());
+                mqttClient.publish((_topicBase + "/iaq_accuracy/state").c_str(),        1, true, String(data_bme.iaqAccuracy).c_str());
+                mqttClient.publish((_topicBase + "/breath_voc/state").c_str(),          1, true, String(data_bme.breathVocEquivalent).c_str());
+                mqttClient.publish((_topicBase + "/co2_equivalent/state").c_str(),      1, true, String(data_bme.co2Equivalent).c_str());
+                mqttClient.publish((_topicBase + "/static_iaq_accuracy/state").c_str(), 1, true, String(data_bme.staticIaqAccuracy).c_str());
+                mqttClient.publish((_topicBase + "/comp_gas_value/state").c_str(),      1, true, String(data_bme.compGasValue).c_str());
+                mqttClient.publish((_topicBase + "/gas_percentage/state").c_str(),      1, true, String(data_bme.gasPercentage).c_str());
+            } // bmeOk
 
 			// MHZ19
 			mqttClient.publish((_topicBase + "/co2/state").c_str(),                 1, true, String(data_co2.getRegular()).c_str());
