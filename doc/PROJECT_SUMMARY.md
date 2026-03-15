@@ -154,7 +154,9 @@ before the display hibernates.
 
 - BSEC config: `generic_33v_3s_4d` (3.3V, 3s sample rate, 4 days burn-in)
 - IAQ calibration persisted to EEPROM:
-  - First save: when IAQ accuracy reaches 3
+  - First save: when IAQ accuracy reaches **1** (previously 3 – threshold was unreachable
+    on new sensors, causing calibration state to never be written and progress to reset
+    on every reboot or I2C recovery)
   - Periodic saves: every 360 minutes
   - On startup: state restored from EEPROM if valid
 - Onboard LED (LED_BUILTIN) lights briefly during EEPROM writes
@@ -175,6 +177,8 @@ before the display hibernates.
 
 - Home Assistant MQTT discovery via `publishDiscovery()` on connect
 - Publishes all sensor values at `intervalMQTT`
+- BME680 values are only published when the sensor is actively delivering valid data;
+  no stale values are sent during I2C recovery
 - Optional user/password authentication (`mqttUSERen`)
 - Host, port, credentials fully configurable via web UI without recompiling
 - MQTT client-ID, discovery identifiers, and all state topics are derived from
