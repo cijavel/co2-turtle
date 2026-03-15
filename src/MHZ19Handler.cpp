@@ -23,10 +23,24 @@ MHZ19Handler::MHZ19Handler()
 	myMHZ19.begin(*Serial_MHZ19); // *Important, Pass your Stream reference
 	// myMHZ19.printCommunication();                            // Error Codes are also included here if found (mainly for debugging/interest)
 
-	myMHZ19.autoCalibration(true);
+	// --- Variant detection ---
+	int cfgVariant = configHandler.getConfigSensor("sensorMHZ19variant");
+	if (cfgVariant == VARIANT_AUTO) {
+		_variant = detectVariant();
+	} else {
+		_variant = static_cast<SensorVariant>(cfgVariant);
+		Serial.printf("[MHZ19] Variant forced by config: %s\n", getSensorVariantName().c_str());
+	}
 
-	Serial.print("[MHZ19] ABC Status: ");
-	myMHZ19.getABC() ? Serial.println("ON") : Serial.println("OFF"); // now print it's status
+	// autoCalibration (ABC) is only supported on MH-Z19B/C.
+	// Calling it on the original may be silently ignored or cause undefined behaviour.
+	if (_variant == VARIANT_BC) {
+		myMHZ19.autoCalibration(true);
+		Serial.print("[MHZ19] ABC Status: ");
+		myMHZ19.getABC() ? Serial.println("ON") : Serial.println("OFF");
+	} else {
+		Serial.println("[MHZ19] Original variant: skipping autoCalibration (not supported).");
+	}
 
 	char myVersion[4];
 	myMHZ19.getVersion(myVersion);
@@ -38,10 +52,33 @@ MHZ19Handler::MHZ19Handler()
 	_lastReadout = DataCO2();
 }
 
+MHZ19Handler::SensorVariant MHZ19Handler::detectVariant()
+{
+	// The firmware-version command (0x3D) returns a non-zero 4-byte string on
+	// MH-Z19B/C and all-zeros on the original MH-Z19.
+	char version[4] = {0, 0, 0, 0};
+	myMHZ19.getVersion(version);
+	bool hasVersion = (version[0] != 0 || version[1] != 0 || version[2] != 0 || version[3] != 0);
+	Serial.printf("[MHZ19] Version response: %c%c%c%c -> auto-detected: %s\n",
+	              version[0] ? version[0] : '0', version[1] ? version[1] : '0',
+	              version[2] ? version[2] : '0', version[3] ? version[3] : '0',
+	              hasVersion ? "MH-Z19B/C" : "MH-Z19 (original)");
+	return hasVersion ? VARIANT_BC : VARIANT_ORIGINAL;
+}
+
+String MHZ19Handler::getSensorVariantName() const
+{
+	switch (_variant) {
+		case VARIANT_ORIGINAL: return "MH-Z19 (original)";
+		case VARIANT_BC:       return "MH-Z19B/C";
+		default:               return "unknown";
+	}
+}
+
 void MHZ19Handler::calibrate()
 {
 	// CALIBRATION
-	// reset the MH-Z19B sensor by connecting "GND" pin and the "HD" pin for 7-10 seconds!!! 
+	// reset the MH-Z19B sensor by connecting "GND" pin and the "HD" pin for 7-10 seconds!!!
 	// This worked and I calibrated the sensor by running him at the open window and it is now starting up with 400~410 PPM.
 	Serial.println("[MHZ19] Calibrating...");
 	myMHZ19.calibrate();    // Take a reading which be used as the zero point for 400 ppm^
@@ -58,12 +95,17 @@ bool MHZ19Handler::updateLastReadout()
 	if (myMHZ19.errorCode == RESULT_OK)
 	{
 		_consecutiveErrors = 0;
+		// getCO2Raw(), getBackgroundCO2(), getTempAdjustment() are B/C-only.
+		// The original MH-Z19 returns 0 or garbage for these commands.
+		unsigned int co2Raw     = (_variant == VARIANT_BC) ? myMHZ19.getCO2Raw()         : 0;
+		int          background = (_variant == VARIANT_BC) ? myMHZ19.getBackgroundCO2()  : 0;
+		byte         tempAdjust = (_variant == VARIANT_BC) ? myMHZ19.getTempAdjustment() : 0;
 		_lastReadout = DataCO2(
 			myMHZ19.getCO2(),
-			myMHZ19.getCO2Raw(),
+			co2Raw,
 			myMHZ19.getCO2(false),
-			myMHZ19.getBackgroundCO2(),
-			myMHZ19.getTempAdjustment(),
+			background,
+			tempAdjust,
 			myMHZ19.getTemperature(),
 			myMHZ19.getAccuracy());
 		return true;
