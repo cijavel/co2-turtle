@@ -107,16 +107,10 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     display.drawInvertedBitmap(l.colL_icon, l.rowBot - 20, bitmap_hum,  24, 24, color_hum);
 
     // Left column values: Temperature (top), Humidity (bottom)
-    if (bmeOk)
-    {
-        printValue(buffer, l.colL_value, l.rowTop, color_temp, temperature);
-        display.drawInvertedBitmap(l.colL_icon, l.rowBot - 20, bitmap_hum,  24, 24, color_hum);
-    }
-
     // Left column values: Temperature (top), Humidity (bottom)
     if (bmeOk)
     {
-        printValue(buffer, l.colL_value, l.rowTop, color_temp, bme_data.temperature);
+        printValue(buffer, l.colL_value, l.rowTop, color_temp, temperature);
         printValue(buffer, l.colL_value, l.rowBot, color_hum,  bme_data.humidity);
     }
     else
