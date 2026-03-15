@@ -165,7 +165,13 @@ void EPDHandler::printLayout(const DataCO2 &co2, const Bsec &bme_data, const Str
     display.print(footerStr(epd_date + " " + epd_time));
     display.drawInvertedBitmap(l.footerTurtleX, l.footerTurtleY, bitmap_turtle, 18, 18, GxEPD_RED);
     display.setCursor(l.footerNameX, l.footerNameY);
-    display.print(footerStr(String(DEVICE_NAME)));
+
+    uint8_t mac[6];
+    WiFi.macAddress(mac);
+    char macSuffix[7];
+    snprintf(macSuffix, sizeof(macSuffix), "%02X%02X%02X", mac[3], mac[4], mac[5]);
+    display.print(footerStr(configHandler.getConfigDevice("deviceName")));
+    
     display.display(false);
     display.hibernate();
     display.end();
