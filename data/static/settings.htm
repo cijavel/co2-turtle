@@ -14,38 +14,8 @@
 <div class="content">
 <h1>Sensor Settings</h1>
 
-<h2>Module Switch</h2>
-<form action="/submitmodulswitch" method="POST" id="moduleSwitchForm">
-<div class="form-row">
-<label for="switchWIFI">WiFi Check</label>
-<input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}}>
-</div>
-<div class="form-row">
-    <label for="switchEPD">EPD Display</label>
-    <input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}}>
-</div>
-<div class="form-row">
-    <label for="switchEPDorientation">EPD Orientation</label>
-    <select id="switchEPDorientation" name="switchEPDorientation">
-        <option value="0" {{epdOrientation_0}}>Vertical 90°</option>
-        <option value="1" {{epdOrientation_1}}>Vertical 270°</option>
-        <option value="2" {{epdOrientation_2}}>Horizontal 90°</option>
-        <option value="3" {{epdOrientation_3}}>Horizontal 270°</option>
-    </select>
-</div>
-<div class="form-row">
-    <label for="switchLED">LED</label>
-    <input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}}>
-</div>
-<div style="display:flex;gap:8px;align-items:center;">
-    <button type="submit" class="btn">Save Settings</button>
-    <button type="button" class="btn" id="btnEPDrefresh">Refresh Display</button>
-</div>
-<div class="form-feedback" id="feedbackSwitch"></div>
-</form>
-
 <h2>Sensor Configuration</h2>
-<form action="/submitSensorConfig" method="POST" id="sensorConfigForm">
+<form id="sensorConfigForm">
 <div class="form-row">
 <label for="sealevelpressure">Sea Level Pressure (hPa)</label>
 <input type="number" id="sealevelpressure" name="SEALEVELPRESSURE_HPA" value="{{SEALEVELPRESSURE_HPA}}" step="1" min="900" max="1100">
@@ -58,10 +28,27 @@
 <div class="form-feedback" id="feedbackSensor"></div>
 </form>
 
-<h2>Module Time Interval</h2>
-<form action="/submitmodulinterval" method="POST" id="moduleIntervalForm">
+<h2>MH-Z19 Sensor</h2>
+<p style="font-size:14px;color:#555;margin-bottom:12px;">
+  Detected variant: <strong>{{mhz19DetectedVariant}}</strong>
+</p>
+<form id="sensorVariantForm">
 <div class="form-row">
-<label for="intervalMHZ19">MHZ19 Interval (s)</label>
+<label for="sensorMHZ19variant">Sensor Variant</label>
+<select id="sensorMHZ19variant" name="sensorMHZ19variant">
+  <option value="0" {{sensorMHZ19variant_0}}>Auto-Detect</option>
+  <option value="1" {{sensorMHZ19variant_1}}>MH-Z19 (original)</option>
+  <option value="2" {{sensorMHZ19variant_2}}>MH-Z19B / MH-Z19C</option>
+</select>
+</div>
+<button type="submit" class="btn">Save Variant</button>
+<div class="form-feedback" id="feedbackVariant"></div>
+</form>
+
+<h2>Sensor Intervals</h2>
+<form id="moduleIntervalForm">
+<div class="form-row">
+<label for="intervalMHZ19">MH-Z19 Interval (s)</label>
 <input type="number" id="intervalMHZ19" name="intervalMHZ19" value="{{intervalMHZ19}}" min="1">
 </div>
 <div class="form-row">
@@ -69,49 +56,28 @@
 <input type="number" id="intervalBME680" name="intervalBME680" value="{{intervalBME680}}" min="3">
 </div>
 <div class="form-row">
-<label for="intervalWiFi">WiFi Check Interval (s)</label>
-<input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}" min="1">
-</div>
-<div class="form-row">
 <label for="intervalPRINT">RAM Printout Interval (s)</label>
 <input type="number" id="intervalPRINT" name="intervalPRINT" value="{{intervalPRINT}}" min="1">
-</div>
-<div class="form-row">
-<label for="intervalEPD">EPD Refresh Interval (s)</label>
-<input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}" min="16">
-</div>
-<div class="form-row">
-<label for="intervalLED">LED Update Interval (s)</label>
-<input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}" min="1">
 </div>
 <div class="form-row">
 <label for="intervalMQTT">MQTT Interval (s)</label>
 <input type="number" id="intervalMQTT" name="intervalMQTT" value="{{intervalMQTT}}" min="1">
 </div>
-<button type="submit" class="btn">Save Interval</button>
+<button type="submit" class="btn">Save Intervals</button>
 <div class="form-feedback" id="feedbackInterval"></div>
 </form>
 
-<h2>LED Brightness</h2>
-<form id="ledconfigForm">
-<div class="form-row">
-<label for="ledBrightness">Brightness: <span id="brightnessValue">{{LEDbrightness}}</span></label>
-<input type="range" id="ledBrightness" name="LEDbrightness" min="2" max="255" value="{{LEDbrightness}}">
-</div>
-<button type="submit" class="btn">Save Brightness</button>
-<div class="form-feedback" id="feedbackBrightness"></div>
+<h2>Calibration</h2>
+<form id="calibrateForm">
+<p style="font-size:13px;color:#555;margin-bottom:8px;">Place sensor in fresh outdoor air (~400 ppm) before calibrating.</p>
+<button type="submit" class="btn">Calibrate MH-Z19</button>
 </form>
 
-<h2>Sensor Option</h2>
-<form action="/calibrateMHZ19" method="POST" id="calibrateForm">
-<button type="submit" class="btn">Calibrate MHZ19</button>
-</form>
-
-<h2>ESP32 Option</h2>
-<form action="/restart" method="POST">
+<h2>Device Options</h2>
+<form action="/restart" method="POST" id="restartForm">
 <button type="submit" class="btn">Restart ESP32</button>
 </form>
-<form action="/restoredefaultconfiguration" method="POST">
+<form action="/restoredefaultconfiguration" method="POST" style="margin-top:10px;">
 <button type="submit" class="btn">Load Defaults</button>
 </form>
 
@@ -119,61 +85,63 @@
 </div>
 <div class="footer">&copy; 2025 SensorTurtle</div>
 <script>
-document.getElementById("btnEPDrefresh").addEventListener("click", function() {
-    fetch("/api/epd/refresh", { method: "POST" })
-        .then(function(r) { showFeedback("feedbackSwitch", r.ok); });
-});
+document.addEventListener("DOMContentLoaded", function() {
+  function showFeedback(id, ok) {
+    var el = document.getElementById(id);
+    el.textContent = ok ? "Saved successfully!" : "Error saving settings.";
+    el.className = "form-feedback " + (ok ? "success" : "error");
+    setTimeout(function() { el.textContent = ""; el.className = "form-feedback"; }, 3000);
+  }
+  function submitForm(url, params, id) {
+    fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: params })
+      .then(function(r) { showFeedback(id, r.ok); })
+      .catch(function() { showFeedback(id, false); });
+  }
 
-document.addEventListener("DOMContentLoaded",function(){
-function showFeedback(id,ok){
-var el=document.getElementById(id);
-el.textContent=ok?"Saved successfully!":"Error saving settings.";
-el.className="form-feedback "+(ok?"success":"error");
-setTimeout(function(){el.textContent="";el.className="form-feedback";},3000);
-}
-function submitForm(url,params,id){
-fetch(url,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:params})
-.then(function(r){showFeedback(id,r.ok);})
-.catch(function(){showFeedback(id,false);});
-}
-var switchForm=document.getElementById("moduleSwitchForm");
-switchForm.addEventListener("submit",function(e){
-e.preventDefault();
-var params=Array.from(switchForm.querySelectorAll("input[type=checkbox],select")).map(function(c){
-return encodeURIComponent(c.name)+"="+(c.tagName==="SELECT"?encodeURIComponent(c.value):(c.checked?1:0));
-}).join("&");
-submitForm("/submitmodulswitch",params,"feedbackSwitch");
-});
-var intervalForm=document.getElementById("moduleIntervalForm");
-intervalForm.addEventListener("submit",function(e){
-e.preventDefault();
-var params=Array.from(intervalForm.querySelectorAll("input[type=number]")).map(function(i){
-return encodeURIComponent(i.name)+"="+encodeURIComponent(i.value);
-}).join("&");
-submitForm("/submitmodulinterval?"+params,"","feedbackInterval");
-});
-var slider=document.getElementById("ledBrightness");
-slider.addEventListener("input",function(){document.getElementById("brightnessValue").textContent=slider.value;});
-document.getElementById("ledconfigForm").addEventListener("submit",function(e){
-e.preventDefault();
-submitForm("/submitLEDConfig","LEDbrightness="+encodeURIComponent(slider.value),"feedbackBrightness");
-});
-document.getElementById("calibrateForm").addEventListener("submit",function(e){
-e.preventDefault();
-if(confirm("Calibrate MHZ19? Make sure sensor is in fresh air (400 ppm).")){
-fetch("/calibrateMHZ19",{method:"POST"}).then(function(r){
-alert(r.ok?"Calibration started!":"Failed to start calibration.");
-}).catch(function(){alert("An error occurred.");});
-}
-});
-var sensorForm=document.getElementById("sensorConfigForm");
-sensorForm.addEventListener("submit",function(e){
-e.preventDefault();
-var params=Array.from(sensorForm.querySelectorAll("input[type=number]")).map(function(i){
-return encodeURIComponent(i.name)+"="+encodeURIComponent(i.value);
-}).join("&");
-submitForm("/submitSensorConfig",params,"feedbackSensor");
-});
+  // Sensor config form
+  document.getElementById("sensorConfigForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var params = Array.from(this.querySelectorAll("input[type=number]")).map(function(i) {
+      return encodeURIComponent(i.name) + "=" + encodeURIComponent(i.value);
+    }).join("&");
+    submitForm("/submitSensorConfig", params, "feedbackSensor");
+  });
+
+  // Sensor variant form
+  document.getElementById("sensorVariantForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var sel = document.getElementById("sensorMHZ19variant");
+    submitForm("/submitSensorConfig", "sensorMHZ19variant=" + encodeURIComponent(sel.value), "feedbackVariant");
+  });
+
+  // Intervals form
+  document.getElementById("moduleIntervalForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var params = Array.from(this.querySelectorAll("input[type=number]")).map(function(i) {
+      return encodeURIComponent(i.name) + "=" + encodeURIComponent(i.value);
+    }).join("&");
+    submitForm("/submitmodulinterval", params, "feedbackInterval");
+  });
+
+  // Calibrate form
+  document.getElementById("calibrateForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    if (confirm("Calibrate MH-Z19? Make sure sensor is in fresh air (400 ppm).")) {
+      fetch("/calibrateMHZ19", { method: "POST" })
+        .then(function(r) { alert(r.ok ? "Calibration started!" : "Failed to start calibration."); })
+        .catch(function() { alert("An error occurred."); });
+    }
+  });
+
+  // Restart form
+  document.getElementById("restartForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    if (confirm("Restart ESP32?")) {
+      fetch("/restart", { method: "POST" }).then(function() {
+        setTimeout(function() { window.location.href = "/index"; }, 6000);
+      });
+    }
+  });
 });
 </script>
 </body>

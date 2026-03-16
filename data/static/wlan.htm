@@ -13,7 +13,9 @@
 </div>
 <div class="content">
 <h1>WLAN Settings</h1>
-<form action="/submitWLANcredentials" method="POST" id="wlanForm">
+
+<h2>WiFi Credentials</h2>
+<form id="wlanForm">
 <div class="form-row">
 <label for="wlanSSID">SSID</label>
 <input type="text" id="wlanSSID" name="wlanSSID" value="{{ssid}}">
@@ -28,13 +30,62 @@
 </svg>
 </button>
 </div>
-<button type="submit" class="btn">Submit</button>
+<p style="font-size:13px;color:#555;margin-top:4px;">The device will restart and reconnect after saving.</p>
+<button type="submit" class="btn">Save &amp; Restart</button>
+<div class="form-feedback" id="feedbackCredentials"></div>
 </form>
+
+<h2>WiFi Settings</h2>
+<form id="wlanSettingsForm">
+<div class="form-row">
+<label for="switchWIFI">WiFi Check enabled</label>
+<input type="checkbox" id="switchWIFI" name="switchWIFI" {{switchWIFI_checked}}>
+</div>
+<div class="form-row">
+<label for="intervalWiFi">WiFi Check Interval (s)</label>
+<input type="number" id="intervalWiFi" name="intervalWiFi" value="{{intervalWiFi}}" min="10">
+</div>
+<button type="submit" class="btn">Save Settings</button>
+<div class="form-feedback" id="feedbackWLAN"></div>
+</form>
+
 </div>
 </div>
 <div class="footer">&copy; 2025 SensorTurtle</div>
 <script>
-function togglePassword(show){document.getElementById('wlanPASSWORD').type=show?'text':'password';}
+function togglePassword(show) { document.getElementById('wlanPASSWORD').type = show ? 'text' : 'password'; }
+
+document.addEventListener("DOMContentLoaded", function() {
+  function showFeedback(id, ok) {
+    var el = document.getElementById(id);
+    el.textContent = ok ? "Saved successfully!" : "Error saving settings.";
+    el.className = "form-feedback " + (ok ? "success" : "error");
+    setTimeout(function() { el.textContent = ""; el.className = "form-feedback"; }, 3000);
+  }
+
+  // Credentials form — full page POST (triggers restart)
+  document.getElementById("wlanForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var params = "wlanSSID=" + encodeURIComponent(document.getElementById("wlanSSID").value)
+               + "&wlanPASSWORD=" + encodeURIComponent(document.getElementById("wlanPASSWORD").value);
+    fetch("/submitWLANcredentials", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: params })
+      .then(function(r) { return r.text(); })
+      .then(function(html) { document.open(); document.write(html); document.close(); })
+      .catch(function() { showFeedback("feedbackCredentials", false); });
+  });
+
+  // WiFi settings form (switch + interval, no restart)
+  document.getElementById("wlanSettingsForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var cb = document.getElementById("switchWIFI");
+    var iv = document.getElementById("intervalWiFi");
+    var params = "switchWIFI=" + (cb.checked ? 1 : 0)
+               + "&intervalWiFi=" + encodeURIComponent(iv.value);
+    fetch("/submitWLANsettings", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: params })
+      .then(function(r) { showFeedback("feedbackWLAN", r.ok); })
+      .catch(function() { showFeedback("feedbackWLAN", false); });
+  });
+});
 </script>
 </body>
 </html>

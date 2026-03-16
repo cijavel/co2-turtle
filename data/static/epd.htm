@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{{deviceName}} - Display Settings</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+<div class="nav">
+<a href="/index" class="button">Back to Index</a>
+</div>
+<div class="content">
+<h1>Display Settings</h1>
+
+<form id="epdSettingsForm">
+<h2>Display Switch</h2>
+<div class="form-row">
+<label for="switchEPD">E-Ink Display enabled</label>
+<input type="checkbox" id="switchEPD" name="switchEPD" {{switchEPD_checked}}>
+</div>
+
+<h2>Orientation</h2>
+<div class="form-row">
+<label for="switchEPDorientation">EPD Orientation</label>
+<select id="switchEPDorientation" name="switchEPDorientation">
+  <option value="0" {{epdOrientation_0}}>Vertical 90° (cable up)</option>
+  <option value="1" {{epdOrientation_1}}>Vertical 270° (cable down)</option>
+  <option value="2" {{epdOrientation_2}}>Horizontal 90° (cable left)</option>
+  <option value="3" {{epdOrientation_3}}>Horizontal 270° (cable right)</option>
+</select>
+</div>
+
+<h2>Interval</h2>
+<div class="form-row">
+<label for="intervalEPD">Refresh Interval (s)</label>
+<input type="number" id="intervalEPD" name="intervalEPD" value="{{intervalEPD}}" min="16">
+</div>
+
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:20px;">
+<button type="submit" class="btn" style="margin-top:0;">Save Display Settings</button>
+<button type="button" class="btn" id="btnEPDrefresh" style="margin-top:0;">Refresh Display Now</button>
+</div>
+<div class="form-feedback" id="feedbackEPD"></div>
+</form>
+
+</div>
+</div>
+<div class="footer">&copy; 2025 SensorTurtle</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  function showFeedback(id, ok) {
+    var el = document.getElementById(id);
+    el.textContent = ok ? "Saved successfully!" : "Error saving settings.";
+    el.className = "form-feedback " + (ok ? "success" : "error");
+    setTimeout(function() { el.textContent = ""; el.className = "form-feedback"; }, 3000);
+  }
+
+  document.getElementById("epdSettingsForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var cb = document.getElementById("switchEPD");
+    var sel = document.getElementById("switchEPDorientation");
+    var iv = document.getElementById("intervalEPD");
+    var params = "switchEPD=" + (cb.checked ? 1 : 0)
+               + "&switchEPDorientation=" + encodeURIComponent(sel.value)
+               + "&intervalEPD=" + encodeURIComponent(iv.value);
+    fetch("/submitEPDsettings", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: params })
+      .then(function(r) { showFeedback("feedbackEPD", r.ok); })
+      .catch(function() { showFeedback("feedbackEPD", false); });
+  });
+
+  document.getElementById("btnEPDrefresh").addEventListener("click", function() {
+    fetch("/api/epd/refresh", { method: "POST" })
+      .then(function(r) { showFeedback("feedbackEPD", r.ok); });
+  });
+});
+</script>
+</body>
+</html>

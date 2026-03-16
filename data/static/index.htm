@@ -17,12 +17,14 @@
         <div class="nav">
             <a href="/sensorsettings" class="button">Sensor Settings</a>
             <a href="/WLAN" class="button">WLAN Settings</a>
+            <a href="/led" class="button">LED Settings</a>
+            <a href="/epd" class="button">Display Settings</a>
             <a href="/mqtt" class="button">MQTT Settings</a>
         </div>
     </div>
     <div class="content">
         <div id="warningBanner" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:15px;margin-top:20px;">
-            <strong>⚠ BME680 sensor error</strong>
+            <strong>&#9888; BME680 sensor error</strong>
             <span id="warningText"></span>
             <div style="margin-top:10px;">
                 <form action="/restart" method="POST" id="restartForm">
