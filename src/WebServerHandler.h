@@ -47,6 +47,12 @@ private:
 	void handle_option_calibrate_mhz19(AsyncWebServerRequest *request);
 
 
+	void handle_page_led(AsyncWebServerRequest *request);
+	void handle_page_epd(AsyncWebServerRequest *request);
+	void handle_submit_wlansettings(AsyncWebServerRequest *request);
+	void handle_submit_ledsettings(AsyncWebServerRequest *request);
+	void handle_submit_epdsettings(AsyncWebServerRequest *request);
+
 	void handle_page_mqtt(AsyncWebServerRequest *request);
 	void handle_submit_mqttconfig(AsyncWebServerRequest *request);
 	void handle_api_mqtt_status(AsyncWebServerRequest *request);

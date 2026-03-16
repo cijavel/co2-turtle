@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{{deviceName}} - LED Settings</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+<div class="nav">
+<a href="/index" class="button">Back to Index</a>
+</div>
+<div class="content">
+<h1>LED Settings</h1>
+
+<form id="ledSettingsForm">
+<h2>LED Switch</h2>
+<div class="form-row">
+<label for="switchLED">LED Strip enabled</label>
+<input type="checkbox" id="switchLED" name="switchLED" {{switchLED_checked}}>
+</div>
+
+<h2>Brightness</h2>
+<div class="form-row">
+<label for="ledBrightness">Brightness: <span id="brightnessValue">{{LEDbrightness}}</span></label>
+<input type="range" id="ledBrightness" name="LEDbrightness" min="2" max="255" value="{{LEDbrightness}}">
+</div>
+
+<h2>Interval</h2>
+<div class="form-row">
+<label for="intervalLED">LED Update Interval (s)</label>
+<input type="number" id="intervalLED" name="intervalLED" value="{{intervalLED}}" min="1">
+</div>
+
+<button type="submit" class="btn">Save LED Settings</button>
+<div class="form-feedback" id="feedbackLED"></div>
+</form>
+
+</div>
+</div>
+<div class="footer">&copy; 2025 SensorTurtle</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  function showFeedback(id, ok) {
+    var el = document.getElementById(id);
+    el.textContent = ok ? "Saved successfully!" : "Error saving settings.";
+    el.className = "form-feedback " + (ok ? "success" : "error");
+    setTimeout(function() { el.textContent = ""; el.className = "form-feedback"; }, 3000);
+  }
+
+  var slider = document.getElementById("ledBrightness");
+  slider.addEventListener("input", function() {
+    document.getElementById("brightnessValue").textContent = slider.value;
+  });
+
+  document.getElementById("ledSettingsForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var cb = document.getElementById("switchLED");
+    var params = "switchLED=" + (cb.checked ? 1 : 0)
+               + "&LEDbrightness=" + encodeURIComponent(slider.value)
+               + "&intervalLED=" + encodeURIComponent(document.getElementById("intervalLED").value);
+    fetch("/submitLEDsettings", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: params })
+      .then(function(r) { showFeedback("feedbackLED", r.ok); })
+      .catch(function() { showFeedback("feedbackLED", false); });
+  });
+});
+</script>
+</body>
+</html>

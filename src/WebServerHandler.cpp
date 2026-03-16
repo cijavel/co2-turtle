@@ -21,6 +21,8 @@ void WebServerHandler::start()
 	server.on("/static/status.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/status.htm", "text/html");});
 	server.on("/static/settings.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/settings.htm", "text/html");});
 	server.on("/static/wlan.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/wlan.htm", "text/html");});
+	server.on("/static/led.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/led.htm", "text/html");});
+	server.on("/static/epd.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/epd.htm", "text/html");});
 	server.on("/static/template.htm", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(LittleFS, "/static/template.htm", "text/html");});
 
 	// webserver linking
@@ -30,10 +32,13 @@ void WebServerHandler::start()
 	server.on("/status", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_status(request); });
 	server.on("/sensorsettings", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_settings(request); });
 	server.on("/WLAN", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_wlan(request); });
+	server.on("/led", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_led(request); });
+	server.on("/epd", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_epd(request); });
 	server.on("/submitWLANcredentials", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_WLANcredentials(request); });
+	server.on("/submitWLANsettings", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_wlansettings(request); });
 	server.on("/submitmodulinterval", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulinterval(request); });
-	server.on("/submitmodulswitch", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_modulswitch(request); });
-	server.on("/submitLEDConfig", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_ledconfig(request); });
+	server.on("/submitLEDsettings", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_ledsettings(request); });
+	server.on("/submitEPDsettings", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_submit_epdsettings(request); });
 	server.on("/submitSensorConfig", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_submit_sensorconfig(request); });
 	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restoreDefaultConfiguration(request); });
 	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restart(request); });
@@ -210,8 +215,10 @@ void WebServerHandler::handle_page_wlan(AsyncWebServerRequest *request)
 	file.close();
 
 	content.replace("{{deviceName}}", DEVICE_NAME);
-    content.replace("{{ssid}}", ssid);
-    request->send(200, "text/html", content);
+	content.replace("{{ssid}}", ssid);
+	content.replace("{{switchWIFI_checked}}", configHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
+	content.replace("{{intervalWiFi}}", String(configHandler.getConfigInterval("intervalWiFi")));
+	request->send(200, "text/html", content);
 }
 
 void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
@@ -228,25 +235,17 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 
 	content.replace("{{intervalMHZ19}}", String(configHandler.getConfigInterval("intervalMHZ19")));
 	content.replace("{{intervalBME680}}", String(configHandler.getConfigInterval("intervalBME680")));
-	content.replace("{{intervalWiFi}}", String(configHandler.getConfigInterval("intervalWiFi")));
 	content.replace("{{intervalPRINT}}", String(configHandler.getConfigInterval("intervalPRINT")));
-	content.replace("{{intervalEPD}}", String(configHandler.getConfigInterval("intervalEPD")));
-	content.replace("{{intervalLED}}", String(configHandler.getConfigInterval("intervalLED")));
 	content.replace("{{intervalMQTT}}", String(configHandler.getConfigInterval("intervalMQTT")));
 
-	content.replace("{{switchWIFI_checked}}", configHandler.getConfigSwitch("switchWIFI") ? "checked" : "");
-	content.replace("{{switchEPD_checked}}", configHandler.getConfigSwitch("switchEPD") ? "checked" : "");
-	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
-
-	int epdOri = configHandler.getConfigSwitch("switchEPDorientation");
-	content.replace("{{epdOrientation_0}}", epdOri == 0 ? "selected" : "");
-	content.replace("{{epdOrientation_1}}", epdOri == 1 ? "selected" : "");
-	content.replace("{{epdOrientation_2}}", epdOri == 2 ? "selected" : "");
-	content.replace("{{epdOrientation_3}}", epdOri == 3 ? "selected" : "");
-
-	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
 	content.replace("{{SEALEVELPRESSURE_HPA}}", String(configHandler.getConfigSensor("pressure")));
 	content.replace("{{TEMPERATUR_OFFSET}}", String(configHandler.getConfigSensor("tempOffset") / 10.0f));
+
+	content.replace("{{mhz19DetectedVariant}}", MHZ19Handler::getInstance().getSensorVariantName());
+	int mhzVariant = configHandler.getConfigSensor("sensorMHZ19variant");
+	content.replace("{{sensorMHZ19variant_0}}", mhzVariant == 0 ? "selected" : "");
+	content.replace("{{sensorMHZ19variant_1}}", mhzVariant == 1 ? "selected" : "");
+	content.replace("{{sensorMHZ19variant_2}}", mhzVariant == 2 ? "selected" : "");
 
 	request->send(200, "text/html; charset=utf-8", content);
 }
@@ -287,114 +286,91 @@ void WebServerHandler::handle_submit_WLANcredentials(AsyncWebServerRequest *requ
 void WebServerHandler::handle_submit_modulinterval(AsyncWebServerRequest *request)
 {
 	if (request->hasParam("intervalMHZ19"))
-	{
 		configHandler.setConfigInterval("intervalMHZ19", request->getParam("intervalMHZ19")->value().toInt());
-	}
-	else
-	{
-		Serial.printf("[WebServer] intervalMHZ19 missing, using default: %ds\n", interval_MHZ19_in_Seconds);
-		configHandler.setConfigInterval("intervalMHZ19", interval_MHZ19_in_Seconds);
-	}
 	if (request->hasParam("intervalBME680"))
-	{
 		configHandler.setConfigInterval("intervalBME680", request->getParam("intervalBME680")->value().toInt());
-	}
-	else
-	{
-		Serial.printf("[WebServer] intervalBME680 missing, using default: %ds\n", interval_BME680_in_Seconds);
-		configHandler.setConfigInterval("intervalBME680", interval_BME680_in_Seconds);
-	}
-	if (request->hasParam("intervalWiFi"))
-	{
-		configHandler.setConfigInterval("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
-	}
-	else
-	{
-		Serial.printf("[WebServer] intervalWiFi missing, using default: %ds\n", interval_WiFiCheck_in_Seconds);
-		configHandler.setConfigInterval("intervalWiFi", interval_WiFiCheck_in_Seconds);
-	}
 	if (request->hasParam("intervalPRINT"))
-	{
 		configHandler.setConfigInterval("intervalPRINT", request->getParam("intervalPRINT")->value().toInt());
-	}
-	else
-	{
-		Serial.printf("[WebServer] intervalPRINT missing, using default: %ds\n", interval_RAMPrintout_in_Seconds);
-		configHandler.setConfigInterval("intervalPRINT", interval_RAMPrintout_in_Seconds);
-	}
-	if (request->hasParam("intervalEPD"))
-	{
-		configHandler.setConfigInterval("intervalEPD", request->getParam("intervalEPD")->value().toInt());
-	}
-	else
-	{
-		Serial.printf("[WebServer] intervalEPD missing, using default: %ds\n", interval_EPD_in_Seconds);
-		configHandler.setConfigInterval("intervalEPD", interval_EPD_in_Seconds);
-	}
-	if (request->hasParam("intervalLED"))
-	{
-		configHandler.setConfigInterval("intervalLED", request->getParam("intervalLED")->value().toInt());
-	}
-	else
-	{
-		Serial.printf("[WebServer] intervalLED missing, using default: %ds\n", interval_LED_in_Seconds);
-		configHandler.setConfigInterval("intervalLED", interval_LED_in_Seconds);
-	}
 	if (request->hasParam("intervalMQTT"))
-	{
 		configHandler.setConfigInterval("intervalMQTT", request->getParam("intervalMQTT")->value().toInt());
-	}
-	else
-	{
-		Serial.printf("[WebServer] intervalMQTT missing, using default: %ds\n", interval_mqtt_in_Seconds);
-		configHandler.setConfigInterval("intervalMQTT", interval_mqtt_in_Seconds);
-	}
 	configHandler.persistAllSettings();
 	request->send(200, "text/plain", "Interval Settings Saved!");
-	request->redirect("/sensorsettings");
 }
 
-void WebServerHandler::handle_submit_modulswitch(AsyncWebServerRequest *request)
+void WebServerHandler::handle_submit_wlansettings(AsyncWebServerRequest *request)
 {
-	if (request->hasParam("switchWIFI"))
-	{
-		configHandler.setConfigSwitch("switchWIFI", atoi(request->getParam("switchWIFI")->value().c_str()));
-	}
-	configHandler.setConfigSwitch("switchEPD", request->hasParam("switchEPD", true) ? 1 : 0);
-
-	if (request->hasParam("switchEPDorientation", true))
-	{
-		configHandler.setConfigSwitch("switchEPDorientation", request->getParam("switchEPDorientation", true)->value().toInt());
-	}
-
-
-	if (request->hasParam("switchLED"))
-	{
-		configHandler.setConfigSwitch("switchLED", atoi(request->getParam("switchLED")->value().c_str()));
-	}
+	configHandler.setConfigSwitch("switchWIFI",
+		request->hasParam("switchWIFI") ? request->getParam("switchWIFI")->value().toInt() : 0);
+	if (request->hasParam("intervalWiFi"))
+		configHandler.setConfigInterval("intervalWiFi", request->getParam("intervalWiFi")->value().toInt());
 	configHandler.persistAllSettings();
-	request->send(200, "text/plain", "Modul Settings Saved!");
-	request->redirect("/sensorsettings");
+	request->send(200, "text/plain", "WLAN Settings Saved!");
 }
 
-void WebServerHandler::handle_submit_ledconfig(AsyncWebServerRequest *request)
+void WebServerHandler::handle_submit_ledsettings(AsyncWebServerRequest *request)
 {
-    if (request->hasParam("LEDbrightness", true)) // Prüft POST-Parameter
-    {
-        int brightness = request->getParam("LEDbrightness", true)->value().toInt();
-        configHandler.setConfigLED("LEDbrightness", brightness);
-
-        LEDHandler &ledhandler = LEDHandler::getInstance();
-        ledhandler.updateLEDBrightness(brightness);
-    }
-    else
-    {
-        request->send(400, "text/plain", "Bad Request: Missing parameters");
-        return;
-    }
+	configHandler.setConfigSwitch("switchLED",
+		request->hasParam("switchLED") ? request->getParam("switchLED")->value().toInt() : 0);
+	if (request->hasParam("LEDbrightness")) {
+		int brightness = request->getParam("LEDbrightness")->value().toInt();
+		configHandler.setConfigLED("LEDbrightness", brightness);
+		LEDHandler::getInstance().updateLEDBrightness(brightness);
+	}
+	if (request->hasParam("intervalLED"))
+		configHandler.setConfigInterval("intervalLED", request->getParam("intervalLED")->value().toInt());
 	configHandler.persistAllSettings();
-    request->send(200, "text/plain", "LED Settings Saved!");
-    request->redirect("/sensorsettings");
+	request->send(200, "text/plain", "LED Settings Saved!");
+}
+
+void WebServerHandler::handle_submit_epdsettings(AsyncWebServerRequest *request)
+{
+	configHandler.setConfigSwitch("switchEPD",
+		request->hasParam("switchEPD") ? request->getParam("switchEPD")->value().toInt() : 0);
+	if (request->hasParam("switchEPDorientation"))
+		configHandler.setConfigSwitch("switchEPDorientation",
+			request->getParam("switchEPDorientation")->value().toInt());
+	if (request->hasParam("intervalEPD"))
+		configHandler.setConfigInterval("intervalEPD", request->getParam("intervalEPD")->value().toInt());
+	configHandler.persistAllSettings();
+	request->send(200, "text/plain", "Display Settings Saved!");
+}
+
+void WebServerHandler::handle_page_led(AsyncWebServerRequest *request)
+{
+	File file = LittleFS.open("/static/led.htm", "r");
+	if (!file)
+	{
+		request->send(500, "text/plain", "Internal Server Error: Cannot open led.htm");
+		return;
+	}
+	String content = file.readString();
+	file.close();
+	content.replace("{{deviceName}}", DEVICE_NAME);
+	content.replace("{{switchLED_checked}}", configHandler.getConfigSwitch("switchLED") ? "checked" : "");
+	content.replace("{{LEDbrightness}}", String(configHandler.getConfigLED("LEDbrightness")));
+	content.replace("{{intervalLED}}", String(configHandler.getConfigInterval("intervalLED")));
+	request->send(200, "text/html; charset=utf-8", content);
+}
+
+void WebServerHandler::handle_page_epd(AsyncWebServerRequest *request)
+{
+	File file = LittleFS.open("/static/epd.htm", "r");
+	if (!file)
+	{
+		request->send(500, "text/plain", "Internal Server Error: Cannot open epd.htm");
+		return;
+	}
+	String content = file.readString();
+	file.close();
+	content.replace("{{deviceName}}", DEVICE_NAME);
+	content.replace("{{switchEPD_checked}}", configHandler.getConfigSwitch("switchEPD") ? "checked" : "");
+	int epdOri = configHandler.getConfigSwitch("switchEPDorientation");
+	content.replace("{{epdOrientation_0}}", epdOri == 0 ? "selected" : "");
+	content.replace("{{epdOrientation_1}}", epdOri == 1 ? "selected" : "");
+	content.replace("{{epdOrientation_2}}", epdOri == 2 ? "selected" : "");
+	content.replace("{{epdOrientation_3}}", epdOri == 3 ? "selected" : "");
+	content.replace("{{intervalEPD}}", String(configHandler.getConfigInterval("intervalEPD")));
+	request->send(200, "text/html; charset=utf-8", content);
 }
 
 void WebServerHandler::handle_submit_sensorconfig(AsyncWebServerRequest *request)
@@ -409,6 +385,11 @@ void WebServerHandler::handle_submit_sensorconfig(AsyncWebServerRequest *request
     if (request->hasParam("TEMPERATUR_OFFSET", true)) {
         float tempOffset = request->getParam("TEMPERATUR_OFFSET", true)->value().toFloat();
         configHandler.setConfigSensor("tempOffset", (int)(tempOffset * 10));
+        updated = true;
+    }
+    if (request->hasParam("sensorMHZ19variant", true)) {
+        int variant = request->getParam("sensorMHZ19variant", true)->value().toInt();
+        configHandler.setConfigSensor("sensorMHZ19variant", variant);
         updated = true;
     }
 
