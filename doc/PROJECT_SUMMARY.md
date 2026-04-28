@@ -14,10 +14,10 @@ without recompiling. Built with PlatformIO (Arduino framework).
 |---|---|
 | MCU | DFRobot FireBeetle32 (ESP32 WROOM-32D) |
 | BME680 | Temperature, humidity, pressure, IAQ via I2C (SDA: GPIO21, SCL: GPIO22) |
-| MH-Z19B | CO2 sensor via HardwareSerial2 (RX: GPIO17, TX: GPIO16) |
+| MH-Z19 / MH-Z19B / MH-Z19C | CO2 sensor via HardwareSerial2 (RX: GPIO17, TX: GPIO16) |
 | E-Ink display | GxEPD2 213 Z98c (122×250px, 3-color B/W/R) via SPI (DC: GPIO27, CS: GPIO5, CLK: GPIO18, DIN: GPIO23, RST: GPIO26, BUSY: GPIO25) |
 | LED strip | WS2812B, 38 LEDs on GPIO4, powered by 5V |
-| Power | 5V external PSU; ESP and sensors (except MH-Z19B) run on 3.3V from onboard regulator |
+| Power | 5V external PSU; ESP and sensors (except MH-Z19x) run on 3.3V from onboard regulator |
 
 **BME680 wiring note:** CS pin hardwired to 3.3V (forces I2C mode). SDO floating → fixed I2C address 0x77.
 
@@ -51,7 +51,7 @@ src/
 ├── Configuration.h           – Compile-time pin definitions and NVS defaults
 ├── Credentials.h             – WiFi/MQTT credentials (not in repo, see Credentials_example.h)
 ├── BME680Handler.cpp/.h      – BSEC sensor reading, EEPROM state persistence
-├── MHZ19Handler.cpp/.h       – CO2 sensor reading with error recovery
+├── MHZ19Handler.cpp/.h       – CO2 sensor reading, variant detection, error recovery
 ├── EPDHandler.cpp/.h         – E-Ink rendering, 4 orientations, FreeRTOS task fallback
 ├── LEDHandler.cpp/.h         – LED strip status display
 ├── LEDsection.h              – LED section definitions (enum + start/end indices)
@@ -59,14 +59,18 @@ src/
 ├── WebServerHandler.cpp/.h   – Async web server, all HTTP handlers (always active)
 ├── MqttClientHandler.cpp/.h  – MQTT publishing and Home Assistant discovery
 ├── ConfigHandler.cpp/.h      – Runtime config via NVS (Preferences)
-├── DataCO2.cpp/.h            – Value object for MH-Z19B readings
+├── DataCO2.cpp/.h            – Value object for MH-Z19x readings
 ├── GxEPD2_display_selection_new_style.h – Display class/driver selection, pin wiring
 └── symbol.h                  – 18×18px and 24×24px bitmap icons (PROGMEM)
 data/static/                  – Web interface HTML/CSS (served from LittleFS)
-  ├── index.htm / template.htm
-  ├── settings.htm            – Module switches, intervals, sensor config
+  ├── index.htm               – Navigation hub (links to all settings pages)
+  ├── status.htm              – Live sensor status page
+  ├── settings.htm            – Sensor settings (pressure, temp offset, MH-Z19 variant/ABC, intervals)
+  ├── wlan.htm                – WiFi credentials + WiFi check switch/interval
+  ├── led.htm                 – LED switch, brightness, interval
+  ├── epd.htm                 – Display switch, orientation, interval, manual refresh
   ├── mqtt.htm                – MQTT connection settings
-  ├── wlan.htm                – WiFi credentials
+  ├── template.htm            – Shared page chrome
   └── style.css
 ```
 
@@ -96,13 +100,31 @@ Config is split into 5 maps:
 
 | Map | Keys |
 |---|---|
-| Switch | switchWIFI, switchEPD, switchEPDorientation (Int 0–3), switchLED, switchMQTT |
+| Switch | switchWIFI, switchEPD, switchEPDorientation (Int 0–3), switchLED, switchMQTT, switchABC |
 | Interval (seconds) | intervalMHZ19, intervalBME680, intervalWiFi, intervalEPD, intervalLED, intervalMQTT, intervalPRINT |
 | Device | deviceName, timezone, wlanSSID, wlanPASSWORD, mqttHOST, mqttPORT, mqttUSER, mqttPASSWORD, mqttUSERen |
 | LED | LEDbrightness (range 2–255) |
-| Sensor | pressure (hPa), tempOffset (stored as int × 10) |
+| Sensor | pressure (hPa), tempOffset (stored as int × 10), sensorMHZ19variant (0=auto, 1=original, 2=B/C) |
 
 **Note:** The web server is always active and is not controlled by a config switch.
+
+---
+
+## Web Interface
+
+Navigation hub at `/index` links to all settings pages. Each settings area is a
+dedicated page with its own POST endpoint; changes take effect without restarting
+unless credentials are saved (which triggers a deliberate restart).
+
+| URL | Page |
+|---|---|
+| `/sensorsettings` | Pressure, temp offset, MH-Z19 variant override, ABC switch, sensor intervals |
+| `/WLAN` | WiFi credentials (triggers restart on save), WiFi check switch + interval |
+| `/led` | LED switch, brightness slider, update interval |
+| `/epd` | Display switch, orientation, refresh interval, manual refresh button |
+| `/mqtt` | MQTT host/port/credentials, MQTT switch |
+| `/status` | Live sensor readings with color-coded quality indicators |
+| `/json` | All sensor values as JSON |
 
 ---
 
@@ -127,9 +149,8 @@ The displayed temperature includes the runtime-configurable `tempOffset` from NV
 Without BUSY pin, both operations run in dedicated one-shot FreeRTOS tasks (4096 byte
 stack each) to prevent blocking the async TCP stack during the ~2–3s busy-wait delay.
 
-**Manual refresh:** A forced re-render can be triggered via the web UI ("Refresh Display"
-button in Sensor Settings). This bypasses the update interval and renders immediately
-on the next main loop cycle.
+**Manual refresh:** A forced re-render can be triggered via the Display Settings page.
+This bypasses the update interval and renders immediately on the next main loop cycle.
 
 **Standby:** When the EPD is disabled, a sleeping turtle is shown
 before the display hibernates.
@@ -154,9 +175,7 @@ before the display hibernates.
 
 - BSEC config: `generic_33v_3s_4d` (3.3V, 3s sample rate, 4 days burn-in)
 - IAQ calibration persisted to EEPROM:
-  - First save: when IAQ accuracy reaches **1** (previously 3 – threshold was unreachable
-    on new sensors, causing calibration state to never be written and progress to reset
-    on every reboot or I2C recovery)
+  - First save: when IAQ accuracy reaches **1**
   - Periodic saves: every 360 minutes
   - On startup: state restored from EEPROM if valid
 - Onboard LED (LED_BUILTIN) lights briefly during EEPROM writes
@@ -164,12 +183,24 @@ before the display hibernates.
 
 ---
 
-## MH-Z19B Handler
+## MH-Z19 Handler
+
+Supports MH-Z19 (original), MH-Z19B, and MH-Z19C on the same firmware image.
 
 - HardwareSerial2 at 9600 baud
-- Auto-calibration enabled
+- **Variant detection** on boot: the firmware-version command (0x3D) returns a
+  non-zero 4-byte string on B/C and all-zeros on the original. Detected variant is
+  shown on the Sensor Settings page and can be overridden via NVS key `sensorMHZ19variant`
+  (0=auto, 1=original, 2=B/C).
+- **ABC (Automatic Baseline Correction):** configurable via NVS key `switchABC`
+  (default: on). Only applied on B/C variants; silently skipped on the original.
+  Can be toggled at runtime from the Sensor Settings page without restarting.
+  Disable in rooms that are never empty or consistently above 400 ppm.
+- **B/C-only commands** (`getCO2Raw`, `getBackgroundCO2`, `getTempAdjustment`) are
+  only called when variant is B/C; the original receives 0 for these fields.
 - Recovery: after 3 consecutive errors, Serial2 is restarted
-- `DataCO2` stores: regular CO2, raw CO2, limited CO2, background CO2, temp adjustment, temperature, accuracy
+- `DataCO2` stores: regular CO2, raw CO2, limited CO2, background CO2,
+  temp adjustment, temperature, accuracy
 
 ---
 
@@ -208,7 +239,7 @@ any manual configuration step. The name can be changed freely via the web interf
   WiFi/MQTT credentials before building.
 - If WiFi credentials are missing or connection fails, the device falls back to AP mode.
 - `DEBUG 1` in `Configuration.h` enables verbose Serial output and RAM usage reporting.
-- The MH-Z19B is powered by 5V directly from the PSU, not from the ESP.
+- The MH-Z19x is powered by 5V directly from the PSU, not from the ESP.
 - `switchEPDorientation` is stored as **Int** (not Bool) to support values 0–3.
 - All runtime values (timezone, tempOffset, pressure) are read from NVS at runtime;
   the defines in `Configuration.h` serve only as first-boot defaults.
