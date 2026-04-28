@@ -41,7 +41,15 @@
   <option value="2" {{sensorMHZ19variant_2}}>MH-Z19B / MH-Z19C</option>
 </select>
 </div>
-<button type="submit" class="btn">Save Variant</button>
+<div class="form-row">
+<label for="switchABC">ABC (Auto Baseline Correction)</label>
+<input type="checkbox" id="switchABC" name="switchABC" {{switchABC_checked}}>
+</div>
+<p style="font-size:12px;color:#888;margin-top:-8px;margin-bottom:12px;">
+  ABC assumes the lowest CO2 reading every 24 h equals fresh air (~400 ppm).<br>
+  Disable in rooms that are never empty or always well above 400 ppm.
+</p>
+<button type="submit" class="btn">Save MH-Z19 Settings</button>
 <div class="form-feedback" id="feedbackVariant"></div>
 </form>
 
@@ -107,11 +115,14 @@ document.addEventListener("DOMContentLoaded", function() {
     submitForm("/submitSensorConfig", params, "feedbackSensor");
   });
 
-  // Sensor variant form
+  // Sensor variant + ABC form
   document.getElementById("sensorVariantForm").addEventListener("submit", function(e) {
     e.preventDefault();
     var sel = document.getElementById("sensorMHZ19variant");
-    submitForm("/submitSensorConfig", "sensorMHZ19variant=" + encodeURIComponent(sel.value), "feedbackVariant");
+    var abc = document.getElementById("switchABC");
+    var params = "sensorMHZ19variant=" + encodeURIComponent(sel.value)
+               + "&switchABC=" + (abc.checked ? 1 : 0);
+    submitForm("/submitSensorConfig", params, "feedbackVariant");
   });
 
   // Intervals form

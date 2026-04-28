@@ -18,6 +18,7 @@ void ConfigHandler::loadAllPersistedSettings()
 		configMapforSwitch["switchEPDorientation"] = preferences.getInt("switchEPDori", switch_EPD_orientation);
 		configMapforSwitch["switchLED"] = preferences.getBool("switchLED", switch_LED);
 		configMapforSwitch["switchMQTT"] = preferences.getBool("switchMQTT", switch_MQTT);
+		configMapforSwitch["switchABC"] = preferences.getBool("switchABC", MHZ19_ABC_ENABLED);
 
 		configMapforInterval["intervalMHZ19"] = preferences.getInt("intervalMHZ19", interval_MHZ19_in_Seconds);
 		configMapforInterval["intervalBME680"] = preferences.getInt("intervalBME680", interval_BME680_in_Seconds);
@@ -39,15 +40,15 @@ void ConfigHandler::loadAllPersistedSettings()
 
 		configMapforLED["LEDbrightness"] = preferences.getInt("LEDbrightness", BRIGHTNESS_LEDS);
 
-		configMapforSensor["pressure"] = preferences.getInt("pressure",          SEALEVELPRESSURE_HPA);
-		configMapforSensor["tempOffset"] = preferences.getInt("tempOffset",         (int)(TEMPERATUR_OFFSET * 10));
+		configMapforSensor["pressure"]          = preferences.getInt("pressure",          SEALEVELPRESSURE_HPA);
+		configMapforSensor["tempOffset"]         = preferences.getInt("tempOffset",         (int)(TEMPERATUR_OFFSET * 10));
 		configMapforSensor["sensorMHZ19variant"] = preferences.getInt("sensorMHZ19var",     MHZ19_SENSOR_VARIANT);
 	preferences.end();
 }
 
 void ConfigHandler::validateConfigMaps()
 {
-    for (const auto& key : {"switchWIFI", "switchEPD", "switchEPDorientation", "switchLED", "switchMQTT"})
+    for (const auto& key : {"switchWIFI", "switchEPD", "switchEPDorientation", "switchLED", "switchMQTT", "switchABC"})
     {
         if (configMapforSwitch.find(key) == configMapforSwitch.end())
         {
@@ -94,6 +95,7 @@ void ConfigHandler::persistAllSettings()
 	preferences.putInt("switchEPDori", configMapforSwitch["switchEPDorientation"]);
 	preferences.putBool("switchLED", configMapforSwitch["switchLED"]);
 	preferences.putBool("switchMQTT", configMapforSwitch["switchMQTT"]);
+	preferences.putBool("switchABC", configMapforSwitch["switchABC"]);
 
 	preferences.putInt("intervalMHZ19", configMapforInterval["intervalMHZ19"]);
 	preferences.putInt("intervalBME680", configMapforInterval["intervalBME680"]);
@@ -134,6 +136,7 @@ void ConfigHandler::restoreDefaultConfiguration()
 	preferences.putInt("switchEPDori", switch_EPD_orientation);
 	preferences.putBool("switchLED", switch_LED);
 	preferences.putBool("switchMQTT", switch_MQTT);
+	preferences.putBool("switchABC", MHZ19_ABC_ENABLED);
 
 	preferences.putInt("intervalMHZ19", interval_MHZ19_in_Seconds);
 	preferences.putInt("intervalBME680", interval_BME680_in_Seconds);

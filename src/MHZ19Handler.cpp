@@ -35,9 +35,9 @@ MHZ19Handler::MHZ19Handler()
 	// autoCalibration (ABC) is only supported on MH-Z19B/C.
 	// Calling it on the original may be silently ignored or cause undefined behaviour.
 	if (_variant == VARIANT_BC) {
-		myMHZ19.autoCalibration(true);
-		Serial.print("[MHZ19] ABC Status: ");
-		myMHZ19.getABC() ? Serial.println("ON") : Serial.println("OFF");
+		bool abcEnabled = configHandler.getConfigSwitch("switchABC");
+		myMHZ19.autoCalibration(abcEnabled);
+		Serial.printf("[MHZ19] ABC: %s\n", abcEnabled ? "ON" : "OFF");
 	} else {
 		Serial.println("[MHZ19] Original variant: skipping autoCalibration (not supported).");
 	}
@@ -73,6 +73,16 @@ String MHZ19Handler::getSensorVariantName() const
 		case VARIANT_BC:       return "MH-Z19B/C";
 		default:               return "unknown";
 	}
+}
+
+void MHZ19Handler::applyABC(bool enable)
+{
+	if (_variant != VARIANT_BC) {
+		Serial.println("[MHZ19] applyABC: skipped – not supported on original MH-Z19.");
+		return;
+	}
+	myMHZ19.autoCalibration(enable);
+	Serial.printf("[MHZ19] ABC set to: %s\n", enable ? "ON" : "OFF");
 }
 
 void MHZ19Handler::calibrate()

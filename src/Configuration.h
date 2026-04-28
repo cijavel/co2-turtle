@@ -20,16 +20,17 @@
 
 #define SEALEVELPRESSURE_HPA 1015
 #define TEMPERATUR_OFFSET -5
+#define MHZ19_SENSOR_VARIANT 0   // 0=auto-detect, 1=MH-Z19 original, 2=MH-Z19B/C
+#define MHZ19_ABC_ENABLED    1   // 1=on, 0=off. Only applies to MH-Z19B/C.
 
 #define DEVICE_NAME "SensorTurtle"
 #define TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
-#define BAUDRATE 9600
 #define PIN_BME680_SDA 21
 #define PIN_BME680_SCL 22
 #define PIN_MHZ19_RX 17
 #define PIN_MHZ19_TX 16
-#define MHZ19_SENSOR_VARIANT 0   // 0=auto-detect, 1=MH-Z19 original, 2=MH-Z19B/C
+#define BAUDRATE 9600
 
 #define BRIGHTNESS_LEDS 2 // range 2-255
 #define NUM_LEDS 38
@@ -39,6 +40,7 @@
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 
+#define MQTT_PORT 1883
 #define MQTT_USER_ENABLED 0
 
 // EPD hardware pins – set to -1 if not wired

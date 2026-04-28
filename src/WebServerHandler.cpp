@@ -246,6 +246,7 @@ void WebServerHandler::handle_page_settings(AsyncWebServerRequest *request)
 	content.replace("{{sensorMHZ19variant_0}}", mhzVariant == 0 ? "selected" : "");
 	content.replace("{{sensorMHZ19variant_1}}", mhzVariant == 1 ? "selected" : "");
 	content.replace("{{sensorMHZ19variant_2}}", mhzVariant == 2 ? "selected" : "");
+	content.replace("{{switchABC_checked}}", configHandler.getConfigSwitch("switchABC") ? "checked" : "");
 
 	request->send(200, "text/html; charset=utf-8", content);
 }
@@ -390,6 +391,13 @@ void WebServerHandler::handle_submit_sensorconfig(AsyncWebServerRequest *request
     if (request->hasParam("sensorMHZ19variant", true)) {
         int variant = request->getParam("sensorMHZ19variant", true)->value().toInt();
         configHandler.setConfigSensor("sensorMHZ19variant", variant);
+        updated = true;
+    }
+    if (request->hasParam("switchABC", true) || request->hasParam("switchABC")) {
+        // Checkbox: present = 1, absent = 0
+        int abcEnabled = request->hasParam("switchABC", true) ? request->getParam("switchABC", true)->value().toInt() : 0;
+        configHandler.setConfigSwitch("switchABC", abcEnabled);
+        MHZ19Handler::getInstance().applyABC(abcEnabled);
         updated = true;
     }
 
