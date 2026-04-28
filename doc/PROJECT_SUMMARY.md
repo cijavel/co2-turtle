@@ -65,7 +65,7 @@ src/
 data/static/                  – Web interface HTML/CSS (served from LittleFS)
   ├── index.htm               – Navigation hub (links to all settings pages)
   ├── status.htm              – Live sensor status page
-  ├── settings.htm            – Sensor settings (pressure, temp offset, MH-Z19 variant/ABC, intervals)
+  ├── settings.htm            – Sensor settings (pressure, temp offset, MH-Z19 variant/ABC, intervals, calibration, 24h ABC session)
   ├── wlan.htm                – WiFi credentials + WiFi check switch/interval
   ├── led.htm                 – LED switch, brightness, interval
   ├── epd.htm                 – Display switch, orientation, interval, manual refresh
@@ -118,13 +118,14 @@ unless credentials are saved (which triggers a deliberate restart).
 
 | URL | Page |
 |---|---|
-| `/sensorsettings` | Pressure, temp offset, MH-Z19 variant override, ABC switch, sensor intervals |
+| `/sensorsettings` | Pressure, temp offset, MH-Z19 variant override, ABC switch, sensor intervals, one-shot calibration, 24h ABC session |
 | `/WLAN` | WiFi credentials (triggers restart on save), WiFi check switch + interval |
 | `/led` | LED switch, brightness slider, update interval |
 | `/epd` | Display switch, orientation, refresh interval, manual refresh button |
 | `/mqtt` | MQTT host/port/credentials, MQTT switch |
 | `/status` | Live sensor readings with color-coded quality indicators |
 | `/json` | All sensor values as JSON |
+| `/api/abcStatus` | JSON status of the 24h ABC session (polled by the settings page) |
 
 ---
 
@@ -198,6 +199,20 @@ Supports MH-Z19 (original), MH-Z19B, and MH-Z19C on the same firmware image.
   Disable in rooms that are never empty or consistently above 400 ppm.
 - **B/C-only commands** (`getCO2Raw`, `getBackgroundCO2`, `getTempAdjustment`) are
   only called when variant is B/C; the original receives 0 for these fields.
+- **One-shot zero calibration:** UART command 0x87 via `myMHZ19.calibrate()`,
+  exposed on the Sensor Settings page. Sets the current reading as the 400 ppm
+  reference. Use after at least 20 minutes of fresh outdoor air. Functionally
+  equivalent to shorting the HD pin to GND, but no disassembly required. Works
+  on all variants. Used to recover sensors that are stuck at unrealistic high
+  values (e.g. 10000 ppm).
+- **24h ABC Session** (B/C only, RAM-only state, lost on reboot):
+  - Started/cancelled via `POST /startABCSession` / `POST /cancelABCSession`
+  - Forces ABC on for exactly 24 h, then reverts to the persistent `switchABC` setting
+  - Tracks the lowest CO2 reading seen during the window; surfaced as
+    `minCO2` and `minReached` (≤420 ppm) via `/api/abcStatus`, so the user can tell
+    whether the sensor actually got close to fresh-air range
+  - While a session is active, manual `applyABC()` calls are deferred (the persistent
+    `switchABC` value is still saved to NVS, but only takes effect when the session ends)
 - Recovery: after 3 consecutive errors, Serial2 is restarted
 - `DataCO2` stores: regular CO2, raw CO2, limited CO2, background CO2,
   temp adjustment, temperature, accuracy
