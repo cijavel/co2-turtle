@@ -75,11 +75,56 @@
 <div class="form-feedback" id="feedbackInterval"></div>
 </form>
 
-<h2>Calibration</h2>
+<h2>One-Shot Calibration</h2>
+<div style="background:#f5f5f5;border-left:3px solid #4a90e2;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#444;">
+  <strong>Procedure:</strong>
+  <ol style="margin:6px 0 6px 18px;padding:0;">
+    <li>Place the device near an open window or outside.</li>
+    <li>Wait <strong>at least 20 minutes</strong> for the reading to stabilise close to ~400&nbsp;ppm.</li>
+    <li>Press the button below — the current value is stored as the 400&nbsp;ppm zero point.</li>
+  </ol>
+  Effect is immediate. Works on all MH-Z19 variants. Use this if a sensor is stuck at very high values (e.g. 10000&nbsp;ppm).
+</div>
 <form id="calibrateForm">
-<p style="font-size:13px;color:#555;margin-bottom:8px;">Place sensor in fresh outdoor air (~400 ppm) before calibrating.</p>
 <button type="submit" class="btn">Calibrate MH-Z19</button>
 </form>
+
+<h2>24h ABC Session</h2>
+<p style="font-size:13px;color:#555;margin-bottom:10px;">
+  Enables ABC for exactly 24&nbsp;hours, then automatically reverts to your persistent ABC setting above.
+  Useful for one-time recovery without permanently changing ABC. Only available on MH-Z19B / MH-Z19C.
+</p>
+<div id="abcSessionUnavailable" style="display:none;background:#fff4e5;border-left:3px solid #f0ad4e;padding:10px 14px;font-size:13px;color:#7a5400;">
+  This feature is only available on MH-Z19B / MH-Z19C. The detected variant on this device does not support ABC.
+</div>
+<div id="abcSessionInactive" style="display:none;">
+  <div style="background:#f5f5f5;border-left:3px solid #4a90e2;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#444;">
+    <strong>While the session runs:</strong>
+    <ul style="margin:6px 0 6px 18px;padding:0;">
+      <li>Open a window once or twice during the 24&nbsp;h so the sensor sees fresh air (~400&nbsp;ppm).</li>
+      <li>The lowest CO2 reading reached during the window is shown below in real time.</li>
+      <li>If the minimum stays well above ~420&nbsp;ppm, ABC will not have recalibrated correctly — use the One-Shot Calibration above instead.</li>
+      <li>If the device is rebooted, the session is reset.</li>
+    </ul>
+  </div>
+  <form id="startABCSessionForm">
+    <button type="submit" class="btn">Start 24h ABC Session</button>
+  </form>
+</div>
+<div id="abcSessionActive" style="display:none;">
+  <div style="background:#e8f5e9;border-left:3px solid #4caf50;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#2e4d2f;">
+    <p style="margin:0 0 8px 0;"><strong>Session running</strong></p>
+    <p style="margin:2px 0;">Time remaining: <strong id="abcRemaining">—</strong></p>
+    <p style="margin:2px 0;">Lowest CO2 seen so far: <strong id="abcMinCO2">—</strong> ppm</p>
+    <p style="margin:2px 0;">Reached fresh-air range (≤420 ppm): <strong id="abcReached">—</strong></p>
+    <p style="margin:8px 0 0 0;font-size:12px;color:#555;">
+      What to do: open a window if it has not yet reached fresh-air range. Once it has, ABC will recalibrate automatically within the session. You can leave this page open or come back later.
+    </p>
+  </div>
+  <form id="cancelABCSessionForm">
+    <button type="submit" class="btn">Cancel session</button>
+  </form>
+</div>
 
 <h2>Device Options</h2>
 <form action="/restart" method="POST" id="restartForm">
@@ -137,9 +182,61 @@ document.addEventListener("DOMContentLoaded", function() {
   // Calibrate form
   document.getElementById("calibrateForm").addEventListener("submit", function(e) {
     e.preventDefault();
-    if (confirm("Calibrate MH-Z19? Make sure sensor is in fresh air (400 ppm).")) {
+    if (confirm("Calibrate MH-Z19? Make sure the sensor has been in fresh air (~400 ppm) for at least 20 minutes.")) {
       fetch("/calibrateMHZ19", { method: "POST" })
         .then(function(r) { alert(r.ok ? "Calibration started!" : "Failed to start calibration."); })
+        .catch(function() { alert("An error occurred."); });
+    }
+  });
+
+  // ABC session
+  function formatDuration(s) {
+    if (s <= 0) return "0 min";
+    var h = Math.floor(s / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    if (h > 0) return h + " h " + m + " min";
+    return m + " min";
+  }
+  function refreshABCSession() {
+    fetch("/api/abcStatus").then(function(r) { return r.json(); }).then(function(d) {
+      var unavailable = document.getElementById("abcSessionUnavailable");
+      var inactive = document.getElementById("abcSessionInactive");
+      var active = document.getElementById("abcSessionActive");
+      if (!d.available) {
+        unavailable.style.display = "block";
+        inactive.style.display = "none";
+        active.style.display = "none";
+        return;
+      }
+      unavailable.style.display = "none";
+      if (d.active) {
+        inactive.style.display = "none";
+        active.style.display = "block";
+        document.getElementById("abcRemaining").textContent = formatDuration(d.remainingSeconds);
+        document.getElementById("abcMinCO2").textContent = d.minCO2 > 0 ? d.minCO2 : "—";
+        document.getElementById("abcReached").textContent = d.minReached ? "yes ✓" : "not yet";
+      } else {
+        inactive.style.display = "block";
+        active.style.display = "none";
+      }
+    }).catch(function() { /* ignore transient errors */ });
+  }
+  refreshABCSession();
+  setInterval(refreshABCSession, 30000);
+
+  document.getElementById("startABCSessionForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    if (confirm("Start 24h ABC session? ABC will be enabled for 24 hours.")) {
+      fetch("/startABCSession", { method: "POST" })
+        .then(function(r) { if (!r.ok) alert("Failed to start session."); refreshABCSession(); })
+        .catch(function() { alert("An error occurred."); });
+    }
+  });
+  document.getElementById("cancelABCSessionForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    if (confirm("Cancel the running ABC session?")) {
+      fetch("/cancelABCSession", { method: "POST" })
+        .then(function() { refreshABCSession(); })
         .catch(function() { alert("An error occurred."); });
     }
   });

@@ -81,8 +81,55 @@ void MHZ19Handler::applyABC(bool enable)
 		Serial.println("[MHZ19] applyABC: skipped – not supported on original MH-Z19.");
 		return;
 	}
+	if (_abcSessionActive) {
+		// Persistent setting is saved in NVS by the caller, but ABC stays forced on
+		// until the session ends; only then is the persistent setting re-applied.
+		Serial.println("[MHZ19] applyABC: deferred – 24h ABC session is active.");
+		return;
+	}
 	myMHZ19.autoCalibration(enable);
 	Serial.printf("[MHZ19] ABC set to: %s\n", enable ? "ON" : "OFF");
+}
+
+bool MHZ19Handler::startABCSession()
+{
+	if (_variant != VARIANT_BC) {
+		Serial.println("[MHZ19] startABCSession: skipped – not supported on original MH-Z19.");
+		return false;
+	}
+	_abcSessionActive = true;
+	_abcSessionStartMillis = millis();
+	_abcSessionMinCO2 = -1;
+	myMHZ19.autoCalibration(true);
+	Serial.println("[MHZ19] 24h ABC session started.");
+	return true;
+}
+
+void MHZ19Handler::cancelABCSession()
+{
+	if (!_abcSessionActive) return;
+	_abcSessionActive = false;
+	bool persistentABC = configHandler.getConfigSwitch("switchABC");
+	if (_variant == VARIANT_BC) myMHZ19.autoCalibration(persistentABC);
+	Serial.printf("[MHZ19] ABC session cancelled. ABC restored to %s.\n", persistentABC ? "ON" : "OFF");
+}
+
+void MHZ19Handler::finishABCSession()
+{
+	_abcSessionActive = false;
+	bool persistentABC = configHandler.getConfigSwitch("switchABC");
+	if (_variant == VARIANT_BC) myMHZ19.autoCalibration(persistentABC);
+	Serial.printf("[MHZ19] 24h ABC session complete. Lowest CO2 seen: %d ppm. ABC restored to %s.\n",
+	              _abcSessionMinCO2, persistentABC ? "ON" : "OFF");
+}
+
+unsigned long MHZ19Handler::getABCSessionRemainingSeconds() const
+{
+	if (!_abcSessionActive) return 0;
+	unsigned long elapsedMs = millis() - _abcSessionStartMillis;
+	unsigned long durationMs = ABC_SESSION_DURATION_S * 1000UL;
+	if (elapsedMs >= durationMs) return 0;
+	return (durationMs - elapsedMs) / 1000UL;
 }
 
 void MHZ19Handler::calibrate()
@@ -118,6 +165,16 @@ bool MHZ19Handler::updateLastReadout()
 			tempAdjust,
 			myMHZ19.getTemperature(),
 			myMHZ19.getAccuracy());
+
+		if (_abcSessionActive) {
+			int co2 = _lastReadout.getRegular();
+			if (co2 > 0 && (_abcSessionMinCO2 < 0 || co2 < _abcSessionMinCO2)) {
+				_abcSessionMinCO2 = co2;
+			}
+			if ((millis() - _abcSessionStartMillis) >= (ABC_SESSION_DURATION_S * 1000UL)) {
+				finishABCSession();
+			}
+		}
 		return true;
 	}
 	else

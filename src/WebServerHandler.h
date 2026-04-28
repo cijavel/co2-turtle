@@ -45,6 +45,9 @@ private:
 	void handle_option_restoreDefaultConfiguration(AsyncWebServerRequest *request);
 	void handle_option_restart(AsyncWebServerRequest *request);
 	void handle_option_calibrate_mhz19(AsyncWebServerRequest *request);
+	void handle_option_start_abc_session(AsyncWebServerRequest *request);
+	void handle_option_cancel_abc_session(AsyncWebServerRequest *request);
+	void handle_api_abc_status(AsyncWebServerRequest *request);
 
 
 	void handle_page_led(AsyncWebServerRequest *request);

@@ -43,6 +43,9 @@ void WebServerHandler::start()
 	server.on("/restoredefaultconfiguration", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restoreDefaultConfiguration(request); });
 	server.on("/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {handle_option_restart(request); });
 	server.on("/calibrateMHZ19", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_option_calibrate_mhz19(request); });
+	server.on("/startABCSession", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_option_start_abc_session(request); });
+	server.on("/cancelABCSession", HTTP_POST, [this](AsyncWebServerRequest *request) { handle_option_cancel_abc_session(request); });
+	server.on("/api/abcStatus", HTTP_GET, [this](AsyncWebServerRequest *request) { handle_api_abc_status(request); });
 
 	//mqtt
 	server.on("/mqtt", HTTP_GET, [this](AsyncWebServerRequest *request) {handle_page_mqtt(request); });
@@ -449,6 +452,35 @@ void WebServerHandler::handle_option_calibrate_mhz19(AsyncWebServerRequest *requ
     request->send(200, "text/plain", "Calibration started.");
 	delay(1000);
 	request->redirect("/sensorsettings");
+}
+
+void WebServerHandler::handle_option_start_abc_session(AsyncWebServerRequest *request)
+{
+    bool ok = MHZ19Handler::getInstance().startABCSession();
+    if (ok) {
+        request->send(200, "text/plain", "ABC session started.");
+    } else {
+        request->send(400, "text/plain", "ABC session not available for this sensor variant.");
+    }
+}
+
+void WebServerHandler::handle_option_cancel_abc_session(AsyncWebServerRequest *request)
+{
+    MHZ19Handler::getInstance().cancelABCSession();
+    request->send(200, "text/plain", "ABC session cancelled.");
+}
+
+void WebServerHandler::handle_api_abc_status(AsyncWebServerRequest *request)
+{
+    MHZ19Handler &h = MHZ19Handler::getInstance();
+    String json = "{";
+    json += "\"available\":" + String(h.isABCSessionAvailable() ? "true" : "false");
+    json += ",\"active\":" + String(h.isABCSessionActive() ? "true" : "false");
+    json += ",\"remainingSeconds\":" + String(h.getABCSessionRemainingSeconds());
+    json += ",\"minCO2\":" + String(h.getABCSessionMinCO2());
+    json += ",\"minReached\":" + String(h.getABCSessionMinReached() ? "true" : "false");
+    json += "}";
+    request->send(200, "application/json", json);
 }
 
 
