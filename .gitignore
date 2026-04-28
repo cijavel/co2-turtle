@@ -1,6 +1,7 @@
 .pio
 .vscode
 .idea
+.claude
 cmake-*
 CMakeLists.txt
 CMakeListsPrivate.txt
